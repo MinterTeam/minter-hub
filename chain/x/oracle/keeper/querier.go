@@ -1,7 +1,7 @@
 package keeper
 
 import (
-	"github.com/althea-net/peggy/module/x/oracle/types"
+	"github.com/MinterTeam/mhub/chain/x/oracle/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"

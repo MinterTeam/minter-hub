@@ -3,7 +3,7 @@ package keeper
 import (
 	"context"
 
-	"github.com/althea-net/peggy/module/x/minter/types"
+	"github.com/MinterTeam/mhub/chain/x/minter/types"
 )
 
 type msgServer struct {

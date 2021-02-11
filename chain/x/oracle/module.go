@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/althea-net/peggy/module/x/oracle/keeper"
+	"github.com/MinterTeam/mhub/chain/x/oracle/keeper"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 
-	"github.com/althea-net/peggy/module/x/oracle/client/cli"
-	"github.com/althea-net/peggy/module/x/oracle/client/rest"
-	"github.com/althea-net/peggy/module/x/oracle/types"
+	"github.com/MinterTeam/mhub/chain/x/oracle/client/cli"
+	"github.com/MinterTeam/mhub/chain/x/oracle/client/rest"
+	"github.com/MinterTeam/mhub/chain/x/oracle/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	"github.com/cosmos/cosmos-sdk/types/module"

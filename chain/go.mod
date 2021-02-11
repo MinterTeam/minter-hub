@@ -1,4 +1,4 @@
-module github.com/althea-net/peggy/module
+module github.com/mhub/chain
 
 go 1.15
 

@@ -31,8 +31,8 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 
-	"github.com/althea-net/peggy/module/app"
-	"github.com/althea-net/peggy/module/app/params"
+	"github.com/MinterTeam/mhub/chain/app"
+	"github.com/MinterTeam/mhub/chain/app/params"
 )
 
 // NewRootCmd creates a new root command for simd. It is called once in the

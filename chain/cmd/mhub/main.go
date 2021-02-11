@@ -4,7 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"os"
 
-	"github.com/althea-net/peggy/module/cmd/mhub/cmd"
+	"github.com/MinterTeam/mhub/chain/cmd/mhub/cmd"
 	"github.com/cosmos/cosmos-sdk/server"
 )
 

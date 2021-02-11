@@ -2,9 +2,9 @@ package keeper
 
 import (
 	"fmt"
-	minterkeeper "github.com/althea-net/peggy/module/x/minter/keeper"
-	oraclekeeper "github.com/althea-net/peggy/module/x/oracle/keeper"
-	"github.com/althea-net/peggy/module/x/peggy/types"
+	minterkeeper "github.com/MinterTeam/mhub/chain/x/minter/keeper"
+	oraclekeeper "github.com/MinterTeam/mhub/chain/x/oracle/keeper"
+	"github.com/MinterTeam/mhub/chain/x/peggy/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"

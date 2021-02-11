@@ -6,7 +6,7 @@ import (
 	"github.com/MinterTeam/minter-go-sdk/v2/api/http_client/models"
 	"github.com/MinterTeam/minter-go-sdk/v2/transaction"
 	"github.com/MinterTeam/minter-hub-connector/command"
-	"github.com/althea-net/peggy/module/coins"
+	"github.com/MinterTeam/mhub/chain/coins"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"strconv"
 	"time"

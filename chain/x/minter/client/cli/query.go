@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/althea-net/peggy/module/x/minter/types"
+	"github.com/MinterTeam/mhub/chain/x/minter/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/spf13/cobra"
 )

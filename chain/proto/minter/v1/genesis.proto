@@ -3,7 +3,7 @@ package minter.v1;
 
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/althea-net/peggy/module/x/minter/types";
+option go_package = "github.com/MinterTeam/mhub/chain/x/minter/types";
 
 message Params {
   option (gogoproto.stringer) = false;

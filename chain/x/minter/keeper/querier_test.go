@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/althea-net/peggy/module/x/minter/types"
+	"github.com/MinterTeam/mhub/chain/x/minter/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	gethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"

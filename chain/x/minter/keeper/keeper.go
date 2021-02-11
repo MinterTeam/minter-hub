@@ -2,11 +2,11 @@ package keeper
 
 import (
 	"fmt"
-	oraclekeeper "github.com/althea-net/peggy/module/x/oracle/keeper"
+	oraclekeeper "github.com/MinterTeam/mhub/chain/x/oracle/keeper"
 	"math"
 	"strconv"
 
-	"github.com/althea-net/peggy/module/x/minter/types"
+	"github.com/MinterTeam/mhub/chain/x/minter/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"

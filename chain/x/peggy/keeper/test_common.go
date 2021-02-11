@@ -2,12 +2,12 @@ package keeper
 
 import (
 	"bytes"
-	minterkeeper "github.com/althea-net/peggy/module/x/minter/keeper"
-	oraclekeeper "github.com/althea-net/peggy/module/x/oracle/keeper"
+	minterkeeper "github.com/MinterTeam/mhub/chain/x/minter/keeper"
+	oraclekeeper "github.com/MinterTeam/mhub/chain/x/oracle/keeper"
 	"testing"
 	"time"
 
-	"github.com/althea-net/peggy/module/x/peggy/types"
+	"github.com/MinterTeam/mhub/chain/x/peggy/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"

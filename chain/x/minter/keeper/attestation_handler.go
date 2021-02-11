@@ -1,8 +1,8 @@
 package keeper
 
 import (
-	"github.com/althea-net/peggy/module/coins"
-	"github.com/althea-net/peggy/module/x/minter/types"
+	"github.com/MinterTeam/mhub/chain/coins"
+	"github.com/MinterTeam/mhub/chain/x/minter/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )

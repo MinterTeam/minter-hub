@@ -3,8 +3,8 @@ package oracle
 import (
 	"fmt"
 
-	"github.com/althea-net/peggy/module/x/oracle/keeper"
-	"github.com/althea-net/peggy/module/x/oracle/types"
+	"github.com/MinterTeam/mhub/chain/x/oracle/keeper"
+	"github.com/MinterTeam/mhub/chain/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )

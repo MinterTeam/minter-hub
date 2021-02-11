@@ -2,13 +2,11 @@ module github.com/MinterTeam/minter-hub-oracle
 
 go 1.13
 
-replace github.com/althea-net/peggy/module => /Users/daniillashin/Desktop/peggy/module
-
 replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.2-alpha.regen.4
 
 require (
 	github.com/MinterTeam/minter-go-sdk/v2 v2.1.0-rc2.0.20210209133819-011976d40e49
-	github.com/althea-net/peggy/module v0.0.0-00010101000000-000000000000
+	github.com/MinterTeam/mhub/chain v0.0.0-00010101000000-000000000000
 	github.com/cosmos/cosmos-sdk v0.40.1
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/tendermint/tendermint v0.34.3

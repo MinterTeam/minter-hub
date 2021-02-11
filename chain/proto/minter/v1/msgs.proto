@@ -3,7 +3,7 @@ package minter.v1;
 import "cosmos/base/v1beta1/coin.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
-option go_package = "github.com/althea-net/peggy/module/x/minter/types";
+option go_package = "github.com/MinterTeam/mhub/chain/x/minter/types";
 
 service Msg {
   rpc ValsetConfirm(MsgValsetConfirm) returns(MsgValsetConfirmResponse) {

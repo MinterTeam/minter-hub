@@ -5,7 +5,7 @@ import "google/api/annotations.proto";
 import "oracle/v1/types.proto";
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/althea-net/peggy/module/x/oracle/types";
+option go_package = "github.com/MinterTeam/mhub/chain/x/oracle/types";
 
 // Query defines the gRPC querier service
 service Query {

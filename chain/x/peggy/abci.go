@@ -1,9 +1,9 @@
 package peggy
 
 import (
-	"github.com/althea-net/peggy/module/coins"
-	"github.com/althea-net/peggy/module/x/peggy/keeper"
-	"github.com/althea-net/peggy/module/x/peggy/types"
+	"github.com/MinterTeam/mhub/chain/coins"
+	"github.com/MinterTeam/mhub/chain/x/peggy/keeper"
+	"github.com/MinterTeam/mhub/chain/x/peggy/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"time"
 )

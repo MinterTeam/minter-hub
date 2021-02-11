@@ -3,7 +3,7 @@ package types
 import (
 	"bytes"
 	"fmt"
-	coins "github.com/althea-net/peggy/module/coins"
+	coins "github.com/MinterTeam/mhub/chain/coins"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"regexp"

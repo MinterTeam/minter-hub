@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/althea-net/peggy/module/x/peggy/types"
+	"github.com/MinterTeam/mhub/chain/x/peggy/types"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"

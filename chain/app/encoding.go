@@ -1,7 +1,7 @@
 package app
 
 import (
-	peggyparams "github.com/althea-net/peggy/module/app/params"
+	peggyparams "github.com/MinterTeam/mhub/chain/app/params"
 	"github.com/cosmos/cosmos-sdk/std"
 )
 

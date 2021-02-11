@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/althea-net/peggy/module/x/oracle/keeper"
-	"github.com/althea-net/peggy/module/x/oracle/types"
+	"github.com/MinterTeam/mhub/chain/x/oracle/keeper"
+	"github.com/MinterTeam/mhub/chain/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

@@ -1,8 +1,8 @@
 package app
 
 import (
-	"github.com/althea-net/peggy/module/x/minter"
-	"github.com/althea-net/peggy/module/x/oracle"
+	"github.com/MinterTeam/mhub/chain/x/minter"
+	"github.com/MinterTeam/mhub/chain/x/oracle"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"io"
 	"net/http"
@@ -20,14 +20,14 @@ import (
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	dbm "github.com/tendermint/tm-db"
 
-	peggyparams "github.com/althea-net/peggy/module/app/params"
-	minterkeeper "github.com/althea-net/peggy/module/x/minter/keeper"
-	mintertypes "github.com/althea-net/peggy/module/x/minter/types"
-	oraclekeeper "github.com/althea-net/peggy/module/x/oracle/keeper"
-	oracletypes "github.com/althea-net/peggy/module/x/oracle/types"
-	"github.com/althea-net/peggy/module/x/peggy"
-	"github.com/althea-net/peggy/module/x/peggy/keeper"
-	peggytypes "github.com/althea-net/peggy/module/x/peggy/types"
+	peggyparams "github.com/MinterTeam/mhub/chain/app/params"
+	minterkeeper "github.com/MinterTeam/mhub/chain/x/minter/keeper"
+	mintertypes "github.com/MinterTeam/mhub/chain/x/minter/types"
+	oraclekeeper "github.com/MinterTeam/mhub/chain/x/oracle/keeper"
+	oracletypes "github.com/MinterTeam/mhub/chain/x/oracle/types"
+	"github.com/MinterTeam/mhub/chain/x/peggy"
+	"github.com/MinterTeam/mhub/chain/x/peggy/keeper"
+	peggytypes "github.com/MinterTeam/mhub/chain/x/peggy/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
