@@ -1,4 +1,4 @@
-module github.com/mhub/chain
+module github.com/MinterTeam/mhub/chain
 
 go 1.15
 
