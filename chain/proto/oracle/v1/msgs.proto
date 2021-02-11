@@ -1,0 +1,35 @@
+syntax = "proto3";
+package oracle.v1;
+
+import "google/api/annotations.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/althea-net/peggy/module/x/oracle/types";
+
+service Msg {
+  rpc PriceClaim(MsgPriceClaim) returns(MsgPriceClaimResponse) {
+    option (google.api.http).post = "/oracle/v1/price_claim";
+  }
+}
+
+message Prices {
+  repeated Price list = 2;
+}
+
+message Price {
+  string name = 1;
+  string value   = 2 [
+                      (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+                      (gogoproto.nullable) = false
+                      ];
+}
+
+// WithdrawClaim claims that a batch of withdrawal
+// operations on the bridge contract was executed.
+message MsgPriceClaim {
+  uint64 epoch    = 1;
+  Prices prices = 2;
+  string orchestrator   = 4;
+}
+
+message MsgPriceClaimResponse {}

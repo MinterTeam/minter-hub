@@ -1,0 +1,27 @@
+syntax = "proto3";
+package oracle.v1;
+
+import "gogoproto/gogo.proto";
+import "oracle/v1/attestation.proto";
+
+option go_package = "github.com/althea-net/peggy/module/x/oracle/types";
+
+message Params {
+  option (gogoproto.stringer)  = false;
+
+  uint64 signed_claims_window             = 1;
+  bytes  slash_fraction_claim             = 2 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  bytes  slash_fraction_conflicting_claim = 3 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+}
+
+// GenesisState struct
+message GenesisState {
+  Params                    params          = 1;
+  repeated Attestation      attestations    = 2 [(gogoproto.nullable) = false];
+}

@@ -1,0 +1,21 @@
+name: Rust
+
+on:
+  push:
+    branches: [master, althea-peggy]
+  pull_request:
+    branches: [master, althea-peggy]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build Orchestrator
+        run: cd orchestrator && cargo build --all --verbose
+      - name: Run Orchestrator tests
+        run: cd orchestrator && cargo test --all --verbose

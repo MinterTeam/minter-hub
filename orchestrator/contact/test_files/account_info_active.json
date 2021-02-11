@@ -1,0 +1,14 @@
+{
+    "height": "0",
+    "result": {
+        "type": "cosmos-sdk/BaseAccount",
+        "value": {
+            "address": "cosmos1qq86jde2cf6t6588nm6tyl5ymm38dlh4vmlgqs",
+            "public_key": {
+                "type": "tendermint/PubKeySecp256k1",
+                "value": "A7p7wCkHW3UY6Lp0y0ccExTdHM1dfeQYWkQRECnVFUQw"
+            },
+            "sequence": "10"
+        }
+    }
+}

@@ -1,0 +1,10 @@
+{
+    "height": "0",
+    "result": {
+        "type": "cosmos-sdk/BaseAccount",
+        "value": {
+            "address": "cosmos1tq8l476lsuz5c3jq2cxerqssuu0ryjsvwglaqp",
+            "account_number": "11"
+        }
+    }
+}

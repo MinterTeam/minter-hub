@@ -1,0 +1,11 @@
+node_modules
+typechain
+target
+tests/test-runner/Cargo.lock
+tests/dockerfile/peggy.tar.gz
+
+#Buidler files
+cache
+artifacts
+*.test
+module/vendor

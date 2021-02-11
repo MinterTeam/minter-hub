@@ -1,0 +1,32 @@
+syntax = "proto3";
+package oracle.v1;
+
+import "oracle/v1/msgs.proto";
+
+option go_package = "github.com/althea-net/peggy/module/x/oracle/types";
+
+
+// It's difficult to serialize and deserialize
+// interfaces, instead we can make this struct
+// that stores all the data the interface requires
+// and use it to store and then re-create a interface
+// object with all the same properties.
+message GenericClaim {
+  uint64  epoch   = 1;
+  int32   claim_type    = 2;
+  bytes   hash          = 3;
+  string  event_claimer = 4;
+  oneof claim {
+    MsgPriceClaim price_claim = 5;
+  }
+}
+
+message Epoch {
+  uint64 nonce   = 1;
+  repeated Vote votes = 2;
+}
+
+message Vote {
+  string oracle = 1;
+  MsgPriceClaim claim = 2;
+}
