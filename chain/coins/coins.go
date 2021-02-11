@@ -59,7 +59,7 @@ func GetCoins() Coins {
 		{
 			Denom:      "hub",
 			EthAddress: "0x8C2B6949590bEBE6BC1124B670e58DA85b081b2E",
-			MinterID:   3,
+			MinterID:   8,
 		},
 	}
 }
