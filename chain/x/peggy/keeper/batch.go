@@ -175,6 +175,7 @@ func (k Keeper) pickUnbatchedTX(ctx sdk.Context, contractAddress string, maxElem
 			DestAddress: tx.DestAddr,
 			Erc20Token:  types.NewERC20Token(tx.Amount.Amount, contractAddress),
 			Erc20Fee:    types.NewERC20Token(tx.BridgeFee.Amount, contractAddress),
+			TxHash:      tx.TxHash,
 		}
 		selectedTx = append(selectedTx, txOut)
 		return len(selectedTx) == maxElements

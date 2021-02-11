@@ -124,6 +124,7 @@ func (k Keeper) pickUnbatchedTX(ctx sdk.Context, maxElements int) ([]*types.Outg
 			Sender:      tx.Sender,
 			DestAddress: tx.DestAddr,
 			MinterToken: types.NewMinterCoin(tx.Amount.Amount, mCoin.CoinId),
+			TxHash:      tx.TxHash,
 		}
 		selectedTx = append(selectedTx, txOut)
 		err = k.removeFromUnbatchedTXIndex(ctx, txID)
