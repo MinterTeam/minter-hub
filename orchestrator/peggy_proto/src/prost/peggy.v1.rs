@@ -60,9 +60,9 @@ pub struct OutgoingTx {
     #[prost(int64, tag="4")]
     pub expiration_time: i64,
     #[prost(message, optional, tag="5")]
-    pub amount: ::std::option::Option<super::super::cosmos::base::v1beta1::Coin>,
+    pub amount: ::std::option::Option<cosmos_sdk_proto::cosmos::base::v1beta1::Coin>,
     #[prost(message, optional, tag="6")]
-    pub bridge_fee: ::std::option::Option<super::super::cosmos::base::v1beta1::Coin>,
+    pub bridge_fee: ::std::option::Option<cosmos_sdk_proto::cosmos::base::v1beta1::Coin>,
     #[prost(string, tag="7")]
     pub tx_hash: std::string::String,
 }
@@ -139,7 +139,7 @@ pub struct GenericClaim {
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct LockedCoins {
     #[prost(message, repeated, tag="1")]
-    pub list: ::std::vec::Vec<super::super::cosmos::base::v1beta1::Coin>,
+    pub list: ::std::vec::Vec<cosmos_sdk_proto::cosmos::base::v1beta1::Coin>,
 }
 /// MsgSetOrchestratorAddress
 /// this message allows validators to delegate their voting responsibilities 
@@ -214,9 +214,9 @@ pub struct MsgSendToEth {
     #[prost(string, tag="2")]
     pub eth_dest: std::string::String,
     #[prost(message, optional, tag="3")]
-    pub amount: ::std::option::Option<super::super::cosmos::base::v1beta1::Coin>,
+    pub amount: ::std::option::Option<cosmos_sdk_proto::cosmos::base::v1beta1::Coin>,
     #[prost(message, optional, tag="4")]
-    pub bridge_fee: ::std::option::Option<super::super::cosmos::base::v1beta1::Coin>,
+    pub bridge_fee: ::std::option::Option<cosmos_sdk_proto::cosmos::base::v1beta1::Coin>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct MsgSendToEthResponse {
