@@ -85,7 +85,7 @@ func (k Keeper) BuildOutgoingTXBatch(ctx sdk.Context, contractAddress string, ma
 	)
 
 	for _, tx := range selectedTx {
-		batchEvent.AppendAttributes(sdk.NewAttribute(types.AttributeKeyTxHash, tx.TxHash))
+		batchEvent = batchEvent.AppendAttributes(sdk.NewAttribute(types.AttributeKeyTxHash, tx.TxHash))
 	}
 
 	ctx.EventManager().EmitEvent(batchEvent)
