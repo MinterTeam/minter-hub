@@ -63,7 +63,7 @@ func (a AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, claim
 
 			for _, val := range valset.Members {
 				amount := commission.Amount.Mul(sdk.NewIntFromUint64(val.Power)).Quo(sdk.NewIntFromUint64(totalPower))
-				_, err := a.minterKeeper.AddToOutgoingPool(ctx, sdk.AccAddress{}, val.MinterAddress, sdk.NewCoin(commission.Denom, amount))
+				_, err := a.minterKeeper.AddToOutgoingPool(ctx, sdk.AccAddress{}, val.MinterAddress, "#commission", sdk.NewCoin(commission.Denom, amount))
 				if err != nil {
 					return sdkerrors.Wrap(err, "commission withdrawal")
 				}
@@ -73,6 +73,14 @@ func (a AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, claim
 		if err = a.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, addr, vouchers); err != nil {
 			return sdkerrors.Wrap(err, "transfer vouchers")
 		}
+
+		depositEvent := sdk.NewEvent(
+			types.EventTypeBridgeDepositReceived,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(types.AttributeKeyTxHash, claim.TxHash),
+		)
+		ctx.EventManager().EmitEvent(depositEvent)
+
 	case *types.MsgSendToMinterClaim:
 		if claim.Amount.LT(minDepositAmount) {
 			return sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, "amount is too small to be deposited")
@@ -97,12 +105,12 @@ func (a AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, claim
 		}
 
 		commission := sdk.NewCoin(denom, claim.Amount.QuoRaw(100))
-		_, err = a.minterKeeper.AddToOutgoingPool(ctx, receiver, claim.MinterReceiver, sdk.NewCoin(denom, claim.Amount).Sub(commission))
+		_, err = a.minterKeeper.AddToOutgoingPool(ctx, receiver, claim.MinterReceiver, claim.TxHash, sdk.NewCoin(denom, claim.Amount).Sub(commission))
 		if err != nil {
 			return sdkerrors.Wrap(err, "withdraw")
 		}
 	case *types.MsgWithdrawClaim:
-		a.keeper.OutgoingTxBatchExecuted(ctx, claim.TokenContract, claim.BatchNonce, claim.TxSender)
+		a.keeper.OutgoingTxBatchExecuted(ctx, claim.TokenContract, claim.BatchNonce, claim.TxSender, claim.TxHash)
 
 	default:
 		return sdkerrors.Wrapf(types.ErrInvalid, "event type: %s", claim.GetType())

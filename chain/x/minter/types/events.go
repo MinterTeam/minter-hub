@@ -8,6 +8,9 @@ const (
 	EventTypeOutgoingBatchCanceled    = "outgoing_batch_canceled"
 	EventTypeBridgeWithdrawalReceived = "withdrawal_received"
 	EventTypeBridgeDepositReceived    = "deposit_received"
+	EventTypeRefund                   = "refund"
+	EventTypeWithdrawRequest          = "withdraw"
+	EventTypeOutgoingBatchExecuted    = "batch_executed"
 
 	AttributeKeyAttestationID   = "attestation_id"
 	AttributeKeyMultisigID      = "multisig_id"
@@ -17,4 +20,5 @@ const (
 	AttributeKeyContract        = "bridge_contract"
 	AttributeKeyNonce           = "nonce"
 	AttributeKeyBridgeChainID   = "bridge_chain_id"
+	AttributeKeyTxHash          = "tx_hash"
 )

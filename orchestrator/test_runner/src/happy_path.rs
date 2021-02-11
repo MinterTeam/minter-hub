@@ -444,6 +444,7 @@ async fn submit_duplicate_erc20_send(
         sender: ethereum_sender,
         destination: receiver,
         amount,
+        tx_hash: "0x".into()
     };
 
     // iterate through all validators and try to send an event with duplicate nonce

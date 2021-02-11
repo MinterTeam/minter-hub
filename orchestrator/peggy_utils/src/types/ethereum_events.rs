@@ -4,6 +4,8 @@ use clarity::Address as EthAddress;
 use deep_space::address::Address as CosmosAddress;
 use num256::Uint256;
 use web30::types::Log;
+use serde::Serialize;
+use clarity::utils::bytes_to_hex_str;
 
 /// A parsed struct representing the Ethereum event fired by the Peggy contract
 /// when the validator set is updated.
@@ -124,6 +126,8 @@ pub struct TransactionBatchExecutedEvent {
     /// of the Peggy solidity contract. Ensuring that these events can only be played
     /// back in order
     pub event_nonce: Uint256,
+
+    pub tx_hash: String,
 }
 
 impl TransactionBatchExecutedEvent {
@@ -144,7 +148,8 @@ impl TransactionBatchExecutedEvent {
                     batch_nonce,
                     erc20,
                     event_nonce,
-                    sender
+                    sender,
+                    tx_hash: format!("0x{}", bytes_to_hex_str(input.transaction_hash.as_deref().unwrap())).into()
                 })
             }
         } else {
@@ -187,6 +192,8 @@ pub struct SendToCosmosEvent {
     pub amount: Uint256,
     /// The transaction's nonce, used to make sure there can be no accidntal duplication
     pub event_nonce: Uint256,
+
+    pub tx_hash: String,
 }
 
 impl SendToCosmosEvent {
@@ -217,7 +224,8 @@ impl SendToCosmosEvent {
                     sender,
                     destination,
                     amount,
-                    event_nonce
+                    event_nonce,
+                    tx_hash: format!("0x{}", bytes_to_hex_str(input.transaction_hash.as_deref().unwrap())).into()
                 })
             }
         } else {
@@ -260,6 +268,7 @@ pub struct SendToMinterEvent {
     pub amount: Uint256,
     /// The transaction's nonce, used to make sure there can be no accidntal duplication
     pub event_nonce: Uint256,
+    pub tx_hash: String,
 }
 
 impl SendToMinterEvent {
@@ -286,7 +295,8 @@ impl SendToMinterEvent {
                     sender,
                     destination,
                     amount,
-                    event_nonce
+                    event_nonce,
+                    tx_hash: format!("0x{}", bytes_to_hex_str(input.transaction_hash.as_deref().unwrap())).into()
                 })
             }
         } else {

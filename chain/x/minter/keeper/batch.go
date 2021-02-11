@@ -43,6 +43,11 @@ func (k Keeper) BuildOutgoingTXBatch(ctx sdk.Context, maxElements int) (*types.O
 		sdk.NewAttribute(types.AttributeKeyOutgoingBatchID, fmt.Sprint(nextID)),
 		sdk.NewAttribute(types.AttributeKeyNonce, fmt.Sprint(nextID)),
 	)
+
+	for _, tx := range selectedTx {
+		batchEvent.AppendAttributes(sdk.NewAttribute(types.AttributeKeyTxHash, tx.TxHash))
+	}
+
 	ctx.EventManager().EmitEvent(batchEvent)
 	return batch, nil
 }
@@ -73,6 +78,14 @@ func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, nonce uint64) error {
 
 	// Delete batch since it is finished
 	k.deleteBatch(ctx, *b)
+
+	batchEvent := sdk.NewEvent(
+		types.EventTypeOutgoingBatchExecuted,
+		sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+		sdk.NewAttribute(types.AttributeKeyNonce, fmt.Sprint(nonce)),
+	)
+
+	ctx.EventManager().EmitEvent(batchEvent)
 
 	return nil
 }

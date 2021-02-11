@@ -22,5 +22,5 @@ type BankKeeper interface {
 
 // PeggyKeeper defines the expected peggy keeper methods
 type PeggyKeeper interface {
-	AddToOutgoingPool(ctx sdk.Context, sender sdk.AccAddress, counterpartReceiver string, refundAddr string, amount sdk.Coin, fee sdk.Coin) (uint64, error)
+	AddToOutgoingPool(ctx sdk.Context, sender sdk.AccAddress, counterpartReceiver string, refundAddr string, txHash string, amount sdk.Coin, fee sdk.Coin) (uint64, error)
 }

@@ -15,6 +15,7 @@ message OutgoingTx {
   int64 expiration_time = 4;
   cosmos.base.v1beta1.Coin amount = 5 [(gogoproto.nullable) = false];
   cosmos.base.v1beta1.Coin bridge_fee = 6 [(gogoproto.nullable) = false];
+  string tx_hash = 7;
 }
 
 // IDSet represents a set of IDs

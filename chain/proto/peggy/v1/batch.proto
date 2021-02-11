@@ -21,4 +21,5 @@ message OutgoingTransferTx {
   string     dest_address = 3;
   ERC20Token erc20_token  = 4;
   ERC20Token erc20_fee    = 5;
+  string tx_hash = 6;
 }

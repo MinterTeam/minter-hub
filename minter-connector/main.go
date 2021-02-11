@@ -4,6 +4,8 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"encoding/hex"
+	"github.com/MinterTeam/mhub/chain/coins"
+	"github.com/MinterTeam/mhub/chain/x/minter/types"
 	"github.com/MinterTeam/minter-go-sdk/v2/api/http_client"
 	"github.com/MinterTeam/minter-go-sdk/v2/api/http_client/models"
 	"github.com/MinterTeam/minter-go-sdk/v2/transaction"
@@ -12,8 +14,6 @@ import (
 	"github.com/MinterTeam/minter-hub-connector/config"
 	"github.com/MinterTeam/minter-hub-connector/cosmos"
 	"github.com/MinterTeam/minter-hub-connector/minter"
-	"github.com/MinterTeam/mhub/chain/coins"
-	"github.com/MinterTeam/mhub/chain/x/minter/types"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	crypto "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -388,6 +388,7 @@ func relayMinterEvents(minterClient *http_client.Client, minterWallet *wallet.Wa
 							Fee:        cmd.Fee,
 							EventNonce: lastEventNonce,
 							CoinID:     sendData.Coin.ID,
+							TxHash:     tx.Hash,
 						})
 
 						lastEventNonce++
@@ -400,6 +401,7 @@ func relayMinterEvents(minterClient *http_client.Client, minterWallet *wallet.Wa
 				batches = append(batches, cosmos.Batch{
 					BatchNonce: lastBatchNonce,
 					EventNonce: lastEventNonce,
+					TxHash:     tx.Hash,
 				})
 
 				lastEventNonce++

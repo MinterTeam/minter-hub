@@ -2,12 +2,12 @@ package cosmos
 
 import (
 	"context"
-	"github.com/MinterTeam/minter-hub-connector/command"
-	"github.com/MinterTeam/minter-hub-connector/config"
 	"github.com/MinterTeam/mhub/chain/app"
 	"github.com/MinterTeam/mhub/chain/coins"
 	mhub "github.com/MinterTeam/mhub/chain/x/minter/types"
 	phub "github.com/MinterTeam/mhub/chain/x/peggy/types"
+	"github.com/MinterTeam/minter-hub-connector/command"
+	"github.com/MinterTeam/minter-hub-connector/config"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	crypto "github.com/cosmos/cosmos-sdk/crypto/types"
@@ -27,6 +27,7 @@ var cfg = config.Get()
 type Batch struct {
 	BatchNonce uint64
 	EventNonce uint64
+	TxHash     string
 }
 
 type Valset struct {
@@ -42,6 +43,7 @@ type Deposit struct {
 	Sender     string
 	CoinID     uint64
 	Type       string
+	TxHash     string
 }
 
 func Setup() {
@@ -70,6 +72,7 @@ func CreateClaims(orcAddress sdk.AccAddress, deposits []Deposit, batches []Batch
 				MinterSender: deposit.Sender,
 				EthReceiver:  deposit.Recipient,
 				Orchestrator: orcAddress.String(),
+				TxHash:       deposit.TxHash,
 			}, &phub.MsgRequestBatch{
 				Orchestrator: orcAddress.String(),
 				Denom:        denom,
@@ -82,6 +85,7 @@ func CreateClaims(orcAddress sdk.AccAddress, deposits []Deposit, batches []Batch
 				MinterSender:   deposit.Sender,
 				CosmosReceiver: deposit.Recipient,
 				Orchestrator:   orcAddress.String(),
+				TxHash:         deposit.TxHash,
 			})
 		}
 	}
@@ -91,6 +95,7 @@ func CreateClaims(orcAddress sdk.AccAddress, deposits []Deposit, batches []Batch
 			EventNonce:   batch.EventNonce,
 			BatchNonce:   batch.BatchNonce,
 			Orchestrator: orcAddress.String(),
+			TxHash:       batch.TxHash,
 		})
 	}
 

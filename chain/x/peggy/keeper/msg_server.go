@@ -149,7 +149,7 @@ func (k msgServer) SendToEth(c context.Context, msg *types.MsgSendToEth) (*types
 		return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "bridge fee is not sufficient")
 	}
 
-	txID, err := k.AddToOutgoingPool(ctx, sender, msg.EthDest, sender.String(), msg.Amount, msg.BridgeFee)
+	txID, err := k.AddToOutgoingPool(ctx, sender, msg.EthDest, sender.String(), "todo", msg.Amount, msg.BridgeFee) // todo
 	if err != nil {
 		return nil, err
 	}

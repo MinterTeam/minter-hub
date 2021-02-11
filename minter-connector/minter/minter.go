@@ -2,11 +2,11 @@ package minter
 
 import (
 	"encoding/json"
+	"github.com/MinterTeam/mhub/chain/coins"
 	"github.com/MinterTeam/minter-go-sdk/v2/api/http_client"
 	"github.com/MinterTeam/minter-go-sdk/v2/api/http_client/models"
 	"github.com/MinterTeam/minter-go-sdk/v2/transaction"
 	"github.com/MinterTeam/minter-hub-connector/command"
-	"github.com/MinterTeam/mhub/chain/coins"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"strconv"
 	"time"

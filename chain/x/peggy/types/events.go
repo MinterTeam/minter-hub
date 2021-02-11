@@ -3,6 +3,7 @@ package types
 const (
 	EventTypeObservation              = "observation"
 	EventTypeOutgoingBatch            = "outgoing_batch"
+	EventTypeOutgoingBatchExecuted            = "outgoing_batch_executed"
 	EventTypeMultisigBootstrap        = "multisig_bootstrap"
 	EventTypeMultisigUpdateRequest    = "multisig_update_request"
 	EventTypeOutgoingBatchCanceled    = "outgoing_batch_canceled"
@@ -23,4 +24,5 @@ const (
 	AttributeKeyBatchNonce       = "batch_nonce"
 	AttributeKeyBridgeChainID    = "bridge_chain_id"
 	AttributeKeySetOperatorAddr  = "set_operator_address"
+	AttributeKeyTxHash           = "tx_hash"
 )

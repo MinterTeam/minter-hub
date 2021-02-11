@@ -192,6 +192,7 @@ pub struct WithdrawClaimMsg {
     pub token_contract: EthAddress,
     pub orchestrator: Address,
     pub tx_sender: EthAddress,
+    pub tx_hash: String,
 }
 
 impl WithdrawClaimMsg {
@@ -206,6 +207,7 @@ impl WithdrawClaimMsg {
             token_contract: input.erc20,
             orchestrator: sender,
             tx_sender: input.sender,
+            tx_hash: input.tx_hash,
         }
     }
 }
@@ -218,6 +220,7 @@ pub struct DepositClaimMsg {
     pub ethereum_sender: EthAddress,
     pub cosmos_receiver: Address,
     pub orchestrator: Address,
+    pub tx_hash: String,
 }
 
 impl DepositClaimMsg {
@@ -231,6 +234,7 @@ impl DepositClaimMsg {
             ethereum_sender: input.sender,
             cosmos_receiver: input.destination,
             orchestrator: sender,
+            tx_hash: input.tx_hash,
         }
     }
 }
@@ -243,6 +247,7 @@ pub struct SendToMinterClaimMsg {
     pub ethereum_sender: EthAddress,
     pub minter_receiver: String,
     pub orchestrator: Address,
+    pub tx_hash: String,
 }
 
 impl SendToMinterClaimMsg {
@@ -256,6 +261,7 @@ impl SendToMinterClaimMsg {
             ethereum_sender: input.sender,
             minter_receiver: input.destination,
             orchestrator: sender,
+            tx_hash: input.tx_hash,
         }
     }
 }

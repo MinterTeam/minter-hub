@@ -89,7 +89,7 @@ func (k Keeper) BuildOutgoingTXBatch(ctx sdk.Context, contractAddress string, ma
 
 // OutgoingTxBatchExecuted is run when the Cosmos chain detects that a batch has been executed on Ethereum
 // It frees all the transactions in the batch, then cancels all earlier batches
-func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, tokenContract string, nonce uint64, txSender string) error {
+func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, tokenContract string, nonce uint64, txSender string, txHash string) error {
 	b := k.GetOutgoingTXBatch(ctx, tokenContract, nonce)
 	if b == nil {
 		return sdkerrors.Wrap(types.ErrUnknown, "nonce")
@@ -113,7 +113,7 @@ func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, tokenContract string, n
 		return sdkerrors.Wrap(err, "transfer vouchers")
 	}
 
-	k.minterKeeper.AddToOutgoingPool(ctx, commissionKeeperAddress, "Mx"+txSender[2:], totalFee)
+	k.minterKeeper.AddToOutgoingPool(ctx, commissionKeeperAddress, "Mx"+txSender[2:], txHash, totalFee)
 
 	// Iterate through remaining batches
 	k.IterateOutgoingTXBatches(ctx, func(key []byte, iter_batch *types.OutgoingTxBatch) bool {
@@ -127,6 +127,14 @@ func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, tokenContract string, n
 
 	// Delete batch since it is finished
 	k.DeleteBatch(ctx, *b)
+
+	batchEventExecuted := sdk.NewEvent(
+		types.EventTypeOutgoingBatchExecuted,
+		sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+		sdk.NewAttribute(types.AttributeKeyNonce, fmt.Sprint(nonce)),
+	)
+	ctx.EventManager().EmitEvent(batchEventExecuted)
+
 	return nil
 }
 

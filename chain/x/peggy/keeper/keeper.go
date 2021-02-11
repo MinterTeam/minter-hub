@@ -411,7 +411,7 @@ func (k Keeper) RefundOutgoingTx(ctx sdk.Context, id uint64, tx *types.OutgoingT
 		if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, receiver, vouchers); err != nil {
 			panic(err)
 		}
-		if _, err := k.minterKeeper.AddToOutgoingPool(ctx, receiver, tx.RefundAddr, tx.Amount); err != nil {
+		if _, err := k.minterKeeper.AddToOutgoingPool(ctx, receiver, tx.RefundAddr, tx.TxHash, tx.Amount); err != nil {
 			panic(err)
 		}
 	} else {

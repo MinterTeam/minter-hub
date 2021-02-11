@@ -161,6 +161,7 @@ message MsgDepositClaim {
   string minter_sender = 4;
   string cosmos_receiver = 5;
   string orchestrator = 6;
+  string tx_hash = 7;
 }
 
 // WithdrawClaim claims that a batch of withdrawal
@@ -169,6 +170,7 @@ message MsgWithdrawClaim {
   uint64 event_nonce = 1;
   uint64 batch_nonce = 2;
   string orchestrator = 4;
+  string tx_hash = 5;
 }
 
 // TODO: write response data here
@@ -195,6 +197,7 @@ message MsgSendToEthClaim {
   string minter_sender = 5;
   string eth_receiver = 6;
   string orchestrator = 7;
+  string tx_hash = 8;
 }
 
 // TODO: write response data here

@@ -151,6 +151,7 @@ message MsgDepositClaim {
   string ethereum_sender = 4;
   string cosmos_receiver = 5;
   string orchestrator    = 6;
+  string tx_hash = 7;
 }
 
 message MsgDepositClaimResponse {}
@@ -165,6 +166,7 @@ message MsgSendToMinterClaim {
   string ethereum_sender = 4;
   string minter_receiver = 5;
   string orchestrator    = 6;
+  string tx_hash = 7;
 }
 
 message MsgSendToMinterClaimResponse {}
@@ -177,6 +179,7 @@ message MsgWithdrawClaim {
   string token_contract = 3;
   string orchestrator   = 4;
   string tx_sender      = 5;
+  string tx_hash = 6;
 }
 
 message MsgWithdrawClaimResponse {}

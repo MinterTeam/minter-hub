@@ -266,7 +266,7 @@ func handleMsgSendToMinter(ctx sdk.Context, keeper keeper.Keeper, msg *types.Msg
 	}
 
 	sender, _ := sdk.AccAddressFromBech32(msg.Sender)
-	txID, err := keeper.AddToOutgoingPool(ctx, sender, msg.MinterDest, msg.Amount)
+	txID, err := keeper.AddToOutgoingPool(ctx, sender, msg.MinterDest, "todo", msg.Amount) // todo: txhash
 	if err != nil {
 		return &sdk.Result{}, nil // todo log
 	}

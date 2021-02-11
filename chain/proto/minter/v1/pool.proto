@@ -12,6 +12,7 @@ message OutgoingTx {
   string sender = 1;
   string dest_addr = 2;
   cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false];
+  string tx_hash = 7;
 }
 
 // IDSet represents a set of IDs

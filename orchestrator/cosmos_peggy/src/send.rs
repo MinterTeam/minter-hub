@@ -194,6 +194,7 @@ pub async fn send_ethereum_claims(
             ethereum_sender: transfer.sender,
             minter_receiver: transfer.destination,
             orchestrator: our_address,
+            tx_hash: transfer.tx_hash,
         }));
 
         msgs.push(PeggyMsg::RequestMinterBatchMsg(RequestMinterBatchMsg {
