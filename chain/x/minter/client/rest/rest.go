@@ -59,5 +59,5 @@ func RegisterRoutes(cliCtx client.Context, r *mux.Router, storeName string) {
 	r.HandleFunc(fmt.Sprintf("/%s/batch_confirm/{%s}", storeName, nonce), allBatchConfirmsHandler(cliCtx, storeName)).Methods("GET")
 
 
-	r.HandleFunc(fmt.Sprintf("/%s/tx_status/{%s}", storeName, nonce), txStatusHandler(cliCtx, storeName)).Methods("GET")
+	r.HandleFunc(fmt.Sprintf("/%s/tx_status/{%s}", storeName, txHash), txStatusHandler(cliCtx, storeName)).Methods("GET")
 }
