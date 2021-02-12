@@ -6,7 +6,7 @@ const (
 	EventTypeMultisigBootstrap        = "multisig_bootstrap"
 	EventTypeMultisigUpdateRequest    = "multisig_update_request"
 	EventTypeOutgoingBatchCanceled    = "outgoing_batch_canceled"
-	EventTypeBridgeWithdrawalReceived = "withdrawal_received"
+	EventTypeBridgeWithdrawalReceived = "minter_withdrawal_received"
 	EventTypeBridgeDepositReceived    = "deposit_received"
 	EventTypeRefund                   = "refund"
 	EventTypeWithdrawRequest          = "withdraw"
