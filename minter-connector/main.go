@@ -332,8 +332,12 @@ func relayValsets(minterClient *http_client.Client, cosmosConn *grpc.ClientConn,
 	println(encodedTx)
 	response, err := minterClient.SendTransaction(encodedTx)
 	if err != nil {
-		code, body, err := http_client.ErrorBody(err)
-		println(code, body.Error.Message, err)
+		code, body, err2 := http_client.ErrorBody(err)
+		if err2 != nil {
+			println(err, err2)
+		} else {
+			println(code, body.Error.Message, err)
+		}
 	} else if response.Code != 0 {
 		println(response.Log)
 	}
