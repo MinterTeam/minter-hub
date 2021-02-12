@@ -204,9 +204,9 @@ func txStatusHandler(cliCtx client.Context, storeName string) http.HandlerFunc {
 		statuses := []string{
 			"eth_outgoing_batch_executed",
 			"eth_outgoing_batch",
-			"minter_deposit_received",
 			"minter_refund",
 			"eth_refund",
+			"minter_deposit_received",
 		}
 
 		for _, status := range statuses {
