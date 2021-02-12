@@ -423,6 +423,13 @@ func (k Keeper) RefundOutgoingTx(ctx sdk.Context, id uint64, tx *types.OutgoingT
 			panic(err)
 		}
 	}
+
+	refundEvent := sdk.NewEvent(
+		types.EventTypeRefund,
+		sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+		sdk.NewAttribute(types.AttributeKeyTxHash, tx.TxHash),
+	)
+	ctx.EventManager().EmitEvent(refundEvent)
 }
 
 func (k Keeper) SetLockedCoins(ctx sdk.Context, coins sdk.Coins) {

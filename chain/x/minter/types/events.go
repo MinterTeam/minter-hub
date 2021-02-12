@@ -1,17 +1,17 @@
 package types
 
 const (
-	EventTypeObservation              = "observation"
-	EventTypeOutgoingBatch            = "outgoing_batch"
-	EventTypeMultisigBootstrap        = "multisig_bootstrap"
-	EventTypeMultisigUpdateRequest    = "multisig_update_request"
-	EventTypeOutgoingBatchCanceled    = "outgoing_batch_canceled"
+	EventTypeObservation              = "minter_observation"
+	EventTypeOutgoingBatch            = "minter_outgoing_batch"
+	EventTypeMultisigBootstrap        = "minter_multisig_bootstrap"
+	EventTypeMultisigUpdateRequest    = "minter_multisig_update_request"
+	EventTypeOutgoingBatchCanceled    = "minter_outgoing_batch_canceled"
 	EventTypeBridgeWithdrawalReceived = "minter_withdrawal_received"
-	EventTypeBridgeDepositReceived    = "deposit_received"
-	EventTypeRefund                   = "refund"
-	EventTypeWithdrawRequest          = "withdraw"
-	EventTypeOutgoingBatchExecuted    = "batch_executed"
-	EventTypeProcessAttestation       = "process_attestation"
+	EventTypeBridgeDepositReceived    = "minter_deposit_received"
+	EventTypeRefund                   = "minter_refund"
+	EventTypeWithdrawRequest          = "minter_withdraw"
+	EventTypeOutgoingBatchExecuted    = "minter_batch_executed"
+	EventTypeProcessAttestation       = "minter_process_attestation"
 
 	AttributeKeyAttestationID   = "attestation_id"
 	AttributeKeyMultisigID      = "multisig_id"

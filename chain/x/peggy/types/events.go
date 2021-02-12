@@ -1,14 +1,15 @@
 package types
 
 const (
-	EventTypeObservation              = "observation"
-	EventTypeOutgoingBatch            = "outgoing_batch"
-	EventTypeOutgoingBatchExecuted    = "outgoing_batch_executed"
-	EventTypeMultisigBootstrap        = "multisig_bootstrap"
-	EventTypeMultisigUpdateRequest    = "multisig_update_request"
-	EventTypeOutgoingBatchCanceled    = "outgoing_batch_canceled"
+	EventTypeObservation              = "eth_observation"
+	EventTypeOutgoingBatch            = "eth_outgoing_batch"
+	EventTypeOutgoingBatchExecuted    = "eth_outgoing_batch_executed"
+	EventTypeMultisigBootstrap        = "eth_multisig_bootstrap"
+	EventTypeMultisigUpdateRequest    = "eth_multisig_update_request"
+	EventTypeOutgoingBatchCanceled    = "eth_outgoing_batch_canceled"
 	EventTypeBridgeWithdrawalReceived = "eth_withdrawal_received"
-	EventTypeBridgeDepositReceived    = "deposit_received"
+	EventTypeBridgeDepositReceived    = "eth_deposit_received"
+	EventTypeRefund    				  = "eth_refund"
 
 	AttributeKeyAttestationID    = "attestation_id"
 	AttributeKeyAttestationIDs   = "attestation_ids"
