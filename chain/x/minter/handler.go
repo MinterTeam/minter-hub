@@ -70,11 +70,6 @@ func handleSendToEthClaim(ctx sdk.Context, keeper keeper.Keeper, msg *types.MsgS
 		return nil, types.ErrServiceStopped
 	}
 
-	ctx.EventManager().EmitEvent(sdk.NewEvent(
-		"new_claim",
-		sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-	))
-
 	var attestationIDs [][]byte
 	// TODO SECURITY this does not auth the sender in the current validator set!
 	// anyone can vote! We need to check and reject right here.
