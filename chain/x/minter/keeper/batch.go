@@ -79,13 +79,17 @@ func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, nonce uint64) error {
 	// Delete batch since it is finished
 	k.deleteBatch(ctx, *b)
 
-	batchEvent := sdk.NewEvent(
+	batchEventExecuted := sdk.NewEvent(
 		types.EventTypeOutgoingBatchExecuted,
 		sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
 		sdk.NewAttribute(types.AttributeKeyNonce, fmt.Sprint(nonce)),
 	)
 
-	ctx.EventManager().EmitEvent(batchEvent)
+	for _, tx := range b.Transactions {
+		batchEventExecuted = batchEventExecuted.AppendAttributes(sdk.NewAttribute(types.AttributeKeyTxHash, tx.TxHash))
+	}
+
+	ctx.EventManager().EmitEvent(batchEventExecuted)
 
 	return nil
 }

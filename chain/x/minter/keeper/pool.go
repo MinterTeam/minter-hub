@@ -42,6 +42,7 @@ func (k Keeper) AddToOutgoingPool(ctx sdk.Context, sender sdk.AccAddress, counte
 		Sender:   sender.String(),
 		DestAddr: counterpartReceiver,
 		Amount:   amount,
+		TxHash:   txHash,
 	}
 
 	// set the outgoing tx in the pool index
