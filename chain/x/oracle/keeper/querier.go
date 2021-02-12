@@ -11,7 +11,7 @@ import (
 const (
 	QueryCurrentEpoch = "currentEpoch"
 	QueryPrices       = "prices"
-	QueryMinEthFee    = "min_eth_fee"
+	QueryEthFee    = "eth_fee"
 )
 
 // NewQuerier is the module level router for state queries
@@ -22,8 +22,8 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return queryCurrentEpoch(ctx, keeper)
 		case QueryPrices:
 			return queryPrices(ctx, keeper)
-		case QueryMinEthFee:
-			return queryMinEthFee(ctx, keeper)
+		case QueryEthFee:
+			return queryEthFee(ctx, keeper)
 		default:
 			return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "unknown %s query endpoint", types.ModuleName)
 		}
@@ -61,7 +61,7 @@ func queryPrices(ctx sdk.Context, keeper Keeper) ([]byte, error) {
 	return res, nil
 }
 
-func queryMinEthFee(ctx sdk.Context, keeper Keeper) ([]byte, error) {
+func queryEthFee(ctx sdk.Context, keeper Keeper) ([]byte, error) {
 	gasPrice, err := keeper.GetEthGasPrice(ctx)
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "gas price")
@@ -72,8 +72,9 @@ func queryMinEthFee(ctx sdk.Context, keeper Keeper) ([]byte, error) {
 		return nil, sdkerrors.Wrap(err, "eth price")
 	}
 
-	response := types.QueryMinEthFeeResponse{
-		Value: gasPrice.Mul(ethPrice).MulRaw(EthMaxExecutionGas).QuoRaw(gweiInEth).QuoRaw(keeper.GetGasUnits()),
+	response := types.QueryEthFeeResponse{
+		Min: gasPrice.Mul(ethPrice).MulRaw(EthMaxExecutionGas).QuoRaw(gweiInEth).QuoRaw(keeper.GetGasUnits()),
+		Fast: gasPrice.Mul(ethPrice).MulRaw(EthMaxFastExecutionGas).QuoRaw(gweiInEth).QuoRaw(keeper.GetGasUnits()),
 	}
 
 	res, err := codec.MarshalJSONIndent(types.ModuleCdc, &response)
