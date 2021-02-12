@@ -25,4 +25,5 @@ const (
 	AttributeKeyBridgeChainID    = "bridge_chain_id"
 	AttributeKeySetOperatorAddr  = "set_operator_address"
 	AttributeKeyTxHash           = "tx_hash"
+	AttributeKeyBatchTxHash      = "batch_tx_hash"
 )

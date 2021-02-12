@@ -123,7 +123,7 @@ func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, tokenContract string, n
 	// Iterate through remaining batches
 	k.IterateOutgoingTXBatches(ctx, func(key []byte, iter_batch *types.OutgoingTxBatch) bool {
 		// If the iterated batches nonce is lower than the one that was just executed, cancel it
-		// TODO: iterate only over batches we need to iterate over
+		// TODO: iterate only over batches we need to iterate over !!!
 		if iter_batch.BatchNonce < b.BatchNonce {
 			k.CancelOutgoingTXBatch(ctx, tokenContract, iter_batch.BatchNonce)
 		}
@@ -137,7 +137,13 @@ func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, tokenContract string, n
 		types.EventTypeOutgoingBatchExecuted,
 		sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
 		sdk.NewAttribute(types.AttributeKeyNonce, fmt.Sprint(nonce)),
+		sdk.NewAttribute(types.AttributeKeyBatchTxHash, txHash),
 	)
+
+	for _, tx := range b.Transactions {
+		batchEventExecuted = batchEventExecuted.AppendAttributes(sdk.NewAttribute(types.AttributeKeyTxHash, tx.TxHash))
+	}
+
 	ctx.EventManager().EmitEvent(batchEventExecuted)
 
 	return nil
