@@ -199,7 +199,7 @@ func txStatusHandler(cliCtx client.Context, storeName string) http.HandlerFunc {
 		height := status.SyncInfo.LatestBlockHeight
 
 		vars := mux.Vars(r)
-		tx_hash := vars[nonce]
+		tx_hash := vars[txHash]
 
 		statuses := []string{
 			"eth_outgoing_batch_executed",
