@@ -217,7 +217,31 @@ func txStatusHandler(cliCtx client.Context, storeName string) http.HandlerFunc {
 			}
 
 			if result.TotalCount > 0 {
-				rest.PostProcessResponse(w, cliCtx.WithHeight(height), status)
+				if status == "eth_outgoing_batch_executed" {
+					var hash string
+					for _, event := range result.Txs[0].TxResult.Events {
+						for _, att := range event.Attributes {
+							if string(att.GetKey()) == "batch_tx_hash" {
+								hash = string(att.GetValue())
+							}
+						}
+					}
+					rest.PostProcessResponse(w, cliCtx.WithHeight(height), cliCtx.LegacyAmino.MustMarshalJSON(struct {
+						Status string `json:"status"`
+						TxHash string `json:"tx_hash"`
+					}{
+						Status: status,
+						TxHash: hash,
+					}))
+					return
+				}
+
+				rest.PostProcessResponse(w, cliCtx.WithHeight(height), cliCtx.LegacyAmino.MustMarshalJSON(struct {
+					Status string `json:"status"`
+				}{
+					Status: status,
+				}))
+
 				return
 			}
 		}

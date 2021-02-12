@@ -11,7 +11,7 @@ import (
 const (
 	QueryCurrentEpoch = "currentEpoch"
 	QueryPrices       = "prices"
-	QueryEthFee    = "eth_fee"
+	QueryEthFee       = "eth_fee"
 )
 
 // NewQuerier is the module level router for state queries
@@ -73,7 +73,7 @@ func queryEthFee(ctx sdk.Context, keeper Keeper) ([]byte, error) {
 	}
 
 	response := types.QueryEthFeeResponse{
-		Min: gasPrice.Mul(ethPrice).MulRaw(EthMaxExecutionGas).QuoRaw(gweiInEth).QuoRaw(keeper.GetGasUnits()),
+		Min:  gasPrice.Mul(ethPrice).MulRaw(EthMaxExecutionGas).QuoRaw(gweiInEth).QuoRaw(keeper.GetGasUnits()),
 		Fast: gasPrice.Mul(ethPrice).MulRaw(EthMaxFastExecutionGas).QuoRaw(gweiInEth).QuoRaw(keeper.GetGasUnits()),
 	}
 

@@ -9,7 +9,7 @@ const (
 	EventTypeOutgoingBatchCanceled    = "eth_outgoing_batch_canceled"
 	EventTypeBridgeWithdrawalReceived = "eth_withdrawal_received"
 	EventTypeBridgeDepositReceived    = "eth_deposit_received"
-	EventTypeRefund    				  = "eth_refund"
+	EventTypeRefund                   = "eth_refund"
 
 	AttributeKeyAttestationID    = "attestation_id"
 	AttributeKeyAttestationIDs   = "attestation_ids"
