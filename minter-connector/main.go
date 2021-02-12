@@ -70,9 +70,9 @@ func main() {
 			types.NewMsgSetMinterAddress("Mx"+minterAddress.String()[2:], orcAddress, hex.EncodeToString(signature)),
 		}, orcAddress, orcPriv, cosmosConn)
 
-		cosmos.SendCosmosTx([]sdk.Msg{
-			types.NewMsgValsetRequest(orcAddress),
-		}, orcAddress, orcPriv, cosmosConn)
+		//cosmos.SendCosmosTx([]sdk.Msg{
+		//	types.NewMsgValsetRequest(orcAddress),
+		//}, orcAddress, orcPriv, cosmosConn)
 	}
 
 	println("Syncing with Minter")
