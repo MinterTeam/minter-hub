@@ -8,6 +8,7 @@ import (
 )
 
 const EthMaxExecutionGas = 50000
+const EthMaxFastExecutionGas = 100000
 const gweiInEth = 1e9
 
 var _ types.QueryServer = Keeper{}
@@ -34,7 +35,7 @@ func (k Keeper) CurrentEpoch(context context.Context, request *types.QueryCurren
 	return &types.QueryCurrentEpochResponse{Epoch: &currentEpoch}, nil
 }
 
-func (k Keeper) MinEthFee(context context.Context, request *types.QueryMinEthFeeRequest) (*types.QueryMinEthFeeResponse, error) {
+func (k Keeper) EthFee(context context.Context, request *types.QueryEthFeeRequest) (*types.QueryEthFeeResponse, error) {
 	ctx := sdk.UnwrapSDKContext(context)
 
 	gasPrice, err := k.GetEthGasPrice(ctx)
@@ -47,7 +48,8 @@ func (k Keeper) MinEthFee(context context.Context, request *types.QueryMinEthFee
 		return nil, sdkerrors.Wrap(err, "eth price")
 	}
 
-	return &types.QueryMinEthFeeResponse{
-		Value: gasPrice.Mul(ethPrice).MulRaw(EthMaxExecutionGas).QuoRaw(gweiInEth).QuoRaw(k.GetGasUnits()),
+	return &types.QueryEthFeeResponse{
+		Min: gasPrice.Mul(ethPrice).MulRaw(EthMaxExecutionGas).QuoRaw(gweiInEth).QuoRaw(k.GetGasUnits()),
+		Fast: gasPrice.Mul(ethPrice).MulRaw(EthMaxFastExecutionGas).QuoRaw(gweiInEth).QuoRaw(k.GetGasUnits()),
 	}, nil
 }

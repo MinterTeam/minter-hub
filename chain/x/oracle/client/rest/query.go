@@ -27,9 +27,9 @@ func pricesHandler(cliCtx client.Context, storeName string) http.HandlerFunc {
 	}
 }
 
-func minEthFeeHandler(cliCtx client.Context, storeName string) http.HandlerFunc {
+func ethFeeHandler(cliCtx client.Context, storeName string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		res, height, err := cliCtx.Query(fmt.Sprintf("custom/%s/min_eth_fee", storeName))
+		res, height, err := cliCtx.Query(fmt.Sprintf("custom/%s/eth_fee", storeName))
 		if err != nil {
 			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
 			return
@@ -39,7 +39,7 @@ func minEthFeeHandler(cliCtx client.Context, storeName string) http.HandlerFunc 
 			return
 		}
 
-		var out types.QueryMinEthFeeResponse
+		var out types.QueryEthFeeResponse
 		cliCtx.JSONMarshaler.MustUnmarshalJSON(res, &out)
 		rest.PostProcessResponse(w, cliCtx.WithHeight(height), res)
 	}

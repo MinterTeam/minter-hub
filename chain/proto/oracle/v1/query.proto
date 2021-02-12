@@ -12,18 +12,22 @@ service Query {
   rpc CurrentEpoch(QueryCurrentEpochRequest) returns(QueryCurrentEpochResponse) {
     option (google.api.http).get = "/oracle/v1beta/epoch/current";
   }
-  rpc MinEthFee(QueryMinEthFeeRequest) returns(QueryMinEthFeeResponse) {
-      option (google.api.http).get = "/oracle/v1beta/min_eth_fee";
+  rpc EthFee(QueryEthFeeRequest) returns(QueryEthFeeResponse) {
+      option (google.api.http).get = "/oracle/v1beta/eth_fee";
   }
 }
 
 message QueryCurrentEpochRequest {}
 message QueryCurrentEpochResponse { Epoch epoch = 1; }
 
-message QueryMinEthFeeRequest {}
-message QueryMinEthFeeResponse {
-    string value = 1 [
+message QueryEthFeeRequest {}
+message QueryEthFeeResponse {
+    string min = 1 [
                       (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
                       (gogoproto.nullable) = false
                      ];
+    string fast = 2 [
+                   (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+                   (gogoproto.nullable) = false
+                   ];
 }
