@@ -11,6 +11,7 @@ const (
 	EventTypeRefund                   = "refund"
 	EventTypeWithdrawRequest          = "withdraw"
 	EventTypeOutgoingBatchExecuted    = "batch_executed"
+	EventTypeProcessAttestation       = "process_attestation"
 
 	AttributeKeyAttestationID   = "attestation_id"
 	AttributeKeyMultisigID      = "multisig_id"
