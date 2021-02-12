@@ -142,17 +142,17 @@ func (a *AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, clai
 		}
 
 		if feeIsOk {
+			_, err := a.peggyKeeper.AddToOutgoingPool(ctx, receiver, claim.EthReceiver, claim.MinterSender, claim.TxHash, sdk.NewCoin(denom, claim.Amount).Sub(commission).Sub(fee), fee)
+			if err != nil {
+				return sdkerrors.Wrap(err, "withdraw")
+			}
+		} else {
 			refundEvent := sdk.NewEvent(
 				types.EventTypeRefund,
 				sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
 				sdk.NewAttribute(types.AttributeKeyTxHash, claim.TxHash),
 			)
 			ctx.EventManager().EmitEvent(refundEvent)
-			_, err := a.peggyKeeper.AddToOutgoingPool(ctx, receiver, claim.EthReceiver, claim.MinterSender, claim.TxHash, sdk.NewCoin(denom, claim.Amount).Sub(commission).Sub(fee), fee)
-			if err != nil {
-				return sdkerrors.Wrap(err, "withdraw")
-			}
-		} else {
 			_, err := a.keeper.AddToOutgoingPool(ctx, receiver, claim.MinterSender, claim.TxHash, sdk.NewCoin(denom, claim.Amount).Sub(commission))
 			if err != nil {
 				return sdkerrors.Wrap(err, "refund")
