@@ -181,3 +181,47 @@ func currentValsetHandler(cliCtx client.Context, storeName string) http.HandlerF
 		rest.PostProcessResponse(w, cliCtx.WithHeight(height), res)
 	}
 }
+
+func txStatusHandler(cliCtx client.Context, storeName string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		node, err := cliCtx.GetNode()
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		status, err := node.Status(r.Context())
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		height := status.SyncInfo.LatestBlockHeight
+
+		vars := mux.Vars(r)
+		tx_hash := vars[nonce]
+
+		statuses := []string{
+			"eth_outgoing_batch_executed",
+			"eth_outgoing_batch",
+			"minter_deposit_received",
+			"minter_refund",
+			"eth_refund",
+		}
+
+		for _, status := range statuses {
+			result, err := node.TxSearch(r.Context(), fmt.Sprintf("%s.tx_hash='%s'", status, tx_hash), false, nil, nil, "")
+			if err != nil {
+				rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+				return
+			}
+
+			if result.TotalCount > 0 {
+				rest.PostProcessResponse(w, cliCtx.WithHeight(height), status)
+				return
+			}
+		}
+
+		rest.PostProcessResponse(w, cliCtx.WithHeight(height), "not found")
+	}
+}

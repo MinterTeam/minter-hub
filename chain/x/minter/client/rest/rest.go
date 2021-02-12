@@ -10,6 +10,7 @@ import (
 
 const (
 	nonce                  = "nonce"
+	txHash                  = "tx_hash"
 	bech32ValidatorAddress = "bech32ValidatorAddress"
 	claimType              = "claimType"
 	signType               = "signType"
@@ -56,4 +57,7 @@ func RegisterRoutes(cliCtx client.Context, r *mux.Router, storeName string) {
 	// This endpoint gets all of the batch confirmations for a given nonce and denom In order to determine if a batch is complete
 	// the relayer will compare the valset power on the contract to the number of signatures
 	r.HandleFunc(fmt.Sprintf("/%s/batch_confirm/{%s}", storeName, nonce), allBatchConfirmsHandler(cliCtx, storeName)).Methods("GET")
+
+
+	r.HandleFunc(fmt.Sprintf("/%s/tx_status/{%s}", storeName, nonce), txStatusHandler(cliCtx, storeName)).Methods("GET")
 }
