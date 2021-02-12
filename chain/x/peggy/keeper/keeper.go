@@ -406,6 +406,8 @@ func (k Keeper) RefundOutgoingTx(ctx sdk.Context, id uint64, tx *types.OutgoingT
 		panic(sdkerrors.Wrapf(err, "mint vouchers coins: %s", vouchers))
 	}
 
+	println(tx.RefundAddr)
+
 	if tx.RefundAddr[2:] == "Mx" {
 		receiver := sdk.AccAddress{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 		if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, receiver, vouchers); err != nil {
