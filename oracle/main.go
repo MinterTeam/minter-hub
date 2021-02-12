@@ -49,7 +49,9 @@ func relayPrices(minterClient *http_client.Client, cosmosConn *grpc.ClientConn, 
 
 	response, err := cosmosClient.CurrentEpoch(context.Background(), &types.QueryCurrentEpochRequest{})
 	if err != nil {
-		panic(err)
+		println(err.Error())
+		time.Sleep(time.Second)
+		return
 	}
 
 	// check if already voted
