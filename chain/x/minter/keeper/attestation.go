@@ -152,8 +152,9 @@ func (k Keeper) processAttestation(ctx sdk.Context, att *types.Attestation, clai
 			"nonce", fmt.Sprint(att.EventNonce),
 		)
 	} else {
-		ctx.EventManager().EmitEvents(xCtx.EventManager().Events())
+		events := xCtx.EventManager().Events()
 		commit() // persist transient storage
+		ctx.EventManager().EmitEvents(events)
 	}
 }
 
