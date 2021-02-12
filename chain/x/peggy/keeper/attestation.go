@@ -146,7 +146,7 @@ func (k Keeper) processAttestation(ctx sdk.Context, att *types.Attestation, clai
 	// TODO: It seems that the validator who puts an attestation over the threshold of votes will also
 	// be charged for the gas of applying it to the consensus state. We should figure out a way to avoid this.
 	xCtx, commit := ctx.CacheContext()
-	if err := k.AttestationHandler.Handle(xCtx, *att, claim); err != nil { // execute with a transient storage
+	if err := k.AttestationHandler.Handle(xCtx.WithEventManager(ctx.EventManager()), *att, claim); err != nil { // execute with a transient storage
 		// If the attestation fails, something has gone wrong and we can't recover it. Log and move on
 		// The attestation will still be marked "Observed", and validators can still be slashed for not
 		// having voted for it.
@@ -157,9 +157,7 @@ func (k Keeper) processAttestation(ctx sdk.Context, att *types.Attestation, clai
 			"nonce", fmt.Sprint(att.EventNonce),
 		)
 	} else {
-		events := xCtx.EventManager().Events()
 		commit() // persist transient storage
-		ctx.EventManager().EmitEvents(events)
 
 		// TODO: after we commit, delete the outgoingtxbatch that this claim references
 	}
