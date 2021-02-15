@@ -32,7 +32,7 @@ message Vote {
 }
 
 message Coin {
-  string Denom = 1;
-  string EthAddr = 2;
-  uint64 MinterId = 3;
+  string denom = 1;
+  string eth_addr = 2;
+  uint64 minter_id = 3;
 }
