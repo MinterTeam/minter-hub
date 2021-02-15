@@ -4,6 +4,7 @@ import (
 	"github.com/MinterTeam/mhub/chain/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"sort"
 )
 
 // AttestationHandler processes `observed` Attestations
@@ -18,7 +19,7 @@ func (a AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, claim
 	switch claim := claim.(type) {
 	case *types.MsgPriceClaim:
 		votes := att.GetVotes()
-		pricesSum := map[string]sdk.Int{}
+		pricesSum := map[string][]sdk.Int{}
 		totalPower := int64(0)
 
 		for _, valaddr := range votes {
@@ -29,19 +30,21 @@ func (a AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, claim
 			priceClaim := a.keeper.GetClaim(ctx, sdk.AccAddress(validator).String(), claim.Epoch).(*types.GenericClaim).GetPriceClaim()
 			prices := priceClaim.GetPrices()
 			for _, item := range prices.List {
-				if _, exists := pricesSum[item.Name]; !exists {
-					pricesSum[item.Name] = sdk.NewInt(0)
+				for i := int64(0); i < power; i++ {
+					pricesSum[item.Name] = append(pricesSum[item.Name], item.Value)
 				}
-
-				pricesSum[item.Name] = pricesSum[item.Name].Add(item.Value.MulRaw(power))
 			}
 		}
 
 		prices := types.Prices{}
 		for name, price := range pricesSum {
+			sort.Slice(price, func(i, j int) bool {
+				return price[i].LT(price[j])
+			})
+
 			prices.List = append(prices.List, &types.Price{
 				Name:  name,
-				Value: price.QuoRaw(totalPower),
+				Value: price[len(price)/2],
 			})
 		}
 
