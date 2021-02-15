@@ -124,7 +124,7 @@ func validateSlashFractionConflictingClaim(i interface{}) error {
 
 func validateCoins(i interface{}) error {
 	// TODO: do we want to set some bounds on this value?
-	if _, ok := i.([]*Coins); !ok {
+	if _, ok := i.([]*Coin); !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
 	return nil
