@@ -65,7 +65,7 @@ func queryPrices(ctx sdk.Context, keeper Keeper) ([]byte, error) {
 }
 
 func queryCoins(ctx sdk.Context, keeper Keeper) ([]byte, error) {
-	res, err := codec.MarshalJSONIndent(types.ModuleCdc, keeper.GetCoins(ctx))
+	res, err := codec.MarshalJSONIndent(types.ModuleCdc, keeper.GetCoins(ctx).List())
 	if err != nil {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error())
 	}
