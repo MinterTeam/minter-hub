@@ -122,7 +122,7 @@ func (k Keeper) pickUnbatchedTX(ctx sdk.Context, maxElements int) ([]*types.Outg
 	var err error
 	k.IterateOutgoingPool(ctx, func(txID uint64, tx *types.OutgoingTx) bool {
 		var mCoin *types.MinterCoin
-		mCoin, err = types.MinterCoinFromPeggyCoin(tx.Amount)
+		mCoin, err = types.MinterCoinFromPeggyCoin(tx.Amount, ctx, k.oracleKeeper)
 		txOut := &types.OutgoingTransferTx{
 			Id:          txID,
 			Sender:      tx.Sender,

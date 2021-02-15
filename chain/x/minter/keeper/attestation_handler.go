@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"github.com/MinterTeam/mhub/chain/coins"
 	"github.com/MinterTeam/mhub/chain/x/minter/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -35,8 +34,8 @@ func (a *AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, clai
 			Amount: claim.Amount,
 			CoinId: claim.CoinId,
 		}
-		coin := token.PeggyCoin()
-		if _, err := types.ValidatePeggyCoin(coin); err != nil {
+		coin := token.PeggyCoin(ctx, a.keeper.oracleKeeper)
+		if _, err := types.ValidatePeggyCoin(coin, ctx, a.keeper.oracleKeeper); err != nil {
 			return sdkerrors.Wrapf(err, "coin is not valid")
 		}
 		vouchers := sdk.Coins{coin}
@@ -102,7 +101,7 @@ func (a *AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, clai
 			return sdkerrors.Wrap(err, "deposit claim")
 		}
 
-		denom, err := coins.GetDenomByMinterId(claim.CoinId)
+		denom, err := a.keeper.oracleKeeper.GetCoins(ctx).GetDenomByMinterId(claim.CoinId)
 		if err != nil {
 			return sdkerrors.Wrap(err, "coin not found")
 		}

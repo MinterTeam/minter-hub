@@ -30,3 +30,9 @@ message Vote {
   string oracle = 1;
   MsgPriceClaim claim = 2;
 }
+
+message Coin {
+  string Denom = 1;
+  string EthAddr = 2;
+  uint64 MinterId = 3;
+}

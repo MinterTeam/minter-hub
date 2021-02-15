@@ -22,7 +22,7 @@ func (k Keeper) AddToOutgoingPool(ctx sdk.Context, sender sdk.AccAddress, counte
 	totalInVouchers := sdk.Coins{totalAmount}
 
 	// Ensure that the coin is a peggy voucher
-	if _, err := types.ValidatePeggyCoin(totalAmount); err != nil {
+	if _, err := types.ValidatePeggyCoin(totalAmount, ctx, k.oracleKeeper); err != nil {
 		return 0, fmt.Errorf("amount not a peggy voucher coin: %s", err)
 	}
 
@@ -78,7 +78,7 @@ func (k Keeper) AddToOutgoingPool(ctx sdk.Context, sender sdk.AccAddress, counte
 // appendToUnbatchedTXIndex add at the end when tx with same fee exists
 func (k Keeper) appendToUnbatchedTXIndex(ctx sdk.Context, fee sdk.Coin, txID uint64) {
 	store := ctx.KVStore(k.storeKey)
-	idxKey := types.GetFeeSecondIndexKey(fee)
+	idxKey := types.GetFeeSecondIndexKey(fee, ctx, k.oracleKeeper)
 	var idSet types.IDSet
 	if store.Has(idxKey) {
 		bz := store.Get(idxKey)
@@ -91,7 +91,7 @@ func (k Keeper) appendToUnbatchedTXIndex(ctx sdk.Context, fee sdk.Coin, txID uin
 // appendToUnbatchedTXIndex add at the top when tx with same fee exists
 func (k Keeper) prependToUnbatchedTXIndex(ctx sdk.Context, fee sdk.Coin, txID uint64) {
 	store := ctx.KVStore(k.storeKey)
-	idxKey := types.GetFeeSecondIndexKey(fee)
+	idxKey := types.GetFeeSecondIndexKey(fee, ctx, k.oracleKeeper)
 	var idSet types.IDSet
 	if store.Has(idxKey) {
 		bz := store.Get(idxKey)
@@ -104,7 +104,7 @@ func (k Keeper) prependToUnbatchedTXIndex(ctx sdk.Context, fee sdk.Coin, txID ui
 // removeFromUnbatchedTXIndex removes the tx from the index and makes it implicit no available anymore
 func (k Keeper) removeFromUnbatchedTXIndex(ctx sdk.Context, fee sdk.Coin, txID uint64) error {
 	store := ctx.KVStore(k.storeKey)
-	idxKey := types.GetFeeSecondIndexKey(fee)
+	idxKey := types.GetFeeSecondIndexKey(fee, ctx, k.oracleKeeper)
 	var idSet types.IDSet
 	bz := store.Get(idxKey)
 	if bz == nil {

@@ -3,7 +3,6 @@ package keeper
 import (
 	"context"
 	"fmt"
-	"github.com/MinterTeam/mhub/chain/coins"
 
 	"github.com/MinterTeam/mhub/chain/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -36,8 +35,8 @@ func (k msgServer) PriceClaim(c context.Context, msg *types.MsgPriceClaim) (*typ
 	}
 
 	requiredPrices := []string{"eth/0", "eth/gas"}
-	for _, coin := range coins.GetCoins() {
-		requiredPrices = append(requiredPrices, fmt.Sprintf("minter/%d", coin.MinterID))
+	for _, coin := range k.GetCoins(ctx).List() {
+		requiredPrices = append(requiredPrices, fmt.Sprintf("minter/%d", coin.MinterId))
 	}
 
 	for _, requiredPrice := range requiredPrices {

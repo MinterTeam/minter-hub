@@ -27,6 +27,22 @@ func pricesHandler(cliCtx client.Context, storeName string) http.HandlerFunc {
 	}
 }
 
+func coinsHandler(cliCtx client.Context, storeName string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		res, height, err := cliCtx.Query(fmt.Sprintf("custom/%s/coins", storeName))
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		if len(res) == 0 {
+			rest.WriteErrorResponse(w, http.StatusNotFound, "coins not found")
+			return
+		}
+
+		rest.PostProcessResponse(w, cliCtx.WithHeight(height), res)
+	}
+}
+
 func ethFeeHandler(cliCtx client.Context, storeName string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		res, height, err := cliCtx.Query(fmt.Sprintf("custom/%s/eth_fee", storeName))

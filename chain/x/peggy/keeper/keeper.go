@@ -58,6 +58,10 @@ func NewKeeper(cdc codec.BinaryMarshaler, storeKey sdk.StoreKey, paramSpace para
 	return k
 }
 
+func (k Keeper) OracleKeeper() oraclekeeper.Keeper {
+	return k.oracleKeeper
+}
+
 func (k Keeper) IsStopped(ctx sdk.Context) bool {
 	params := k.GetParams(ctx)
 

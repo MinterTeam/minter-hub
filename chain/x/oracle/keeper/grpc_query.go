@@ -13,6 +13,12 @@ const gweiInEth = 1e9
 
 var _ types.QueryServer = Keeper{}
 
+func (k Keeper) Coins(context context.Context, request *types.QueryCoinsRequest) (*types.QueryCoinsResponse, error) {
+	ctx := sdk.UnwrapSDKContext(context)
+
+	return &types.QueryCoinsResponse{Coins: k.GetCoins(ctx).List()}, nil
+}
+
 func (k Keeper) CurrentEpoch(context context.Context, request *types.QueryCurrentEpochRequest) (*types.QueryCurrentEpochResponse, error) {
 	ctx := sdk.UnwrapSDKContext(context)
 

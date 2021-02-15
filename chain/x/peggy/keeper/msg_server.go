@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-	"github.com/MinterTeam/mhub/chain/coins"
 
 	"github.com/MinterTeam/mhub/chain/x/peggy/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -121,9 +120,22 @@ func (k msgServer) SendToEth(c context.Context, msg *types.MsgSendToEth) (*types
 		return nil, types.ErrServiceStopped
 	}
 
+	aCoin, err := types.ERC20FromPeggyCoin(msg.Amount, ctx, k.OracleKeeper())
+	if err != nil {
+		return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, fmt.Sprintf("amount %#v is not a voucher type", msg))
+	}
+	fCoin, err := types.ERC20FromPeggyCoin(msg.BridgeFee, ctx, k.OracleKeeper())
+	if err != nil {
+		return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, fmt.Sprintf("fee %#vs is not a voucher type", msg))
+	}
+
+	if aCoin.Contract != fCoin.Contract {
+		return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, fmt.Sprintf("fee and amount must be the same type %s != %s", aCoin.Contract, fCoin.Contract))
+	}
+
 	sender, _ := sdk.AccAddressFromBech32(msg.Sender)
 
-	minterCoinId, err := coins.GetMinterIdByDenom(msg.BridgeFee.Denom)
+	minterCoinId, err := k.oracleKeeper.GetCoins(ctx).GetMinterIdByDenom(msg.BridgeFee.Denom)
 	if err != nil {
 		return nil, sdkerrors.Wrap(err, "coin")
 	}
@@ -168,7 +180,8 @@ func (k msgServer) SendToEth(c context.Context, msg *types.MsgSendToEth) (*types
 // RequestBatch handles MsgRequestBatch
 func (k msgServer) RequestBatch(c context.Context, msg *types.MsgRequestBatch) (*types.MsgRequestBatchResponse, error) {
 	ctx := sdk.UnwrapSDKContext(c)
-	ec, err := types.ERC20FromPeggyCoin(sdk.NewInt64Coin(msg.Denom, 0))
+
+	ec, err := types.ERC20FromPeggyCoin(sdk.NewInt64Coin(msg.Denom, 0), ctx, k.oracleKeeper)
 	if err != nil {
 		return nil, err
 	}

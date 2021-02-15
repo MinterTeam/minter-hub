@@ -3,6 +3,7 @@ package oracle.v1;
 
 import "gogoproto/gogo.proto";
 import "oracle/v1/attestation.proto";
+import "oracle/v1/types.proto";
 
 option go_package = "github.com/MinterTeam/mhub/chain/x/oracle/types";
 
@@ -18,6 +19,8 @@ message Params {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
+
+  repeated Coin coins = 4;
 }
 
 // GenesisState struct

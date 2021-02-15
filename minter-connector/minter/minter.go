@@ -1,13 +1,15 @@
 package minter
 
 import (
+	"context"
 	"encoding/json"
-	"github.com/MinterTeam/mhub/chain/coins"
+	oracleTypes "github.com/MinterTeam/mhub/chain/x/oracle/types"
 	"github.com/MinterTeam/minter-go-sdk/v2/api/http_client"
 	"github.com/MinterTeam/minter-go-sdk/v2/api/http_client/models"
 	"github.com/MinterTeam/minter-go-sdk/v2/transaction"
 	"github.com/MinterTeam/minter-hub-connector/command"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"google.golang.org/grpc"
 	"strconv"
 	"time"
 )
@@ -23,14 +25,18 @@ func GetLatestMinterBlock(client *http_client.Client) uint64 {
 	return status.LatestBlockHeight
 }
 
-func GetLatestMinterBlockAndNonce(startMinterBlock uint64, startEventNonce uint64, startBatchNonce uint64, startValsetNonce uint64, multisigAddr string, currentNonce uint64, client *http_client.Client) (block, eventNonce, batchNonce, valsetNonce uint64) {
+func GetLatestMinterBlockAndNonce(cosmosConn *grpc.ClientConn, startMinterBlock uint64, startEventNonce uint64, startBatchNonce uint64, startValsetNonce uint64, multisigAddr string, currentNonce uint64, client *http_client.Client) (block, eventNonce, batchNonce, valsetNonce uint64) {
 	latestBlock := GetLatestMinterBlock(client)
 
 	eventNonce = startEventNonce
 	batchNonce = startBatchNonce
 	valsetNonce = startValsetNonce
 
-	coinList := coins.GetCoins()
+	oracleClient := oracleTypes.NewQueryClient(cosmosConn)
+	coinList, err := oracleClient.Coins(context.Background(), &oracleTypes.QueryCoinsRequest{})
+	if err != nil {
+		panic(err)
+	}
 
 	for i := startMinterBlock; i <= latestBlock; i++ {
 		println(i, "of", latestBlock)
@@ -51,8 +57,8 @@ func GetLatestMinterBlockAndNonce(startMinterBlock uint64, startEventNonce uint6
 
 				value, _ := sdk.NewIntFromString(sendData.Value)
 				if sendData.To == multisigAddr && cmd.Validate(value) == nil {
-					for _, c := range coinList {
-						if sendData.Coin.ID == c.MinterID {
+					for _, c := range coinList.GetCoins() {
+						if sendData.Coin.ID == c.MinterId {
 							if currentNonce < eventNonce {
 								return i - 1, eventNonce, batchNonce, valsetNonce
 							}

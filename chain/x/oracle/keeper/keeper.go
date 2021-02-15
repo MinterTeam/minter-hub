@@ -130,6 +130,12 @@ func (k Keeper) SetParams(ctx sdk.Context, ps types.Params) {
 	k.paramSpace.SetParamSet(ctx, &ps)
 }
 
+func (k Keeper) GetCoins(ctx sdk.Context) types.Coins {
+	p := k.GetParams(ctx)
+
+	return types.NewCoins(p.Coins)
+}
+
 // logger returns a module-specific logger.
 func (k Keeper) logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))

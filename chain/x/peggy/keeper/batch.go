@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"fmt"
-	"github.com/MinterTeam/mhub/chain/coins"
 	"strconv"
 
 	"github.com/MinterTeam/mhub/chain/x/peggy/types"
@@ -35,7 +34,7 @@ func (k Keeper) BuildOutgoingTXBatch(ctx sdk.Context, contractAddress string, ma
 		totalCommission = totalCommission.Add(tx.Erc20Fee.Amount)
 	}
 
-	coinId, err := coins.GetMinterIdByDenom(selectedTx[0].Erc20Fee.PeggyCoin().Denom)
+	coinId, err := k.oracleKeeper.GetCoins(ctx).GetMinterIdByDenom(selectedTx[0].Erc20Fee.PeggyCoin(ctx, k.oracleKeeper).Denom)
 	if err != nil {
 		return nil, sdkerrors.Wrap(types.ErrInvalid, "coin not found")
 	}
@@ -62,7 +61,7 @@ func (k Keeper) BuildOutgoingTXBatch(ctx sdk.Context, contractAddress string, ma
 	}
 
 	for _, tx := range selectedTx {
-		if err := k.removeFromUnbatchedTXIndex(ctx, tx.Erc20Fee.PeggyCoin(), tx.Id); err != nil {
+		if err := k.removeFromUnbatchedTXIndex(ctx, tx.Erc20Fee.PeggyCoin(ctx, k.oracleKeeper), tx.Id); err != nil {
 			return nil, sdkerrors.Wrap(err, "fee")
 		}
 	}
@@ -100,13 +99,13 @@ func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, tokenContract string, n
 		return sdkerrors.Wrap(types.ErrUnknown, "nonce")
 	}
 
-	totalFee := sdk.NewInt64Coin(b.Transactions[0].Erc20Fee.PeggyCoin().Denom, 0)
+	totalFee := sdk.NewInt64Coin(b.Transactions[0].Erc20Fee.PeggyCoin(ctx, k.oracleKeeper).Denom, 0)
 	// cleanup outgoing TX pool
 	for _, tx := range b.Transactions {
-		totalFee = totalFee.Add(tx.Erc20Fee.PeggyCoin())
+		totalFee = totalFee.Add(tx.Erc20Fee.PeggyCoin(ctx, k.oracleKeeper))
 		k.removePoolEntry(ctx, tx.Id)
 
-		k.SubLockedCoins(ctx, sdk.Coins{tx.Erc20Token.PeggyCoin()})
+		k.SubLockedCoins(ctx, sdk.Coins{tx.Erc20Token.PeggyCoin(ctx, k.oracleKeeper)})
 	}
 	commissionKeeperAddress := sdk.AccAddress{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	vouchers := sdk.Coins{totalFee}
@@ -215,7 +214,7 @@ func (k Keeper) CancelOutgoingTXBatch(ctx sdk.Context, tokenContract string, non
 	}
 	for _, tx := range batch.Transactions {
 		tx.Erc20Fee.Contract = tokenContract
-		k.prependToUnbatchedTXIndex(ctx, tx.Erc20Fee.PeggyCoin(), tx.Id)
+		k.prependToUnbatchedTXIndex(ctx, tx.Erc20Fee.PeggyCoin(ctx, k.oracleKeeper), tx.Id)
 	}
 
 	// Delete batch since it is finished

@@ -271,6 +271,11 @@ func handleMsgSendToMinter(ctx sdk.Context, keeper keeper.Keeper, msg *types.Msg
 		return nil, types.ErrServiceStopped
 	}
 
+	_, err := types.MinterCoinFromPeggyCoin(msg.Amount, ctx, keeper.OracleKeeper())
+	if err != nil {
+		return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, fmt.Sprintf("amount %#v is not a voucher type", msg))
+	}
+
 	sender, _ := sdk.AccAddressFromBech32(msg.Sender)
 	txID, err := keeper.AddToOutgoingPool(ctx, sender, msg.MinterDest, "todo", msg.Amount) // todo: txhash
 	if err != nil {

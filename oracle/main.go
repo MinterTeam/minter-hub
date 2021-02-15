@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/MinterTeam/mhub/chain/coins"
 	"github.com/MinterTeam/mhub/chain/x/oracle/types"
 	"github.com/MinterTeam/minter-go-sdk/v2/api/http_client"
 	"github.com/MinterTeam/minter-hub-oracle/config"
@@ -68,11 +67,18 @@ func relayPrices(minterClient *http_client.Client, cosmosConn *grpc.ClientConn, 
 		}
 	}
 
+	coins, err := cosmosClient.Coins(context.Background(), &types.QueryCoinsRequest{})
+	if err != nil {
+		println(err.Error())
+		time.Sleep(time.Second)
+		return
+	}
+
 	prices := &types.Prices{List: []*types.Price{}}
 
 	basecoinPrice := getBasecoinPrice()
 	for _, coin := range coins.GetCoins() {
-		response, err := minterClient.EstimateCoinIDSell(0, coin.MinterID, pipInBip.String())
+		response, err := minterClient.EstimateCoinIDSell(0, coin.MinterId, pipInBip.String())
 		if err != nil {
 			code, payload, err := http_client.ErrorBody(err)
 			if err != nil {
@@ -89,7 +95,7 @@ func relayPrices(minterClient *http_client.Client, cosmosConn *grpc.ClientConn, 
 		price := priceInBasecoin.Mul(basecoinPrice).Quo(pipInBip)
 
 		prices.List = append(prices.List, &types.Price{
-			Name:  fmt.Sprintf("minter/%d", coin.MinterID),
+			Name:  fmt.Sprintf("minter/%d", coin.MinterId),
 			Value: price,
 		})
 	}

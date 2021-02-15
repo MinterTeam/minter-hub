@@ -359,6 +359,10 @@ func (k Keeper) IsStopped(ctx sdk.Context) bool {
 	return p.GetStopped()
 }
 
+func (k Keeper) OracleKeeper() oraclekeeper.Keeper {
+	return k.oracleKeeper
+}
+
 // prefixRange turns a prefix into a (start, end) range. The start is the given prefix value and
 // the end is calculated by adding 1 bit to the start value. Nil is not allowed as prefix.
 // 		Example: []byte{1, 3, 4} becomes []byte{1, 3, 5}

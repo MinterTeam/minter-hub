@@ -4,8 +4,8 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"encoding/hex"
-	"github.com/MinterTeam/mhub/chain/coins"
 	"github.com/MinterTeam/mhub/chain/x/minter/types"
+	oracleTypes "github.com/MinterTeam/mhub/chain/x/oracle/types"
 	"github.com/MinterTeam/minter-go-sdk/v2/api/http_client"
 	"github.com/MinterTeam/minter-go-sdk/v2/api/http_client/models"
 	"github.com/MinterTeam/minter-go-sdk/v2/transaction"
@@ -76,7 +76,7 @@ func main() {
 	}
 
 	println("Syncing with Minter")
-	lastCheckedMinterBlock, lastEventNonce, lastBatchNonce, lastValsetNonce := minter.GetLatestMinterBlockAndNonce(cfg.Minter.StartBlock, cfg.Minter.StartEventNonce, cfg.Minter.StartBatchNonce, cfg.Minter.StartValsetNonce, cfg.Minter.MultisigAddr, cosmos.GetLastMinterNonce(orcAddress.String(), cosmosConn), minterClient)
+	lastCheckedMinterBlock, lastEventNonce, lastBatchNonce, lastValsetNonce := minter.GetLatestMinterBlockAndNonce(cosmosConn, cfg.Minter.StartBlock, cfg.Minter.StartEventNonce, cfg.Minter.StartBatchNonce, cfg.Minter.StartValsetNonce, cfg.Minter.MultisigAddr, cosmos.GetLastMinterNonce(orcAddress.String(), cosmosConn), minterClient)
 	println("Starting with block", lastCheckedMinterBlock, "event nonce", lastEventNonce, "batch nonce", lastBatchNonce, "valset nonce", lastValsetNonce)
 	for {
 		relayBatches(minterClient, cosmosConn, orcAddress, orcPriv, minterWallet, lastBatchNonce)
@@ -349,7 +349,13 @@ func relayMinterEvents(minterClient *http_client.Client, minterWallet *wallet.Wa
 		latestBlock = lastCheckedBlock + 10
 	}
 
-	coinList := coins.GetCoins()
+	oracleClient := oracleTypes.NewQueryClient(cosmosConn)
+	coinList, err := oracleClient.Coins(context.Background(), &oracleTypes.QueryCoinsRequest{})
+	if err != nil {
+		println("ERROR: ", err.Error())
+		time.Sleep(time.Second)
+		return
+	}
 
 	var deposits []cosmos.Deposit
 	var batches []cosmos.Batch
@@ -382,8 +388,8 @@ func relayMinterEvents(minterClient *http_client.Client, minterWallet *wallet.Wa
 					continue
 				}
 
-				for _, c := range coinList {
-					if sendData.Coin.ID == c.MinterID {
+				for _, c := range coinList.GetCoins() {
+					if sendData.Coin.ID == c.MinterId {
 						println("Found new deposit from", tx.From, "to", string(tx.Payload), "amount", sendData.Value, "coin", sendData.Coin.ID)
 						deposits = append(deposits, cosmos.Deposit{
 							Sender:     tx.From,
@@ -433,7 +439,7 @@ func relayMinterEvents(minterClient *http_client.Client, minterWallet *wallet.Wa
 	}
 
 	if len(deposits) > 0 || len(batches) > 0 || len(valsets) > 0 {
-		cosmos.SendCosmosTx(cosmos.CreateClaims(orcAddress, deposits, batches, valsets), orcAddress, orcPriv, cosmosConn)
+		cosmos.SendCosmosTx(cosmos.CreateClaims(cosmosConn, orcAddress, deposits, batches, valsets), orcAddress, orcPriv, cosmosConn)
 	}
 
 	return latestBlock, lastEventNonce, lastBatchNonce, lastValsetNonce

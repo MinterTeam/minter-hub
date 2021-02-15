@@ -3,7 +3,7 @@ package types
 import (
 	"bytes"
 	"fmt"
-	"github.com/MinterTeam/mhub/chain/coins"
+	oraclekeeper "github.com/MinterTeam/mhub/chain/x/oracle/keeper"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"regexp"
 )
@@ -51,14 +51,13 @@ func NewMinterCoin(amount sdk.Int, coinId uint64) *MinterCoin {
 }
 
 // PeggyCoin returns the peggy representation of the ERC20
-func (e *MinterCoin) PeggyCoin() sdk.Coin {
-	coinsList := coins.GetCoins()
-	for _, coin := range coinsList {
-		if coin.MinterID == e.CoinId {
-			return sdk.NewCoin(coin.Denom, e.Amount)
-		}
+func (e *MinterCoin) PeggyCoin(ctx sdk.Context, oracleKeeper oraclekeeper.Keeper) sdk.Coin {
+	denom, err := oracleKeeper.GetCoins(ctx).GetDenomByMinterId(e.CoinId)
+	if err != nil {
+		return sdk.NewCoin(fmt.Sprintf("%s/%d", PeggyDenomPrefix, e.CoinId), e.Amount)
 	}
-	return sdk.NewCoin(fmt.Sprintf("%s/%d", PeggyDenomPrefix, e.CoinId), e.Amount)
+
+	return sdk.NewCoin(denom, e.Amount)
 }
 
 // ValidateBasic permforms stateless validation
@@ -82,8 +81,8 @@ func (e *MinterCoin) Add(o *MinterCoin) *MinterCoin {
 }
 
 // MinterCoinFromPeggyCoin returns the ERC20 representation of a given peggy coin
-func MinterCoinFromPeggyCoin(v sdk.Coin) (*MinterCoin, error) {
-	coinId, err := ValidatePeggyCoin(v)
+func MinterCoinFromPeggyCoin(v sdk.Coin, ctx sdk.Context, oracleKeeper oraclekeeper.Keeper) (*MinterCoin, error) {
+	coinId, err := ValidatePeggyCoin(v, ctx, oracleKeeper)
 	if err != nil {
 		return nil, fmt.Errorf("%s isn't a valid peggy coin: %s", v.String(), err)
 	}
@@ -91,13 +90,6 @@ func MinterCoinFromPeggyCoin(v sdk.Coin) (*MinterCoin, error) {
 }
 
 // ValidatePeggyCoin returns true if a coin is a peggy representation of an Minter Coin
-func ValidatePeggyCoin(v sdk.Coin) (uint64, error) {
-	coinsList := coins.GetCoins()
-	for _, coin := range coinsList {
-		if v.Denom == coin.Denom {
-			return coin.MinterID, nil
-		}
-	}
-
-	return 0, fmt.Errorf("denom(%s) not valid", v.Denom)
+func ValidatePeggyCoin(v sdk.Coin, ctx sdk.Context, oracleKeeper oraclekeeper.Keeper) (uint64, error) {
+	return oracleKeeper.GetCoins(ctx).GetMinterIdByDenom(v.Denom)
 }

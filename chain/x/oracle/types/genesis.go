@@ -49,6 +49,13 @@ func DefaultParams() *Params {
 		SignedClaimsWindow:            10000,
 		SlashFractionClaim:            sdk.NewDec(1).Quo(sdk.NewDec(1000)),
 		SlashFractionConflictingClaim: sdk.NewDec(1).Quo(sdk.NewDec(1000)),
+		Coins: []*Coin{
+			{
+				Denom:    "hub",
+				EthAddr:  "0x8C2B6949590bEBE6BC1124B670e58DA85b081b2E",
+				MinterId: 1,
+			},
+		},
 	}
 }
 

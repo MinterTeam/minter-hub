@@ -1,7 +1,6 @@
 package peggy
 
 import (
-	"github.com/MinterTeam/mhub/chain/coins"
 	"github.com/MinterTeam/mhub/chain/x/peggy/keeper"
 	"github.com/MinterTeam/mhub/chain/x/peggy/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -14,9 +13,9 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) {
 	currentBondedSet := k.StakingKeeper.GetBondedValidatorsByPower(ctx)
 
 	// return coins from pools if they are too old
-	coinsList := coins.GetCoins()
+	coinsList := k.OracleKeeper().GetCoins(ctx).List()
 	for _, coin := range coinsList {
-		k.IterateOutgoingPoolByFee(ctx, coin.EthAddress, func(id uint64, tx *types.OutgoingTx) bool {
+		k.IterateOutgoingPoolByFee(ctx, coin.EthAddr, func(id uint64, tx *types.OutgoingTx) bool {
 			if ctx.BlockTime().After(time.Unix(tx.ExpirationTime, 0)) {
 				k.RefundOutgoingTx(ctx, id, tx)
 			}

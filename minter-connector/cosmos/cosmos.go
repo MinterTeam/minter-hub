@@ -3,8 +3,8 @@ package cosmos
 import (
 	"context"
 	"github.com/MinterTeam/mhub/chain/app"
-	"github.com/MinterTeam/mhub/chain/coins"
 	mhub "github.com/MinterTeam/mhub/chain/x/minter/types"
+	oracleTypes "github.com/MinterTeam/mhub/chain/x/oracle/types"
 	phub "github.com/MinterTeam/mhub/chain/x/peggy/types"
 	"github.com/MinterTeam/minter-hub-connector/command"
 	"github.com/MinterTeam/minter-hub-connector/config"
@@ -52,7 +52,17 @@ func Setup() {
 	config.Seal()
 }
 
-func CreateClaims(orcAddress sdk.AccAddress, deposits []Deposit, batches []Batch, valsets []Valset) []sdk.Msg {
+func CreateClaims(cosmosConn *grpc.ClientConn, orcAddress sdk.AccAddress, deposits []Deposit, batches []Batch, valsets []Valset) []sdk.Msg {
+	oracleClient := oracleTypes.NewQueryClient(cosmosConn)
+	coinList, err := oracleClient.Coins(context.Background(), &oracleTypes.QueryCoinsRequest{})
+	if err != nil {
+		println("ERROR: ", err.Error())
+		time.Sleep(time.Second)
+		return CreateClaims(cosmosConn, orcAddress, deposits, batches, valsets)
+	}
+
+	coins := oracleTypes.NewCoins(coinList.GetCoins())
+
 	var msgs []sdk.Msg
 	for _, deposit := range deposits {
 		amount, _ := sdk.NewIntFromString(deposit.Amount)

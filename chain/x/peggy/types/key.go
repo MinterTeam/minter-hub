@@ -1,6 +1,7 @@
 package types
 
 import (
+	oraclekeeper "github.com/MinterTeam/mhub/chain/x/oracle/keeper"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -202,8 +203,8 @@ func GetBatchConfirmKey(tokenContract string, batchNonce uint64, validator sdk.A
 // GetFeeSecondIndexKey returns the following key format
 // prefix            eth-contract-address            fee_amount
 // [0x9][0xc783df8a850f42e7F7e57013759C285caa701eB6][1000000000]
-func GetFeeSecondIndexKey(fee sdk.Coin) []byte {
-	er, _ := ERC20FromPeggyCoin(fee)
+func GetFeeSecondIndexKey(fee sdk.Coin, ctx sdk.Context, oracleKeeper oraclekeeper.Keeper) []byte {
+	er, _ := ERC20FromPeggyCoin(fee, ctx, oracleKeeper)
 	var amount [32]byte
 	copy(amount[32-len(fee.Amount.BigInt().Bytes()):], fee.Amount.BigInt().Bytes())
 

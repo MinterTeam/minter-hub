@@ -3,7 +3,7 @@ package types
 import (
 	"bytes"
 	"fmt"
-	coins "github.com/MinterTeam/mhub/chain/coins"
+	"github.com/MinterTeam/mhub/chain/x/oracle/keeper"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"regexp"
@@ -52,15 +52,13 @@ func NewERC20Token(amount sdk.Int, contract string) *ERC20Token {
 }
 
 // PeggyCoin returns the peggy representation of the ERC20
-func (e *ERC20Token) PeggyCoin() sdk.Coin {
-	coinsList := coins.GetCoins()
-	for _, coin := range coinsList {
-		if e.Contract == coin.EthAddress {
-			return sdk.NewCoin(coin.Denom, e.Amount)
-		}
+func (e *ERC20Token) PeggyCoin(ctx sdk.Context, oracleKeeper keeper.Keeper) sdk.Coin {
+	denom, err := oracleKeeper.GetCoins(ctx).GetDenomByEthereumAddress(e.Contract)
+	if err != nil {
+		return sdk.NewCoin(fmt.Sprintf("%s/%s", PeggyDenomPrefix, e.Contract), e.Amount)
 	}
 
-	return sdk.NewCoin(fmt.Sprintf("%s/%s", PeggyDenomPrefix, e.Contract), e.Amount)
+	return sdk.NewCoin(denom, e.Amount)
 }
 
 // ValidateBasic permforms stateless validation
@@ -87,8 +85,8 @@ func (e *ERC20Token) Add(o *ERC20Token) *ERC20Token {
 }
 
 // ERC20FromPeggyCoin returns the ERC20 representation of a given peggy coin
-func ERC20FromPeggyCoin(v sdk.Coin) (*ERC20Token, error) {
-	contract, err := ValidatePeggyCoin(v)
+func ERC20FromPeggyCoin(v sdk.Coin, ctx sdk.Context, oracleKeeper keeper.Keeper) (*ERC20Token, error) {
+	contract, err := ValidatePeggyCoin(v, ctx, oracleKeeper)
 	if err != nil {
 		return nil, fmt.Errorf("%s isn't a valid peggy coin: %s", v.String(), err)
 	}
@@ -96,13 +94,6 @@ func ERC20FromPeggyCoin(v sdk.Coin) (*ERC20Token, error) {
 }
 
 // ValidatePeggyCoin returns true if a coin is a peggy representation of an ERC20 token
-func ValidatePeggyCoin(v sdk.Coin) (string, error) {
-	coinsList := coins.GetCoins()
-	for _, coin := range coinsList {
-		if v.Denom == coin.Denom {
-			return coin.EthAddress, nil
-		}
-	}
-
-	return "", fmt.Errorf("denom(%s) not valid", v.Denom)
+func ValidatePeggyCoin(v sdk.Coin, ctx sdk.Context, oracleKeeper keeper.Keeper) (string, error) {
+	return oracleKeeper.GetCoins(ctx).GetEthereumAddressByDenom(v.Denom)
 }
