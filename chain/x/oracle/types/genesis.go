@@ -22,6 +22,8 @@ var (
 	// ParamsStoreSlashFractionConflictingClaim stores the slash fraction ConflictingClaim
 	ParamsStoreSlashFractionConflictingClaim = []byte("SlashFractionConflictingClaim")
 
+	ParamsStoreCoins = []byte("Coins")
+
 	// Ensure that params implements the proper interface
 	_ paramtypes.ParamSet = &Params{}
 )
@@ -85,6 +87,7 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 		paramtypes.NewParamSetPair(ParamsStoreKeySignedClaimsWindow, &p.SignedClaimsWindow, validateSignedClaimsWindow),
 		paramtypes.NewParamSetPair(ParamsStoreSlashFractionClaim, &p.SlashFractionClaim, validateSlashFractionClaim),
 		paramtypes.NewParamSetPair(ParamsStoreSlashFractionConflictingClaim, &p.SlashFractionConflictingClaim, validateSlashFractionConflictingClaim),
+		paramtypes.NewParamSetPair(ParamsStoreCoins, &p.Coins, validateCoins),
 	}
 }
 
@@ -114,6 +117,14 @@ func validateSlashFractionClaim(i interface{}) error {
 func validateSlashFractionConflictingClaim(i interface{}) error {
 	// TODO: do we want to set some bounds on this value?
 	if _, ok := i.(sdk.Dec); !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+	return nil
+}
+
+func validateCoins(i interface{}) error {
+	// TODO: do we want to set some bounds on this value?
+	if _, ok := i.([]*Coins); !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
 	return nil
