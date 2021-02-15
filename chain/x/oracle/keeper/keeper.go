@@ -8,6 +8,7 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/tendermint/tendermint/libs/log"
+	"math"
 )
 
 // Keeper maintains the link to storage and exposes getter/setter methods for the various parts of the state machine
@@ -154,6 +155,28 @@ func (k Keeper) storePrices(ctx sdk.Context, prices *types.Prices) {
 
 func (k Keeper) GetGasUnits() int64 {
 	return 10
+}
+
+func (k Keeper) GetNormalizedValPowers(ctx sdk.Context) map[string]uint64 {
+	validators := k.StakingKeeper.GetBondedValidatorsByPower(ctx)
+	bridgeValidators := map[string]uint64{}
+	var totalPower uint64
+
+	for _, validator := range validators {
+		validatorAddress := validator.GetOperator()
+
+		p := uint64(k.StakingKeeper.GetLastValidatorPower(ctx, validatorAddress))
+		totalPower += p
+
+		bridgeValidators[validatorAddress.String()] = p
+	}
+
+	// normalize power values
+	for address, power := range bridgeValidators {
+		bridgeValidators[address] = sdk.NewUint(power).MulUint64(math.MaxUint16).QuoUint64(totalPower).Uint64()
+	}
+
+	return bridgeValidators
 }
 
 // prefixRange turns a prefix into a (start, end) range. The start is the given prefix value and

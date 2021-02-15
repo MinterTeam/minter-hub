@@ -20,17 +20,17 @@ func (a AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, claim
 	case *types.MsgPriceClaim:
 		votes := att.GetVotes()
 		pricesSum := map[string][]sdk.Int{}
-		totalPower := int64(0)
+
+		powers := a.keeper.GetNormalizedValPowers(ctx)
 
 		for _, valaddr := range votes {
 			validator, _ := sdk.ValAddressFromBech32(valaddr)
-			power := a.stakingKeeper.GetLastValidatorPower(ctx, validator)
-			totalPower += power
+			power := powers[valaddr]
 
 			priceClaim := a.keeper.GetClaim(ctx, sdk.AccAddress(validator).String(), claim.Epoch).(*types.GenericClaim).GetPriceClaim()
 			prices := priceClaim.GetPrices()
 			for _, item := range prices.List {
-				for i := int64(0); i < power; i++ {
+				for i := uint64(0); i < power; i++ {
 					pricesSum[item.Name] = append(pricesSum[item.Name], item.Value)
 				}
 			}
