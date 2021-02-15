@@ -7,7 +7,7 @@ replace github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.2-alp
 // replace github.com/MinterTeam/mhub/chain => /Users/daniillashin/Desktop/mhub/chain
 
 require (
-	github.com/MinterTeam/mhub/chain v0.0.0-20210212103816-71cc01e753c4
+	github.com/MinterTeam/mhub/chain v0.0.0-20210215123059-60b2b06d4815
 	github.com/MinterTeam/minter-go-sdk/v2 v2.1.0-rc2.0.20210209133819-011976d40e49
 	github.com/cosmos/cosmos-sdk v0.40.1
 	github.com/cosmos/go-bip39 v1.0.0

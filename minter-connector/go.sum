@@ -61,8 +61,8 @@ github.com/FactomProject/basen v0.0.0-20150613233007-fe3947df716e/go.mod h1:kGUq
 github.com/FactomProject/btcutilecc v0.0.0-20130527213604-d3a63a5752ec h1:1Qb69mGp/UtRPn422BH4/Y4Q3SLUrD9KHuDkm8iodFc=
 github.com/FactomProject/btcutilecc v0.0.0-20130527213604-d3a63a5752ec/go.mod h1:CD8UlnlLDiqb36L110uqiP2iSflVjx9g/3U9hCI4q2U=
 github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible/go.mod h1:r7JcOSlj0wfOMncg0iLm8Leh48TZaKVeNIfJntJ2wa0=
-github.com/MinterTeam/mhub/chain v0.0.0-20210212103816-71cc01e753c4 h1:oD2pNfRUtTkVdIpPchV0hzRvQ19+Dc9rFag+vPBw+5k=
-github.com/MinterTeam/mhub/chain v0.0.0-20210212103816-71cc01e753c4/go.mod h1:L82bjoM03JYP5BcD32EiG442quB+StK7CX7jsKtokr8=
+github.com/MinterTeam/mhub/chain v0.0.0-20210215123059-60b2b06d4815 h1:pSa8XJEchPNf+3UzOWmA6BvgGJOFikA7Os8+4raxdrw=
+github.com/MinterTeam/mhub/chain v0.0.0-20210215123059-60b2b06d4815/go.mod h1:L82bjoM03JYP5BcD32EiG442quB+StK7CX7jsKtokr8=
 github.com/MinterTeam/minter-go-sdk/v2 v2.1.0-rc2.0.20210209133819-011976d40e49 h1:Y2uwdEbqXK95hmZxD+cl1uZHa5Dx4xfGqOtWFCBCe3U=
 github.com/MinterTeam/minter-go-sdk/v2 v2.1.0-rc2.0.20210209133819-011976d40e49/go.mod h1:ysGyxp670uBb8cSJ3ePpDj6ol4m6Bo3i3X/3q6wntnw=
 github.com/MinterTeam/node-grpc-gateway v1.2.2-0.20210209133243-8f08af6b7437/go.mod h1:d4Rw0MtsZTrFNLJJWr/jcurTYcqRVITzWuGDGo7aHxM=
