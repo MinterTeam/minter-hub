@@ -20,6 +20,7 @@ import (
 	ethCrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/tendermint/tendermint/libs/json"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/backoff"
 	"strconv"
 	"time"
 )
@@ -41,11 +42,10 @@ func main() {
 		panic(err)
 	}
 
-	cosmosConn, err := grpc.DialContext(context.Background(), cfg.Cosmos.NodeGrpcUrl, grpc.WithInsecure())
-	if err != nil {
-		panic(err)
-	}
-	defer cosmosConn.Close()
+	cosmosConn, err := grpc.DialContext(context.Background(), cfg.Cosmos.NodeGrpcUrl, grpc.WithInsecure(), grpc.WithConnectParams(grpc.ConnectParams{
+		Backoff:           backoff.DefaultConfig,
+		MinConnectTimeout: time.Second * 5,
+	}))
 
 	if true { // todo: check if we have address
 		privateKey, err := ethCrypto.HexToECDSA(minterWallet.PrivateKey)

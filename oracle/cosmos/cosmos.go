@@ -2,8 +2,8 @@ package cosmos
 
 import (
 	"context"
-	"github.com/MinterTeam/minter-hub-oracle/config"
 	"github.com/MinterTeam/mhub/chain/app"
+	"github.com/MinterTeam/minter-hub-oracle/config"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	crypto "github.com/cosmos/cosmos-sdk/crypto/types"

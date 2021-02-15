@@ -13,11 +13,14 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/valyala/fasthttp"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/backoff"
 	"time"
 )
 
 var cfg = config.Get()
+
 const multiplier = 1e10
+
 var pipInBip = sdk.NewInt(1000000000000000000)
 
 func main() {
@@ -31,7 +34,11 @@ func main() {
 		panic(err)
 	}
 
-	cosmosConn, err := grpc.DialContext(context.Background(), cfg.Cosmos.NodeGrpcUrl, grpc.WithInsecure())
+	cosmosConn, err := grpc.DialContext(context.Background(), cfg.Cosmos.NodeGrpcUrl, grpc.WithInsecure(), grpc.WithConnectParams(grpc.ConnectParams{
+		Backoff:           backoff.DefaultConfig,
+		MinConnectTimeout: time.Second * 5,
+	}))
+
 	if err != nil {
 		panic(err)
 	}
