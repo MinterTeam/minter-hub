@@ -12,7 +12,7 @@ const (
 	QueryCurrentEpoch = "currentEpoch"
 	QueryPrices       = "prices"
 	QueryEthFee       = "eth_fee"
-	QueryCoins       = "coins"
+	QueryCoins        = "coins"
 )
 
 // NewQuerier is the module level router for state queries

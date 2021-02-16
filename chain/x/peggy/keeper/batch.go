@@ -120,11 +120,11 @@ func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, tokenContract string, n
 	k.minterKeeper.AddToOutgoingPool(ctx, commissionKeeperAddress, "Mx"+txSender[2:], txHash, totalFee)
 
 	// Iterate through remaining batches
-	k.IterateOutgoingTXBatches(ctx, func(key []byte, iter_batch *types.OutgoingTxBatch) bool {
+	k.IterateOutgoingTXBatches(ctx, func(key []byte, iterBatch *types.OutgoingTxBatch) bool {
 		// If the iterated batches nonce is lower than the one that was just executed, cancel it
-		// TODO: iterate only over batches we need to iterate over !!!
-		if iter_batch.BatchNonce < b.BatchNonce {
-			k.CancelOutgoingTXBatch(ctx, tokenContract, iter_batch.BatchNonce)
+		// TODO: iterate only over batches we need to iterate over
+		if iterBatch.TokenContract == b.TokenContract && iterBatch.BatchNonce < b.BatchNonce {
+			k.CancelOutgoingTXBatch(ctx, tokenContract, iterBatch.BatchNonce)
 		}
 		return false
 	})
