@@ -11,6 +11,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc"
 	"math"
+	"sort"
 	"strconv"
 	"time"
 )
@@ -55,6 +56,10 @@ func GetLatestMinterBlockAndNonce(cosmosConn *grpc.ClientConn, startMinterBlock 
 			i--
 			continue
 		}
+
+		sort.Slice(blocks.Blocks, func(i, j int) bool {
+			return blocks.Blocks[i].Height < blocks.Blocks[j].Height
+		})
 
 		for _, block := range blocks.Blocks {
 			println(block.Height, "of", latestBlock)
