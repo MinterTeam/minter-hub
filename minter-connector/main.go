@@ -190,6 +190,7 @@ func relayBatches(minterClient *http_client.Client, cosmosConn *grpc.ClientConn,
 		panic(err)
 	}
 
+	println(encodedTx)
 	response, err := minterClient.SendTransaction(encodedTx)
 	if err != nil {
 		code, body, err := http_client.ErrorBody(err)
