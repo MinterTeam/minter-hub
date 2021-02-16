@@ -39,7 +39,7 @@ func GetLatestMinterBlockAndNonce(cosmosConn *grpc.ClientConn, startMinterBlock 
 		panic(err)
 	}
 
-	const blocksPerBatch = 20
+	const blocksPerBatch = 100
 	for i := uint64(0); i <= uint64(math.Ceil(float64(latestBlock)/blocksPerBatch)); i++ {
 		from := startMinterBlock + i
 		to := startMinterBlock + (i + 1) * blocksPerBatch
