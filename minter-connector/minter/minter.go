@@ -28,6 +28,8 @@ func GetLatestMinterBlock(client *http_client.Client) uint64 {
 }
 
 func GetLatestMinterBlockAndNonce(cosmosConn *grpc.ClientConn, startMinterBlock uint64, startEventNonce uint64, startBatchNonce uint64, startValsetNonce uint64, multisigAddr string, currentNonce uint64, client *http_client.Client) (block, eventNonce, batchNonce, valsetNonce uint64) {
+	println("Current nonce @ hub", currentNonce)
+
 	latestBlock := GetLatestMinterBlock(client)
 
 	eventNonce = startEventNonce
