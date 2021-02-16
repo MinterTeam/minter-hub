@@ -47,7 +47,6 @@ func GetLatestMinterBlockAndNonce(cosmosConn *grpc.ClientConn, startMinterBlock 
 			to = latestBlock
 		}
 
-		println(i, "of", latestBlock)
 		blocks, err := client.Blocks(from, to, false)
 		if err != nil {
 			println("ERROR: ", err.Error())
@@ -57,6 +56,7 @@ func GetLatestMinterBlockAndNonce(cosmosConn *grpc.ClientConn, startMinterBlock 
 		}
 
 		for _, block := range blocks.Blocks {
+			println(block.Height, "of", latestBlock)
 			for _, tx := range block.Transactions {
 				if tx.Type == uint64(transaction.TypeSend) {
 					data, _ := tx.Data.UnmarshalNew()
