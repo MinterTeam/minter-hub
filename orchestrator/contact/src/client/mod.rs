@@ -1,7 +1,4 @@
-use crate::jsonrpc::{client::HTTPClient, error::JsonRpcError};
-use deep_space::address::Address;
-use deep_space::coin::Coin;
-use deep_space::private_key::PrivateKey;
+use crate::jsonrpc::{client::HTTPClient};
 use std::sync::Arc;
 use std::time::Duration;
 

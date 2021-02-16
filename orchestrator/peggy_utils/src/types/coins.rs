@@ -1,7 +1,4 @@
-use super::*;
 use crate::error::PeggyError;
-use clarity::{abi::Token, Address as EthAddress};
-use deep_space::address::Address as CosmosAddress;
 
 /// This represents an individual transaction being bridged over to Ethereum
 /// parallel is the OutgoingTransferTx in x/peggy/types/batch.go

@@ -4,7 +4,7 @@ use clarity::{Address, Uint256};
 use cosmos_peggy::query::get_last_event_nonce;
 use deep_space::address::Address as CosmosAddress;
 use peggy_proto::peggy::query_client::QueryClient as PeggyQueryClient;
-use peggy_utils::types::{SendToCosmosEvent, TransactionBatchExecutedEvent};
+use peggy_utils::types::{SendToCosmosEvent, SendToMinterEvent, TransactionBatchExecutedEvent};
 use tokio::time::delay_for;
 use tonic::transport::Channel;
 use web30::client::Web3;
@@ -67,21 +67,31 @@ pub async fn get_last_checked_block(
                 end_search.clone(),
                 Some(current_block.clone()),
                 vec![peggy_contract_address],
-                vec!["SendToHubEvent(address,address,bytes32,uint256,uint256,uint8)"],
+                vec!["SendToHubEvent(address,address,bytes32,uint256,uint256)"],
             )
             .await;
-        if all_batch_events.is_err() || all_send_to_cosmos_events.is_err() {
+        let all_send_to_minter_events = web3
+            .check_for_events(
+                end_search.clone(),
+                Some(current_block.clone()),
+                vec![peggy_contract_address],
+                vec!["SendToMinterEvent(address,address,bytes32,uint256,uint256)"],
+            )
+            .await;
+        if all_batch_events.is_err() || all_send_to_cosmos_events.is_err() || all_send_to_minter_events.is_err() {
             error!("Failed to get blockchain events while resyncing, is your Eth node working?");
             delay_for(RETRY_TIME).await;
             continue;
         }
         let all_batch_events = all_batch_events.unwrap();
         let all_send_to_cosmos_events = all_send_to_cosmos_events.unwrap();
+        let all_send_to_minter_events = all_send_to_minter_events.unwrap();
 
         trace!(
-            "Found events {:?} {:?}",
+            "Found events {:?} {:?} {:?}",
             all_batch_events,
-            all_send_to_cosmos_events
+            all_send_to_cosmos_events,
+            all_send_to_minter_events
         );
         for event in all_batch_events {
             match TransactionBatchExecutedEvent::from_log(&event) {
@@ -100,7 +110,17 @@ pub async fn get_last_checked_block(
                         return event.block_number.unwrap();
                     }
                 }
-                Err(e) => error!("Got valset event that we can't parse {}", e),
+                Err(e) => error!("Got event that we can't parse {}", e),
+            }
+        }
+        for event in all_send_to_minter_events {
+            match SendToMinterEvent::from_log(&event) {
+                Ok(send) => {
+                    if send.event_nonce == last_event_nonce && event.block_number.is_some() {
+                        return event.block_number.unwrap();
+                    }
+                }
+                Err(e) => error!("Got event that we can't parse {}", e),
             }
         }
         current_block = end_search;
