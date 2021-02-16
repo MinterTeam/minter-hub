@@ -2,11 +2,13 @@ use clarity::Address as EthAddress;
 use contact::types::parse_val;
 use num256::Uint256;
 mod batches;
+mod coins;
 mod ethereum_events;
 mod signatures;
 mod valsets;
 use crate::error::PeggyError;
 
+pub use coins::*;
 pub use batches::*;
 pub use ethereum_events::*;
 pub use signatures::*;

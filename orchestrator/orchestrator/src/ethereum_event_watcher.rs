@@ -6,6 +6,7 @@ use contact::client::Contact;
 use cosmos_peggy::{query::get_last_event_nonce, send::send_ethereum_claims};
 use deep_space::{coin::Coin, private_key::PrivateKey as CosmosPrivateKey};
 use peggy_proto::peggy::query_client::QueryClient as PeggyQueryClient;
+use peggy_proto::oracle::query_client::QueryClient as OracleQueryClient;
 use peggy_utils::{
     error::PeggyError,
     types::{SendToCosmosEvent, SendToMinterEvent, TransactionBatchExecutedEvent, ValsetUpdatedEvent},
@@ -19,6 +20,7 @@ pub async fn check_for_events(
     web3: &Web3,
     contact: &Contact,
     grpc_client: &mut PeggyQueryClient<Channel>,
+    oracle_grpc_client: &mut OracleQueryClient<Channel>,
     peggy_contract_address: EthAddress,
     our_private_key: CosmosPrivateKey,
     fee: Coin,
@@ -112,7 +114,7 @@ pub async fn check_for_events(
 
         if !deposits.is_empty() || !withdraws.is_empty() || !transfers.is_empty() {
             let _res =
-                send_ethereum_claims(contact, our_private_key, deposits, withdraws, transfers, fee).await?;
+                send_ethereum_claims(contact, oracle_grpc_client, our_private_key, deposits, withdraws, transfers, fee).await?;
             let new_event_nonce = get_last_event_nonce(grpc_client, our_cosmos_address).await?;
             // since we can't actually trust that the above txresponse is correct we have to check here
             // we may be able to trust the tx response post grpc

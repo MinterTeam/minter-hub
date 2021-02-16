@@ -8,3 +8,7 @@ pub use cosmos_sdk_proto;
 pub mod peggy {
     include!("prost/peggy.v1.rs");
 }
+
+pub mod oracle {
+    include!("prost/oracle.v1.rs");
+}

@@ -28,6 +28,7 @@ use contact::client::Contact;
 use deep_space::private_key::PrivateKey as CosmosPrivateKey;
 use docopt::Docopt;
 use peggy_proto::peggy::query_client::QueryClient as PeggyQueryClient;
+use peggy_proto::oracle::query_client::QueryClient as OracleQueryClient;
 use url::Url;
 use web30::client::Web3;
 
@@ -97,7 +98,8 @@ async fn main() {
 
     let fee_denom = args.flag_fees;
 
-    let grpc_client = PeggyQueryClient::connect(cosmos_grpc_url).await.unwrap();
+    let grpc_client = PeggyQueryClient::connect(cosmos_grpc_url.clone()).await.unwrap();
+    let oracle_grpc_client = OracleQueryClient::connect(cosmos_grpc_url).await.unwrap();
     let web3 = Web3::new(&eth_url, LOOP_SPEED);
     let contact = Contact::new(&cosmos_legacy_url, LOOP_SPEED);
 
@@ -120,6 +122,7 @@ async fn main() {
         web3,
         contact,
         grpc_client,
+        oracle_grpc_client,
         contract_address,
         fee_denom,
     )

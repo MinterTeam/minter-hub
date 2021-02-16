@@ -36,11 +36,13 @@ fn compile_protos(out_dir: &Path) {
     peggy_proto_dir.push("chain/proto/peggy/v1");
     let mut peggy_proto_include_dir = root.clone();
     peggy_proto_include_dir.push("chain/proto");
-    let mut third_party_proto_include_dir = root;
+    let mut third_party_proto_include_dir = root.clone();
     third_party_proto_include_dir.push("chain/third_party/proto");
+    let mut oracle_dir = root;
+    oracle_dir.push("chain/proto/oracle/v1");
 
     // Paths
-    let proto_paths = [peggy_proto_dir];
+    let proto_paths = [peggy_proto_dir, oracle_dir];
     // we need to have an include which is just the folder of our protos to satisfy protoc
     // which insists that any passed file be included in a directory passed as an include
     let proto_include_paths = [peggy_proto_include_dir, third_party_proto_include_dir];

@@ -13,9 +13,10 @@ use deep_space::{coin::Coin, utils::bytes_to_hex_str};
 use ethereum_peggy::message_signatures::{encode_tx_batch_confirm, encode_valset_confirm};
 use peggy_utils::types::*;
 use ethereum_peggy::utils::downcast_nonce;
-use num256::Uint256;
-use std::ops::{Sub, Div};
 use std::collections::HashMap;
+use peggy_proto::oracle::query_client::QueryClient as OracleQueryClient;
+use tonic::transport::Channel;
+use crate::query::get_coins;
 
 /// Send a transaction updating the eth address for the sending
 /// Cosmos address. The sending Cosmos address should be a validator
@@ -165,6 +166,7 @@ pub async fn send_batch_confirm(
 
 pub async fn send_ethereum_claims(
     contact: &Contact,
+    oracle_grpc_client: &mut OracleQueryClient<Channel>,
     private_key: PrivateKey,
     deposits: Vec<SendToCosmosEvent>,
     withdraws: Vec<TransactionBatchExecutedEvent>,
@@ -181,9 +183,10 @@ pub async fn send_ethereum_claims(
     let mut msgs = Vec::new();
     for transfer in transfers {
         let mut coins = HashMap::new();
-        coins.insert(String::from("0x98C4408691165a7D892C2D9b5A2D9b9c9ac6FF19"), String::from("lashin"));
-        coins.insert(String::from("0x7186b91eB6EaeE563bc670d475A9E8555b755A57"), String::from("chain"));
-        coins.insert(String::from("0x8C2B6949590bEBE6BC1124B670e58DA85b081b2E"), String::from("hub"));
+        let hub_coins = get_coins(oracle_grpc_client).await.unwrap();
+        for coin in hub_coins {
+            coins.insert(coin.eth_addr, coin.denom);
+        }
 
         msgs.push(PeggyMsg::SendToMinterClaimMsg(SendToMinterClaimMsg {
             event_nonce: downcast_nonce(transfer.event_nonce)

@@ -2518,36 +2518,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "test_runner"
-version = "0.1.0"
-dependencies = [
- "actix",
- "actix-rt",
- "actix-web",
- "clarity",
- "contact",
- "cosmos_peggy",
- "deep_space",
- "docopt",
- "env_logger",
- "ethereum_peggy",
- "futures",
- "lazy_static",
- "log",
- "num256",
- "orchestrator",
- "peggy_proto",
- "peggy_utils",
- "rand 0.8.2",
- "serde",
- "serde_derive",
- "tokio",
- "tonic",
- "url",
- "web30",
-]
-
-[[package]]
 name = "thiserror"
 version = "1.0.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
