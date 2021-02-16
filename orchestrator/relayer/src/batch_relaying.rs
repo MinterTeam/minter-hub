@@ -30,10 +30,11 @@ pub async fn relay_batches(
     if latest_batches.is_err() {
         return;
     }
-    let latest_batches = latest_batches.unwrap();
+    let mut latest_batches = latest_batches.unwrap();
+    latest_batches.reverse();
     let mut oldest_signed_batch: Option<TransactionBatch> = None;
     let mut oldest_signatures: Option<Vec<BatchConfirmResponse>> = None;
-    for batch in latest_batches.clone().reverse() {
+    for batch in latest_batches {
         let sigs =
             get_transaction_batch_signatures(grpc_client, batch.nonce, batch.token_contract).await;
         trace!("Got sigs {:?}", sigs);
