@@ -10,6 +10,7 @@ import (
 	"github.com/MinterTeam/minter-hub-connector/command"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc"
+	"math"
 	"strconv"
 	"time"
 )
@@ -38,9 +39,16 @@ func GetLatestMinterBlockAndNonce(cosmosConn *grpc.ClientConn, startMinterBlock 
 		panic(err)
 	}
 
-	for i := startMinterBlock; i <= latestBlock; i++ {
+	for i := startMinterBlock; i <= uint64(math.Ceil(float64(latestBlock)/100)); i++ {
+		from := i
+		to := i * 100
+
+		if to > latestBlock {
+			to = latestBlock
+		}
+
 		println(i, "of", latestBlock)
-		block, err := client.Block(i)
+		blocks, err := client.Blocks(from, to, false)
 		if err != nil {
 			println("ERROR: ", err.Error())
 			time.Sleep(time.Second)
@@ -48,47 +56,49 @@ func GetLatestMinterBlockAndNonce(cosmosConn *grpc.ClientConn, startMinterBlock 
 			continue
 		}
 
-		for _, tx := range block.Transactions {
-			if tx.Type == uint64(transaction.TypeSend) {
-				data, _ := tx.Data.UnmarshalNew()
-				sendData := data.(*models.SendData)
-				cmd := command.Command{}
-				json.Unmarshal(tx.Payload, &cmd)
+		for _, block := range blocks.Blocks {
+			for _, tx := range block.Transactions {
+				if tx.Type == uint64(transaction.TypeSend) {
+					data, _ := tx.Data.UnmarshalNew()
+					sendData := data.(*models.SendData)
+					cmd := command.Command{}
+					json.Unmarshal(tx.Payload, &cmd)
 
-				value, _ := sdk.NewIntFromString(sendData.Value)
-				if sendData.To == multisigAddr && cmd.Validate(value) == nil {
-					for _, c := range coinList.GetCoins() {
-						if sendData.Coin.ID == c.MinterId {
-							if currentNonce < eventNonce {
-								return i - 1, eventNonce, batchNonce, valsetNonce
+					value, _ := sdk.NewIntFromString(sendData.Value)
+					if sendData.To == multisigAddr && cmd.Validate(value) == nil {
+						for _, c := range coinList.GetCoins() {
+							if sendData.Coin.ID == c.MinterId {
+								if currentNonce < eventNonce {
+									return block.Height - 1, eventNonce, batchNonce, valsetNonce
+								}
+
+								eventNonce++
 							}
-
-							eventNonce++
 						}
 					}
 				}
-			}
 
-			if tx.Type == uint64(transaction.TypeMultisend) && tx.From == multisigAddr {
-				if currentNonce < eventNonce {
-					return i - 1, eventNonce, batchNonce, valsetNonce
-				}
-
-				eventNonce++
-				batchNonce++
-			}
-
-			if tx.Type == uint64(transaction.TypeEditMultisig) && tx.From == multisigAddr {
-				nonce, err := strconv.Atoi(string(tx.Payload))
-				if err != nil {
-					println("ERROR:", err.Error())
-				} else {
+				if tx.Type == uint64(transaction.TypeMultisend) && tx.From == multisigAddr {
 					if currentNonce < eventNonce {
-						return i - 1, eventNonce, batchNonce, valsetNonce
+						return block.Height - 1, eventNonce, batchNonce, valsetNonce
 					}
 
-					valsetNonce = uint64(nonce)
 					eventNonce++
+					batchNonce++
+				}
+
+				if tx.Type == uint64(transaction.TypeEditMultisig) && tx.From == multisigAddr {
+					nonce, err := strconv.Atoi(string(tx.Payload))
+					if err != nil {
+						println("ERROR:", err.Error())
+					} else {
+						if currentNonce < eventNonce {
+							return block.Height - 1, eventNonce, batchNonce, valsetNonce
+						}
+
+						valsetNonce = uint64(nonce)
+						eventNonce++
+					}
 				}
 			}
 		}
