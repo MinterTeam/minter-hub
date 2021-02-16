@@ -117,9 +117,5 @@ func GetLatestMinterBlockAndNonce(cosmosConn *grpc.ClientConn, startMinterBlock 
 		}
 	}
 
-	if currentNonce < eventNonce {
-		panic("Something went wrong")
-	}
-
 	return latestBlock, eventNonce, batchNonce, valsetNonce
 }
