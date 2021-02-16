@@ -42,9 +42,16 @@ func (a AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, claim
 				return price[i].LT(price[j])
 			})
 
+			var calculatedPrice sdk.Int
+			if len(price) % 2 == 0 {
+				calculatedPrice = price[len(price)/2].Add(price[len(price)/2-1]).QuoRaw(2) // compute average
+			} else {
+				calculatedPrice = price[len(price)/2]
+			}
+
 			prices.List = append(prices.List, &types.Price{
 				Name:  name,
-				Value: price[len(price)/2],
+				Value: calculatedPrice,
 			})
 		}
 
