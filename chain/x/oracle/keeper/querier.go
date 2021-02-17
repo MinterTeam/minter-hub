@@ -84,8 +84,8 @@ func queryEthFee(ctx sdk.Context, keeper Keeper) ([]byte, error) {
 	}
 
 	response := types.QueryEthFeeResponse{
-		Min:  gasPrice.Mul(ethPrice).MulRaw(EthMaxExecutionGas).QuoRaw(gweiInEth).QuoRaw(keeper.GetGasUnits()),
-		Fast: gasPrice.Mul(ethPrice).MulRaw(EthMaxFastExecutionGas).QuoRaw(gweiInEth).QuoRaw(keeper.GetGasUnits()),
+		Min:  gasPrice.Mul(ethPrice).MulRaw(EthMaxExecutionGas).QuoRaw(gweiInEth).QuoRaw(keeper.GetGasUnits()).MulRaw(110).QuoRaw(100),
+		Fast: gasPrice.Mul(ethPrice).MulRaw(EthMaxFastExecutionGas).QuoRaw(gweiInEth).QuoRaw(keeper.GetGasUnits()).MulRaw(110).QuoRaw(100),
 	}
 
 	res, err := codec.MarshalJSONIndent(types.ModuleCdc, &response)
