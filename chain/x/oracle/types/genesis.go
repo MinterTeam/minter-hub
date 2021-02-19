@@ -61,8 +61,8 @@ func DefaultParams() *Params {
 				MinterId: 1,
 			},
 		},
-		MinBatchGas:          50000,
-		MinSingleWithdrawGas: 100000,
+		MinBatchGas:          100000,
+		MinSingleWithdrawGas: 50000,
 	}
 }
 
