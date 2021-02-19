@@ -7,8 +7,6 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-const EthMaxExecutionGas = 50000
-const EthMaxFastExecutionGas = 100000
 const gweiInEth = 1e9
 
 var _ types.QueryServer = Keeper{}
@@ -55,7 +53,7 @@ func (k Keeper) EthFee(context context.Context, request *types.QueryEthFeeReques
 	}
 
 	return &types.QueryEthFeeResponse{
-		Min:  gasPrice.Mul(ethPrice).MulRaw(EthMaxExecutionGas).QuoRaw(gweiInEth).QuoRaw(k.GetGasUnits()),
-		Fast: gasPrice.Mul(ethPrice).MulRaw(EthMaxFastExecutionGas).QuoRaw(gweiInEth).QuoRaw(k.GetGasUnits()),
+		Min:  gasPrice.Mul(ethPrice).MulRaw(int64(k.GetMinSingleWithdrawGas(ctx))).QuoRaw(gweiInEth).QuoRaw(k.GetGasUnits()),
+		Fast: gasPrice.Mul(ethPrice).MulRaw(int64(k.GetMinBatchGas(ctx))).QuoRaw(gweiInEth).QuoRaw(k.GetGasUnits()),
 	}, nil
 }

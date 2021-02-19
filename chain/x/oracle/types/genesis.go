@@ -24,6 +24,9 @@ var (
 
 	ParamsStoreCoins = []byte("Coins")
 
+	ParamsMinBatchGas          = []byte("MinBatchGas")
+	ParamsMinSingleWithdrawGas = []byte("MinSingleWithdrawGas")
+
 	// Ensure that params implements the proper interface
 	_ paramtypes.ParamSet = &Params{}
 )
@@ -58,6 +61,8 @@ func DefaultParams() *Params {
 				MinterId: 1,
 			},
 		},
+		MinBatchGas:          50000,
+		MinSingleWithdrawGas: 100000,
 	}
 }
 
@@ -88,6 +93,8 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 		paramtypes.NewParamSetPair(ParamsStoreSlashFractionClaim, &p.SlashFractionClaim, validateSlashFractionClaim),
 		paramtypes.NewParamSetPair(ParamsStoreSlashFractionConflictingClaim, &p.SlashFractionConflictingClaim, validateSlashFractionConflictingClaim),
 		paramtypes.NewParamSetPair(ParamsStoreCoins, &p.Coins, validateCoins),
+		paramtypes.NewParamSetPair(ParamsMinBatchGas, &p.MinBatchGas, validateMinBatchGas),
+		paramtypes.NewParamSetPair(ParamsMinSingleWithdrawGas, &p.MinSingleWithdrawGas, validateMinSingleWithdrawGas),
 	}
 }
 
@@ -127,6 +134,32 @@ func validateCoins(i interface{}) error {
 	if _, ok := i.([]*Coin); !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
+	return nil
+}
+
+func validateMinSingleWithdrawGas(i interface{}) error {
+	// TODO: do we want to set some bounds on this value?
+	if _, ok := i.(uint64); !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if i.(uint64) < 1 {
+		return fmt.Errorf("invalid parameter value: min single withdraw gas")
+	}
+
+	return nil
+}
+
+func validateMinBatchGas(i interface{}) error {
+	// TODO: do we want to set some bounds on this value?
+	if _, ok := i.(uint64); !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if i.(uint64) < 1 {
+		return fmt.Errorf("invalid parameter value: min batch gas")
+	}
+
 	return nil
 }
 

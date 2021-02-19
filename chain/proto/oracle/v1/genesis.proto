@@ -21,6 +21,9 @@ message Params {
   ];
 
   repeated Coin coins = 4;
+
+  uint64 min_single_withdraw_gas = 5;
+  uint64 min_batch_gas = 6;
 }
 
 // GenesisState struct

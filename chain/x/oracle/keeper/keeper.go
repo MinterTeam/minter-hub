@@ -136,6 +136,18 @@ func (k Keeper) GetCoins(ctx sdk.Context) types.Coins {
 	return types.NewCoins(p.Coins)
 }
 
+func (k Keeper) GetMinSingleWithdrawGas(ctx sdk.Context) uint64 {
+	p := k.GetParams(ctx)
+
+	return p.MinSingleWithdrawGas
+}
+
+func (k Keeper) GetMinBatchGas(ctx sdk.Context) uint64 {
+	p := k.GetParams(ctx)
+
+	return p.MinBatchGas
+}
+
 // logger returns a module-specific logger.
 func (k Keeper) logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))

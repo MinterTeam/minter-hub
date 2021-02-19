@@ -11,7 +11,6 @@ import (
 )
 
 const OutgoingTxBatchSize = 100
-const EthMaxExecutionGas = 100000
 const gweiInEth = 1e9
 
 // BuildOutgoingTXBatch starts the following process chain:
@@ -55,7 +54,7 @@ func (k Keeper) BuildOutgoingTXBatch(ctx sdk.Context, contractAddress string, ma
 	}
 
 	totalUsdCommission := totalCommission.Mul(price).Quo(k.oracleKeeper.GetPipInBip())
-	totalUsdGas := gasPrice.Mul(ethPrice).MulRaw(EthMaxExecutionGas).QuoRaw(gweiInEth).QuoRaw(k.oracleKeeper.GetGasUnits())
+	totalUsdGas := gasPrice.Mul(ethPrice).MulRaw(int64(k.oracleKeeper.GetMinBatchGas(ctx))).QuoRaw(gweiInEth).QuoRaw(k.oracleKeeper.GetGasUnits())
 	if totalUsdCommission.LT(totalUsdGas) {
 		return nil, sdkerrors.Wrap(types.ErrInvalid, "not enough gas yet")
 	}

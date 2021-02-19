@@ -6,7 +6,6 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-const EthMaxExecutionGas = 50000
 const gweiInEth = 1e9
 
 var minDepositAmount = sdk.NewInt(100)
@@ -127,7 +126,7 @@ func (a *AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, clai
 		}
 
 		totalUsdCommission := fee.Amount.Mul(coinPrice).Quo(a.keeper.oracleKeeper.GetPipInBip())
-		totalUsdGas := gasPrice.Mul(ethPrice).MulRaw(EthMaxExecutionGas).QuoRaw(gweiInEth).QuoRaw(a.keeper.oracleKeeper.GetGasUnits())
+		totalUsdGas := gasPrice.Mul(ethPrice).MulRaw(int64(a.keeper.oracleKeeper.GetMinSingleWithdrawGas(ctx))).QuoRaw(gweiInEth).QuoRaw(a.keeper.oracleKeeper.GetGasUnits())
 		if totalUsdCommission.GTE(totalUsdGas) {
 			feeIsOk = true
 		}
