@@ -52,8 +52,6 @@ func GetLatestMinterBlockAndNonce(cosmosConn *grpc.ClientConn, startMinterBlock 
 			to = latestBlock
 		}
 
-		println("Scanning from", from, "to", to)
-
 		blocks, err := client.Blocks(from, to, false)
 		if err != nil {
 			println("ERROR: ", err.Error())
@@ -117,6 +115,8 @@ func GetLatestMinterBlockAndNonce(cosmosConn *grpc.ClientConn, startMinterBlock 
 			}
 		}
 	}
+
+	println()
 
 	return latestBlock, eventNonce, batchNonce, valsetNonce
 }
