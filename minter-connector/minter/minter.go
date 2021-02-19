@@ -44,14 +44,14 @@ func GetLatestMinterBlockAndNonce(cosmosConn *grpc.ClientConn, startMinterBlock 
 
 	const blocksPerBatch = 100
 	for i := uint64(0); i <= uint64(math.Ceil(float64(latestBlock-startMinterBlock)/blocksPerBatch)); i++ {
-		from := startMinterBlock + 1 + i * blocksPerBatch
-		to := startMinterBlock + (i + 1) * blocksPerBatch
+		from := startMinterBlock + 1 + i*blocksPerBatch
+		to := startMinterBlock + (i+1)*blocksPerBatch
 
 		if to > latestBlock {
 			to = latestBlock
 		}
 
-		println("\rScanning from", from, "to", to)
+		println("Scanning from", from, "to", to)
 
 		blocks, err := client.Blocks(from, to, false)
 		if err != nil {
@@ -66,7 +66,8 @@ func GetLatestMinterBlockAndNonce(cosmosConn *grpc.ClientConn, startMinterBlock 
 		})
 
 		for _, block := range blocks.Blocks {
-			println(block.Height, "of", latestBlock)
+			println("\r")
+			print(block.Height, " of ", latestBlock)
 			for _, tx := range block.Transactions {
 				if tx.Type == uint64(transaction.TypeSend) {
 					data, _ := tx.Data.UnmarshalNew()

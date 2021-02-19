@@ -47,6 +47,10 @@ func main() {
 		MinConnectTimeout: time.Second * 5,
 	}))
 
+	println("Syncing with Minter")
+	lastCheckedMinterBlock, lastEventNonce, lastBatchNonce, lastValsetNonce := minter.GetLatestMinterBlockAndNonce(cosmosConn, cfg.Minter.StartBlock, cfg.Minter.StartEventNonce, cfg.Minter.StartBatchNonce, cfg.Minter.StartValsetNonce, cfg.Minter.MultisigAddr, cosmos.GetLastMinterNonce(orcAddress.String(), cosmosConn), minterClient)
+	println("Starting with block", lastCheckedMinterBlock, "event nonce", lastEventNonce, "batch nonce", lastBatchNonce, "valset nonce", lastValsetNonce)
+
 	if true { // todo: check if we have address
 		privateKey, err := ethCrypto.HexToECDSA(minterWallet.PrivateKey)
 		if err != nil {
@@ -75,9 +79,6 @@ func main() {
 		}, orcAddress, orcPriv, cosmosConn)
 	}
 
-	println("Syncing with Minter")
-	lastCheckedMinterBlock, lastEventNonce, lastBatchNonce, lastValsetNonce := minter.GetLatestMinterBlockAndNonce(cosmosConn, cfg.Minter.StartBlock, cfg.Minter.StartEventNonce, cfg.Minter.StartBatchNonce, cfg.Minter.StartValsetNonce, cfg.Minter.MultisigAddr, cosmos.GetLastMinterNonce(orcAddress.String(), cosmosConn), minterClient)
-	println("Starting with block", lastCheckedMinterBlock, "event nonce", lastEventNonce, "batch nonce", lastBatchNonce, "valset nonce", lastValsetNonce)
 	for {
 		relayBatches(minterClient, cosmosConn, orcAddress, orcPriv, minterWallet, lastBatchNonce)
 
