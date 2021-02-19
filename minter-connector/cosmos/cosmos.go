@@ -18,6 +18,7 @@ import (
 	"github.com/cosmos/go-bip39"
 	tmClient "github.com/tendermint/tendermint/rpc/client/http"
 	"google.golang.org/grpc"
+	"strings"
 	"time"
 )
 
@@ -194,17 +195,16 @@ func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, c
 
 	result, err := client.BroadcastTxCommit(context.Background(), txBytes)
 	if err != nil {
-		println(err.Error())
+		if !strings.Contains(err.Error(), "incorrect account sequence") {
+			println(err.Error())
+		}
+
 		time.Sleep(1 * time.Second)
 		SendCosmosTx(msgs, address, priv, cosmosConn)
 		return
 	}
 
-	cj, _ := result.CheckTx.MarshalJSON()
-	println(string(cj))
-
 	println(result.DeliverTx.GetCode(), result.DeliverTx.GetLog(), result.DeliverTx.GetInfo())
-
 	if result.DeliverTx.GetCode() != 0 || result.CheckTx.GetCode() != 0 {
 		time.Sleep(1 * time.Second)
 		SendCosmosTx(msgs, address, priv, cosmosConn)
