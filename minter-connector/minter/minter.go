@@ -77,7 +77,6 @@ func GetLatestMinterBlockAndNonce(cosmosConn *grpc.ClientConn, startMinterBlock 
 					if sendData.To == multisigAddr && cmd.Validate(value) == nil {
 						for _, c := range coinList.GetCoins() {
 							if sendData.Coin.ID == c.MinterId {
-								println("deposit")
 								if currentNonce < eventNonce {
 									return block.Height - 1, eventNonce, batchNonce, valsetNonce
 								}
@@ -89,7 +88,6 @@ func GetLatestMinterBlockAndNonce(cosmosConn *grpc.ClientConn, startMinterBlock 
 				}
 
 				if tx.Type == uint64(transaction.TypeMultisend) && tx.From == multisigAddr {
-					println("batch")
 					if currentNonce < eventNonce {
 						return block.Height - 1, eventNonce, batchNonce, valsetNonce
 					}
@@ -103,7 +101,6 @@ func GetLatestMinterBlockAndNonce(cosmosConn *grpc.ClientConn, startMinterBlock 
 					if err != nil {
 						println("ERROR:", err.Error())
 					} else {
-						println("valset update")
 						if currentNonce < eventNonce {
 							return block.Height - 1, eventNonce, batchNonce, valsetNonce
 						}
