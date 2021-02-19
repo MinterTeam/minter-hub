@@ -3,6 +3,7 @@ package minter
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	oracleTypes "github.com/MinterTeam/mhub/chain/x/oracle/types"
 	"github.com/MinterTeam/minter-go-sdk/v2/api/http_client"
 	"github.com/MinterTeam/minter-go-sdk/v2/api/http_client/models"
@@ -66,8 +67,7 @@ func GetLatestMinterBlockAndNonce(cosmosConn *grpc.ClientConn, startMinterBlock 
 		})
 
 		for _, block := range blocks.Blocks {
-			println("\r")
-			print(block.Height, " of ", latestBlock)
+			fmt.Printf("\r%d of %d", block.Height, latestBlock)
 			for _, tx := range block.Transactions {
 				if tx.Type == uint64(transaction.TypeSend) {
 					data, _ := tx.Data.UnmarshalNew()
