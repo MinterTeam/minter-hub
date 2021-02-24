@@ -80,10 +80,9 @@ pub async fn relay_batches(
                         peggy_contract_address,
                         ethereum_key,
                         i.clone().into()
-                    );
+                    ).await;
 
                     i += 1;
-                    sleep(Duration::from_secs(5)) // todo
                 } else {
                     error!("Failed to find latest valset with {:?}", current_valset);
                 }
