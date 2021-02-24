@@ -2,6 +2,7 @@ use super::*;
 use crate::error::PeggyError;
 use clarity::{abi::Token, Address as EthAddress};
 use deep_space::address::Address as CosmosAddress;
+use std::cmp::Ordering;
 
 /// This represents an individual transaction being bridged over to Ethereum
 /// parallel is the OutgoingTransferTx in x/peggy/types/batch.go
@@ -32,12 +33,18 @@ impl BatchTransaction {
 }
 
 /// the response we get when querying for a valset confirmation
-#[derive(Serialize, Deserialize, Debug, Default, Clone)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, PartialOrd, PartialEq, Eq)]
 pub struct TransactionBatch {
     pub nonce: u64,
     pub transactions: Vec<BatchTransaction>,
     pub total_fee: ERC20Token,
     pub token_contract: EthAddress,
+}
+
+impl Ord for TransactionBatch {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.nonce.cmp(&other.nonce)
+    }
 }
 
 impl TransactionBatch {
