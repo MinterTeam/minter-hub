@@ -83,6 +83,10 @@ pub async fn send_eth_transaction_batch(
     }
 
     let nonce = web3.eth_get_transaction_count(eth_address).await?.add(add_nonce);
+    info!(
+        "Sending eth tx with nonce {}",
+        nonce
+    );
 
     let tx = web3
         .send_transaction(
