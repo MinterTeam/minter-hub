@@ -21,6 +21,7 @@ import (
 	"github.com/tendermint/tendermint/libs/json"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/backoff"
+	"math"
 	"strconv"
 	"time"
 )
@@ -347,8 +348,8 @@ func relayValsets(minterClient *http_client.Client, cosmosConn *grpc.ClientConn,
 
 func relayMinterEvents(minterClient *http_client.Client, minterWallet *wallet.Wallet, cosmosConn *grpc.ClientConn, orcAddress sdk.AccAddress, orcPriv crypto.PrivKey, lastCheckedBlock, lastEventNonce, lastBatchNonce, lastValsetNonce uint64) (lastBlock, eventNonce, batchNonce, valsetNonce uint64) {
 	latestBlock := minter.GetLatestMinterBlock(minterClient)
-	if latestBlock-lastCheckedBlock > 10 {
-		latestBlock = lastCheckedBlock + 10
+	if latestBlock-lastCheckedBlock > 100 {
+		latestBlock = lastCheckedBlock + 100
 	}
 
 	oracleClient := oracleTypes.NewQueryClient(cosmosConn)
@@ -363,8 +364,16 @@ func relayMinterEvents(minterClient *http_client.Client, minterWallet *wallet.Wa
 	var batches []cosmos.Batch
 	var valsets []cosmos.Valset
 
-	for i := lastCheckedBlock + 1; i <= latestBlock; i++ {
-		block, err := minterClient.Block(i)
+	const blocksPerBatch = 100
+	for i := uint64(0); i <= uint64(math.Ceil(float64(latestBlock-lastCheckedBlock)/blocksPerBatch)); i++ {
+		from := lastCheckedBlock + 1 + i*blocksPerBatch
+		to := lastCheckedBlock + (i+1)*blocksPerBatch
+
+		if to > latestBlock {
+			to = latestBlock
+		}
+
+		blocks, err := minterClient.Blocks(from, to, false)
 		if err != nil {
 			println("ERROR: ", err.Error())
 			time.Sleep(time.Second)
@@ -372,69 +381,71 @@ func relayMinterEvents(minterClient *http_client.Client, minterWallet *wallet.Wa
 			continue
 		}
 
-		for _, tx := range block.Transactions {
-			if tx.Type == uint64(transaction.TypeSend) {
-				data, _ := tx.Data.UnmarshalNew()
-				sendData := data.(*models.SendData)
-				if sendData.To != cfg.Minter.MultisigAddr {
-					continue
-				}
+		for _, block := range blocks.Blocks {
+			for _, tx := range block.Transactions {
+				if tx.Type == uint64(transaction.TypeSend) {
+					data, _ := tx.Data.UnmarshalNew()
+					sendData := data.(*models.SendData)
+					if sendData.To != cfg.Minter.MultisigAddr {
+						continue
+					}
 
-				cmd := command.Command{}
-				json.Unmarshal(tx.Payload, &cmd)
+					cmd := command.Command{}
+					json.Unmarshal(tx.Payload, &cmd)
 
-				value, _ := sdk.NewIntFromString(sendData.Value)
+					value, _ := sdk.NewIntFromString(sendData.Value)
 
-				if err := cmd.Validate(value); err != nil {
-					println(err.Error())
-					continue
-				}
+					if err := cmd.Validate(value); err != nil {
+						println(err.Error())
+						continue
+					}
 
-				for _, c := range coinList.GetCoins() {
-					if sendData.Coin.ID == c.MinterId {
-						println("Found new deposit from", tx.From, "to", string(tx.Payload), "amount", sendData.Value, "coin", sendData.Coin.ID)
-						deposits = append(deposits, cosmos.Deposit{
-							Sender:     tx.From,
-							Type:       cmd.Type,
-							Recipient:  cmd.Recipient,
-							Amount:     sendData.Value,
-							Fee:        cmd.Fee,
-							EventNonce: lastEventNonce,
-							CoinID:     sendData.Coin.ID,
-							TxHash:     tx.Hash,
-						})
+					for _, c := range coinList.GetCoins() {
+						if sendData.Coin.ID == c.MinterId {
+							println("Found new deposit from", tx.From, "to", string(tx.Payload), "amount", sendData.Value, "coin", sendData.Coin.ID)
+							deposits = append(deposits, cosmos.Deposit{
+								Sender:     tx.From,
+								Type:       cmd.Type,
+								Recipient:  cmd.Recipient,
+								Amount:     sendData.Value,
+								Fee:        cmd.Fee,
+								EventNonce: lastEventNonce,
+								CoinID:     sendData.Coin.ID,
+								TxHash:     tx.Hash,
+							})
 
-						lastEventNonce++
+							lastEventNonce++
+						}
 					}
 				}
-			}
 
-			if tx.Type == uint64(transaction.TypeMultisend) && tx.From == cfg.Minter.MultisigAddr {
-				println("Found withdrawal")
-				batches = append(batches, cosmos.Batch{
-					BatchNonce: lastBatchNonce,
-					EventNonce: lastEventNonce,
-					TxHash:     tx.Hash,
-				})
-
-				lastEventNonce++
-				lastBatchNonce++
-			}
-
-			if tx.Type == uint64(transaction.TypeEditMultisig) && tx.From == cfg.Minter.MultisigAddr {
-				println("Found valset update")
-
-				nonce, err := strconv.Atoi(string(tx.Payload))
-				if err != nil {
-					println("ERROR:", err.Error())
-				} else {
-					valsets = append(valsets, cosmos.Valset{
-						ValsetNonce: uint64(nonce),
-						EventNonce:  lastEventNonce,
+				if tx.Type == uint64(transaction.TypeMultisend) && tx.From == cfg.Minter.MultisigAddr {
+					println("Found withdrawal")
+					batches = append(batches, cosmos.Batch{
+						BatchNonce: lastBatchNonce,
+						EventNonce: lastEventNonce,
+						TxHash:     tx.Hash,
 					})
 
 					lastEventNonce++
-					lastValsetNonce = uint64(nonce)
+					lastBatchNonce++
+				}
+
+				if tx.Type == uint64(transaction.TypeEditMultisig) && tx.From == cfg.Minter.MultisigAddr {
+					println("Found valset update")
+
+					nonce, err := strconv.Atoi(string(tx.Payload))
+					if err != nil {
+						println("ERROR:", err.Error())
+					} else {
+						valsets = append(valsets, cosmos.Valset{
+							ValsetNonce: uint64(nonce),
+							EventNonce:  lastEventNonce,
+						})
+
+						lastEventNonce++
+						lastValsetNonce = uint64(nonce)
+					}
 				}
 			}
 		}
