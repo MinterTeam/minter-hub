@@ -73,8 +73,8 @@ pub async fn relay_batches(
                 if let Ok(current_valset) = current_valset {
                     let _res = send_eth_transaction_batch(
                         current_valset,
-                        oldest_signed_batch,
-                        &oldest_signatures,
+                        batch,
+                        &sigs,
                         web3,
                         timeout,
                         peggy_contract_address,
@@ -93,9 +93,5 @@ pub async fn relay_batches(
                 batch.token_contract, batch.nonce, sigs
             );
         }
-    }
-    if oldest_signed_batch.is_none() {
-        trace!("Could not find batch with signatures! exiting");
-        return;
     }
 }
