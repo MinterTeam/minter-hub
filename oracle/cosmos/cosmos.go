@@ -14,6 +14,8 @@ import (
 	"github.com/cosmos/go-bip39"
 	tmClient "github.com/tendermint/tendermint/rpc/client/http"
 	"google.golang.org/grpc"
+	"strings"
+	"time"
 )
 
 var encoding = app.MakeEncodingConfig()
@@ -31,8 +33,7 @@ func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, c
 	fee := sdk.NewCoins(sdk.NewCoin("hub", sdk.NewInt(1)))
 
 	tx := encoding.TxConfig.NewTxBuilder()
-	err := tx.SetMsgs(msgs...)
-	if err != nil {
+	if err := tx.SetMsgs(msgs...); err != nil {
 		panic(err)
 	}
 
@@ -94,20 +95,26 @@ func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, c
 		panic(err)
 	}
 
-	result, err := client.BroadcastTxCommit(context.Background(), txBytes)
+	_, err = client.BroadcastTxCommit(context.Background(), txBytes)
 	if err != nil {
-		panic(err)
+		if !strings.Contains(err.Error(), "incorrect account sequence") {
+			println(err.Error())
+		}
+
+		time.Sleep(1 * time.Second)
+		SendCosmosTx(msgs, address, priv, cosmosConn)
+		return
 	}
 
-	{
-		cj, _ := result.CheckTx.MarshalJSON()
-		println(string(cj))
-	}
-
-	{
-		cj, _ := result.DeliverTx.MarshalJSON()
-		println(string(cj))
-	}
+	//{
+	//	cj, _ := result.CheckTx.MarshalJSON()
+	//	println(string(cj))
+	//}
+	//
+	//{
+	//	cj, _ := result.DeliverTx.MarshalJSON()
+	//	println(string(cj))
+	//}
 }
 
 func getAccount(address string, conn *grpc.ClientConn) (number, sequence uint64) {
@@ -115,12 +122,16 @@ func getAccount(address string, conn *grpc.ClientConn) (number, sequence uint64)
 
 	response, err := authClient.Account(context.Background(), &types.QueryAccountRequest{Address: address})
 	if err != nil {
-		panic(err)
+		println(err.Error())
+		time.Sleep(1 * time.Second)
+		return getAccount(address, conn)
 	}
 
 	var account types.AccountI
 	if err := encoding.Marshaler.UnpackAny(response.Account, &account); err != nil {
-		panic(err)
+		println(err.Error())
+		time.Sleep(1 * time.Second)
+		return getAccount(address, conn)
 	}
 
 	return account.GetAccountNumber(), account.GetSequence()

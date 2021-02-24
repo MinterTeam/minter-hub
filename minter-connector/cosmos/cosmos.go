@@ -204,8 +204,8 @@ func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, c
 		return
 	}
 
-	println(result.DeliverTx.GetCode(), result.DeliverTx.GetLog(), result.DeliverTx.GetInfo())
 	if result.DeliverTx.GetCode() != 0 || result.CheckTx.GetCode() != 0 {
+		println(result.DeliverTx.GetCode(), result.DeliverTx.GetLog(), result.DeliverTx.GetInfo())
 		time.Sleep(1 * time.Second)
 		SendCosmosTx(msgs, address, priv, cosmosConn)
 	}
