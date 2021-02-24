@@ -8,6 +8,7 @@ use web30::client::Web3;
 use web30::types::SendTxOption;
 use num256::Uint256;
 use std::ops::Add;
+use web30::jsonrpc::error::Web3Error;
 
 /// this function generates an appropriate Ethereum transaction
 /// to submit the provided transaction batch and validator set update.
@@ -88,7 +89,7 @@ pub async fn send_eth_transaction_batch(
         nonce
     );
 
-    let tx = web3
+    let tx_result = web3
         .send_transaction(
             peggy_contract_address,
             payload,
@@ -97,7 +98,20 @@ pub async fn send_eth_transaction_batch(
             our_eth_key,
             vec![SendTxOption::GasLimit(1_000_000u32.into()), SendTxOption::Nonce(nonce)],
         )
-        .await?;
+        .await;
+    let tx;
+    match tx_result {
+        Ok(t) => {
+            tx = t
+        }
+        Err(e) => {
+            error!(
+                "Error while sending tx",
+                e
+            );
+        }
+    }
+
     info!("Sent batch update with txid {:#066x}", tx);
 
     // TODO this segment of code works around the race condition for submitting batches mostly
