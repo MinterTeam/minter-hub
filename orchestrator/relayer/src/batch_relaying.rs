@@ -12,6 +12,7 @@ use peggy_proto::peggy::query_client::QueryClient as PeggyQueryClient;
 use std::time::Duration;
 use tonic::transport::Channel;
 use web30::client::Web3;
+use std::thread::sleep;
 
 /// Check the last validator set on Ethereum, if it's lower than our latest validator
 /// set then we should package and submit the update as an Ethereum transaction
@@ -31,7 +32,6 @@ pub async fn relay_batches(
     }
     let mut latest_batches = latest_batches.unwrap();
     latest_batches.reverse();
-
 
     let mut i = 0u32;
 
@@ -83,6 +83,7 @@ pub async fn relay_batches(
                     );
 
                     i += 1;
+                    sleep(Duration::from_secs(5)) // todo
                 } else {
                     error!("Failed to find latest valset with {:?}", current_valset);
                 }
