@@ -78,7 +78,7 @@ pub async fn relay_batches(
                 )
                     .await;
                 if let Ok(current_valset) = current_valset {
-                    let current_nonce = nonce.add(i.clone().into());
+                    let current_nonce = nonce.clone().add(i.clone().into());
                     info!(
                         "Sending eth tx with nonce {}",
                         current_nonce
