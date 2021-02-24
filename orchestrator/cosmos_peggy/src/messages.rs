@@ -93,7 +93,7 @@ impl DeepSpaceMsg for PeggyMsg {
 /// This message sets both the Cosmos and Ethereum address being delegated for
 /// Orchestrator operations. This allows a validator to use their highly valuable
 /// valoper key to simply sign off on these addresses.
-#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash, PartialOrd)]
 pub struct SetOrchestratorAddressMsg {
     #[serde(rename = "eth_address")]
     // the Ethereum address being delegated to
@@ -104,7 +104,7 @@ pub struct SetOrchestratorAddressMsg {
     pub orchestrator: Address,
 }
 /// a transaction we send to submit a valset confirmation signature
-#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash, PartialOrd)]
 pub struct ValsetConfirmMsg {
     pub orchestrator: Address,
     pub eth_address: EthAddress,
@@ -114,7 +114,7 @@ pub struct ValsetConfirmMsg {
 }
 
 /// a transaction we send to move funds from Cosmos to Ethereum
-#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash, PartialOrd)]
 pub struct SendToEthMsg {
     pub sender: Address,
     pub eth_dest: EthAddress,
@@ -123,7 +123,7 @@ pub struct SendToEthMsg {
 }
 
 /// a transaction we send to move funds from Cosmos to Ethereum
-#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash, PartialOrd)]
 pub struct SendToMinterMsg {
     pub sender: Address,
     pub minter_dest: String,
@@ -135,18 +135,18 @@ pub struct SendToMinterMsg {
 /// internal batch creation rules. Said batch will be of arbitrary size also
 /// depending on those rules. What this message does determine is the coin
 /// type of the batch. Since all batches only move a single asset within them.
-#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash, PartialOrd)]
 pub struct RequestBatchMsg {
     pub orchestrator: Address,
     pub denom: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash, PartialOrd)]
 pub struct RequestMinterBatchMsg {
     pub requester: Address,
 }
 
-#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash, PartialOrd)]
 pub struct ConfirmBatchMsg {
     pub nonce: Uint256,
     pub orchestrator: Address,
@@ -157,7 +157,7 @@ pub struct ConfirmBatchMsg {
     pub eth_signature: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash, PartialOrd)]
 pub struct EthereumBridgeDepositClaim {
     #[serde(rename = "nonce")]
     pub event_nonce: Uint256,
@@ -184,7 +184,7 @@ impl EthereumBridgeDepositClaim {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash, PartialOrd)]
 pub struct EthereumBridgeWithdrawBatchClaim {
     pub batch_nonce: Uint256,
     pub event_nonce: Uint256,
@@ -207,7 +207,7 @@ impl EthereumBridgeWithdrawBatchClaim {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, Hash, PartialOrd)]
 #[serde(tag = "type", content = "value")]
 pub enum EthereumBridgeClaim {
     #[serde(rename = "peggy/DepositClaim")]
@@ -216,7 +216,7 @@ pub enum EthereumBridgeClaim {
     EthereumBridgeWithdrawBatchClaim(EthereumBridgeWithdrawBatchClaim),
 }
 
-#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash, PartialOrd)]
 pub struct CreateEthereumClaimsMsg {
     pub ethereum_chain_id: Uint256,
     pub bridge_contract_address: EthAddress,
@@ -225,7 +225,7 @@ pub struct CreateEthereumClaimsMsg {
     pub withdraws: Vec<EthereumBridgeClaim>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash, PartialOrd)]
 pub struct WithdrawClaimMsg {
     pub event_nonce: Uint256,
     pub batch_nonce: Uint256,
@@ -252,7 +252,7 @@ impl WithdrawClaimMsg {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash, PartialOrd)]
 pub struct DepositClaimMsg {
     pub event_nonce: Uint256,
     pub token_contract: EthAddress,
@@ -279,7 +279,7 @@ impl DepositClaimMsg {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash, PartialOrd)]
 pub struct SendToMinterClaimMsg {
     pub event_nonce: Uint256,
     pub token_contract: EthAddress,
