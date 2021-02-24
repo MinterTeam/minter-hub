@@ -7,8 +7,6 @@ use std::time::Duration;
 use web30::client::Web3;
 use web30::types::SendTxOption;
 use num256::Uint256;
-use std::ops::Add;
-use web30::jsonrpc::error::Web3Error;
 
 /// this function generates an appropriate Ethereum transaction
 /// to submit the provided transaction batch and validator set update.
