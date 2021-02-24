@@ -29,8 +29,8 @@ pub async fn relay_batches(
     if latest_batches.is_err() {
         return;
     }
-    let latest_batches = latest_batches.unwrap();
-   // latest_batches.reverse();
+    let mut latest_batches = latest_batches.unwrap();
+    latest_batches.reverse();
 
 
     let mut i = 0u32;
