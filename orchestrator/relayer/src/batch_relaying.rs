@@ -12,6 +12,7 @@ use peggy_proto::peggy::query_client::QueryClient as PeggyQueryClient;
 use std::time::Duration;
 use tonic::transport::Channel;
 use web30::client::Web3;
+use std::ops::Add;
 use std::thread::sleep;
 
 /// Check the last validator set on Ethereum, if it's lower than our latest validator
@@ -33,6 +34,7 @@ pub async fn relay_batches(
     let mut latest_batches = latest_batches.unwrap();
     latest_batches.reverse();
 
+    let nonce = web3.eth_get_transaction_count(eth_address).await?;
     let mut i = 0u32;
 
     for batch in latest_batches {
@@ -71,6 +73,12 @@ pub async fn relay_batches(
                 )
                     .await;
                 if let Ok(current_valset) = current_valset {
+                    let current_nonce = nonce.add(i.clone().into());
+                    info!(
+                        "Sending eth tx with nonce {}",
+                        current_nonce
+                    );
+
                     let _res = send_eth_transaction_batch(
                         current_valset,
                         batch,
@@ -79,7 +87,7 @@ pub async fn relay_batches(
                         timeout,
                         peggy_contract_address,
                         ethereum_key,
-                        i.clone().into()
+                        current_nonce
                     ).await;
 
                     i += 1;

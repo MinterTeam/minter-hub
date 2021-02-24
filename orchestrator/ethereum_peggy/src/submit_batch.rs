@@ -20,7 +20,7 @@ pub async fn send_eth_transaction_batch(
     timeout: Duration,
     peggy_contract_address: EthAddress,
     our_eth_key: EthPrivateKey,
-    add_nonce: Uint256,
+    nonce: Uint256,
 ) -> Result<(), PeggyError> {
     let (current_addresses, current_powers) = current_valset.filter_empty_addresses();
     let current_valset_nonce = current_valset.nonce;
@@ -82,12 +82,6 @@ pub async fn send_eth_transaction_batch(
         );
         return Ok(());
     }
-
-    let nonce = web3.eth_get_transaction_count(eth_address).await?.add(add_nonce);
-    info!(
-        "Sending eth tx with nonce {}",
-        nonce
-    );
 
     let tx_result = web3
         .send_transaction(
