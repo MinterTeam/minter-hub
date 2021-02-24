@@ -9,7 +9,6 @@ use cosmos_peggy::query::get_transaction_batch_signatures;
 use ethereum_peggy::submit_batch::send_eth_transaction_batch;
 use ethereum_peggy::utils::get_tx_batch_nonce;
 use peggy_proto::peggy::query_client::QueryClient as PeggyQueryClient;
-use peggy_utils::types::{BatchConfirmResponse, TransactionBatch};
 use std::time::Duration;
 use tonic::transport::Channel;
 use web30::client::Web3;
@@ -33,21 +32,6 @@ pub async fn relay_batches(
     let latest_batches = latest_batches.unwrap();
    // latest_batches.reverse();
 
-    let erc20_contract = oldest_signed_batch.token_contract;
-    let latest_ethereum_batch = get_tx_batch_nonce(
-        peggy_contract_address,
-        erc20_contract,
-        our_ethereum_address,
-        web3,
-    )
-        .await;
-    if latest_ethereum_batch.is_err() {
-        error!(
-            "Failed to get latest Ethereum batch with {:?}",
-            latest_ethereum_batch
-        );
-    }
-    let latest_ethereum_batch = latest_ethereum_batch.unwrap();
 
     let mut i = 0u32;
 
@@ -57,6 +41,22 @@ pub async fn relay_batches(
         trace!("Got sigs {:?}", sigs);
         if let Ok(sigs) = sigs {
             // todo check that enough people have signed
+
+            let erc20_contract = batch.token_contract;
+            let latest_ethereum_batch = get_tx_batch_nonce(
+                peggy_contract_address,
+                erc20_contract,
+                our_ethereum_address,
+                web3,
+            )
+                .await;
+            if latest_ethereum_batch.is_err() {
+                error!(
+                    "Failed to get latest Ethereum batch with {:?}",
+                    latest_ethereum_batch
+                );
+            }
+            let latest_ethereum_batch = latest_ethereum_batch.unwrap();
 
             if batch.clone().nonce > latest_ethereum_batch {
                 info!(
