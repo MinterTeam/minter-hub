@@ -31,9 +31,7 @@ pub async fn relay_batches(
     if latest_batches.is_err() {
         return;
     }
-    let mut latest_batches = latest_batches.unwrap();
-    latest_batches.reverse();
-
+    let latest_batches = latest_batches.unwrap();
     let nonce = web3.eth_get_transaction_count(our_ethereum_address).await;
     if nonce.is_err() {
         return;
