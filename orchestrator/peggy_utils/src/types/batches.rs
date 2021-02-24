@@ -6,7 +6,7 @@ use std::cmp::Ordering;
 
 /// This represents an individual transaction being bridged over to Ethereum
 /// parallel is the OutgoingTransferTx in x/peggy/types/batch.go
-#[derive(Serialize, Deserialize, Debug, Default, Clone, Ord, PartialOrd, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, PartialOrd, PartialEq, Eq)]
 pub struct BatchTransaction {
     pub id: u64,
     pub sender: CosmosAddress,
