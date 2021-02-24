@@ -49,7 +49,7 @@ pub async fn relay_batches(
     }
     let latest_ethereum_batch = latest_ethereum_batch.unwrap();
 
-    let mut i = 0;
+    let mut i = 0u32;
 
     for batch in latest_batches {
         let sigs =
