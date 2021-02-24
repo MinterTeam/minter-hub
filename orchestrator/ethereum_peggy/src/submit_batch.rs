@@ -109,7 +109,8 @@ pub async fn send_eth_transaction_batch(
                 "Error while sending tx: {}",
                 e
             );
-            Ok(())
+            
+            return Ok(())
         }
     }
 
