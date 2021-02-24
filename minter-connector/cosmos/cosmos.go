@@ -205,10 +205,12 @@ func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, c
 	}
 
 	if result.DeliverTx.GetCode() != 0 || result.CheckTx.GetCode() != 0 {
-		println(result.DeliverTx.GetCode(), result.DeliverTx.GetLog(), result.DeliverTx.GetInfo())
+		println("Error on sending cosmos tx with code", result.CheckTx.GetCode())
 		time.Sleep(1 * time.Second)
 		SendCosmosTx(msgs, address, priv, cosmosConn)
 	}
+
+	println(result.DeliverTx.GetCode(), result.DeliverTx.GetLog(), result.DeliverTx.GetInfo())
 }
 
 func GetLastMinterNonce(address string, conn *grpc.ClientConn) uint64 {
