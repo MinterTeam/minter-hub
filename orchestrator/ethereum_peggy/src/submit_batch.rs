@@ -106,7 +106,7 @@ pub async fn send_eth_transaction_batch(
         }
         Err(e) => {
             error!(
-                "Error while sending tx",
+                "Error while sending tx: {}",
                 e
             );
         }
