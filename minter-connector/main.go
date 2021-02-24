@@ -357,7 +357,7 @@ func relayMinterEvents(minterClient *http_client.Client, minterWallet *wallet.Wa
 	if err != nil {
 		println("ERROR: ", err.Error())
 		time.Sleep(time.Second)
-		return latestBlock, lastEventNonce, lastBatchNonce, lastValsetNonce
+		return lastCheckedBlock, lastEventNonce, lastBatchNonce, lastValsetNonce
 	}
 
 	var deposits []cosmos.Deposit
