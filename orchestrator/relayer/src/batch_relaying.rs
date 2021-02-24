@@ -30,8 +30,8 @@ pub async fn relay_batches(
     if latest_batches.is_err() {
         return;
     }
-    let mut latest_batches = latest_batches.unwrap();
-    latest_batches.reverse();
+    let latest_batches = latest_batches.unwrap();
+   // latest_batches.reverse();
     let mut oldest_signed_batch: Option<TransactionBatch> = None;
     let mut oldest_signatures: Option<Vec<BatchConfirmResponse>> = None;
     for batch in latest_batches {

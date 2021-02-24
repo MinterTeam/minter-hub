@@ -36,15 +36,25 @@ pub async fn find_latest_valset(
         } else {
             current_block.clone() - BLOCKS_TO_SEARCH.into()
         };
-        let mut all_valset_events = web3
+        let all_valset_events_result = web3
             .check_for_events(
                 end_search.clone(),
                 Some(current_block.clone()),
                 vec![peggy_contract_address],
                 vec!["ValsetUpdatedEvent(uint256,address[],uint256[])"],
             )
-            .await
-            .unwrap();
+            .await;
+
+        let mut all_valset_events;
+        match all_valset_events_result {
+            Ok(events) => {
+                all_valset_events = events;
+            }
+            Err(e) => {
+                return Err(PeggyError::EthereumRestError(e))
+            }
+        }
+
         // by default the lowest found valset goes first, we want the highest.
         all_valset_events.reverse();
 
