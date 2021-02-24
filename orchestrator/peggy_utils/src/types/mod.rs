@@ -14,7 +14,7 @@ pub use ethereum_events::*;
 pub use signatures::*;
 pub use valsets::*;
 
-#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash, PartialOrd)]
 pub struct ERC20Token {
     pub amount: Uint256,
     #[serde(rename = "contract")]
@@ -30,7 +30,7 @@ impl ERC20Token {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash)]
+#[derive(Serialize, Deserialize, Debug, Default, Clone, Eq, PartialEq, Hash, PartialOrd)]
 pub struct ERC20Denominator {
     #[serde(deserialize_with = "parse_val")]
     pub token_contract_address: EthAddress,
