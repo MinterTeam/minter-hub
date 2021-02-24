@@ -219,6 +219,8 @@ pub async fn send_ethereum_claims(
         )))
     }
 
+    msgs.sort();
+
     let std_sign_msg = StdSignMsg {
         chain_id: tx_info.chain_id,
         account_number: tx_info.account_number,

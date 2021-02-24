@@ -4,10 +4,11 @@ use deep_space::canonical_json::{to_canonical_json, CanonicalJsonError};
 use deep_space::coin::Coin;
 use deep_space::msg::DeepSpaceMsg;
 use ethereum_peggy::utils::downcast_nonce;
+use std::cmp::Ordering;
 use num256::Uint256;
 use peggy_utils::types::{ERC20Token, SendToCosmosEvent, SendToMinterEvent, TransactionBatchExecutedEvent};
 /// Any arbitrary message
-#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, PartialOrd)]
 #[serde(tag = "type", content = "value")]
 pub enum PeggyMsg {
     #[serde(rename = "peggy/MsgSetOrchestratorAddress")]
@@ -42,6 +43,45 @@ pub enum PeggyMsg {
 
     #[serde(rename = "minter/MsgRequestBatch")]
     RequestMinterBatchMsg(RequestMinterBatchMsg),
+}
+
+impl Ord for PeggyMsg {
+    fn cmp(&self, other: &Self) -> Ordering {
+        let self_nonce;
+        let other_nonce;
+
+        match self {
+            PeggyMsg::DepositClaimMsg(msg) => {
+                self_nonce = msg.clone().event_nonce
+            }
+            PeggyMsg::SendToMinterClaimMsg(msg) => {
+                self_nonce = msg.clone().event_nonce
+            }
+            PeggyMsg::WithdrawClaimMsg(msg) => {
+                self_nonce = msg.clone().event_nonce
+            }
+            other => {
+                self_nonce = 99999999999u64.into()
+            }
+        }
+
+        match other {
+            PeggyMsg::DepositClaimMsg(msg) => {
+                other_nonce = msg.clone().event_nonce
+            }
+            PeggyMsg::SendToMinterClaimMsg(msg) => {
+                other_nonce = msg.clone().event_nonce
+            }
+            PeggyMsg::WithdrawClaimMsg(msg) => {
+                other_nonce = msg.clone().event_nonce
+            }
+            other => {
+                other_nonce = 99999999999u64.into()
+            }
+        }
+
+        self_nonce.cmp(&other_nonce)
+    }
 }
 
 impl DeepSpaceMsg for PeggyMsg {
