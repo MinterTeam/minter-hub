@@ -6,6 +6,8 @@ use peggy_utils::types::*;
 use std::time::Duration;
 use web30::client::Web3;
 use web30::types::SendTxOption;
+use num256::Uint256;
+use std::ops::Add;
 
 /// this function generates an appropriate Ethereum transaction
 /// to submit the provided transaction batch and validator set update.
@@ -17,6 +19,7 @@ pub async fn send_eth_transaction_batch(
     timeout: Duration,
     peggy_contract_address: EthAddress,
     our_eth_key: EthPrivateKey,
+    add_nonce: Uint256,
 ) -> Result<(), PeggyError> {
     let (current_addresses, current_powers) = current_valset.filter_empty_addresses();
     let current_valset_nonce = current_valset.nonce;
@@ -79,6 +82,8 @@ pub async fn send_eth_transaction_batch(
         return Ok(());
     }
 
+    let nonce = web3.eth_get_transaction_count(eth_address).await?.add(add_nonce);
+
     let tx = web3
         .send_transaction(
             peggy_contract_address,
@@ -86,7 +91,7 @@ pub async fn send_eth_transaction_batch(
             0u32.into(),
             eth_address,
             our_eth_key,
-            vec![SendTxOption::GasLimit(1_000_000u32.into())],
+            vec![SendTxOption::GasLimit(1_000_000u32.into()), SendTxOption::Nonce(nonce)],
         )
         .await?;
     info!("Sent batch update with txid {:#066x}", tx);
