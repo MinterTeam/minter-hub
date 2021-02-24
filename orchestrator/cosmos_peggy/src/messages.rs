@@ -60,7 +60,7 @@ impl Ord for PeggyMsg {
             PeggyMsg::WithdrawClaimMsg(msg) => {
                 self_nonce = msg.clone().event_nonce
             }
-            other => {
+            _ => {
                 self_nonce = 99999999999u64.into()
             }
         }
@@ -75,7 +75,7 @@ impl Ord for PeggyMsg {
             PeggyMsg::WithdrawClaimMsg(msg) => {
                 other_nonce = msg.clone().event_nonce
             }
-            other => {
+            _ => {
                 other_nonce = 99999999999u64.into()
             }
         }
