@@ -1,7 +1,7 @@
 package main
 
 import (
-	"context"
+	c "context"
 	"crypto/ecdsa"
 	"encoding/hex"
 	"github.com/MinterTeam/mhub/chain/x/minter/types"
@@ -12,10 +12,9 @@ import (
 	"github.com/MinterTeam/minter-go-sdk/v2/wallet"
 	"github.com/MinterTeam/minter-hub-connector/command"
 	"github.com/MinterTeam/minter-hub-connector/config"
+	"github.com/MinterTeam/minter-hub-connector/context"
 	"github.com/MinterTeam/minter-hub-connector/cosmos"
 	"github.com/MinterTeam/minter-hub-connector/minter"
-	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
-	crypto "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	ethCrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/tendermint/tendermint/libs/json"
@@ -43,14 +42,27 @@ func main() {
 		panic(err)
 	}
 
-	cosmosConn, err := grpc.DialContext(context.Background(), cfg.Cosmos.NodeGrpcUrl, grpc.WithInsecure(), grpc.WithConnectParams(grpc.ConnectParams{
+	cosmosConn, err := grpc.DialContext(c.Background(), cfg.Cosmos.NodeGrpcUrl, grpc.WithInsecure(), grpc.WithConnectParams(grpc.ConnectParams{
 		Backoff:           backoff.DefaultConfig,
 		MinConnectTimeout: time.Second * 5,
 	}))
 
 	println("Syncing with Minter")
-	lastCheckedMinterBlock, lastEventNonce, lastBatchNonce, lastValsetNonce := minter.GetLatestMinterBlockAndNonce(cosmosConn, cfg.Minter.StartBlock, cfg.Minter.StartEventNonce, cfg.Minter.StartBatchNonce, cfg.Minter.StartValsetNonce, cfg.Minter.MultisigAddr, cosmos.GetLastMinterNonce(orcAddress.String(), cosmosConn), minterClient)
-	println("Starting with block", lastCheckedMinterBlock, "event nonce", lastEventNonce, "batch nonce", lastBatchNonce, "valset nonce", lastValsetNonce)
+	ctx := context.Context{
+		LastCheckedMinterBlock: cfg.Minter.StartBlock,
+		LastEventNonce:         cfg.Minter.StartEventNonce,
+		LastBatchNonce:         cfg.Minter.StartBatchNonce,
+		LastValsetNonce:        cfg.Minter.StartValsetNonce,
+		MinterMultisigAddr:     cfg.Minter.MultisigAddr,
+		CosmosConn:             cosmosConn,
+		MinterClient:           minterClient,
+		OrcAddress:             orcAddress,
+		OrcPriv:                orcPriv,
+		MinterWallet:           minterWallet,
+	}
+
+	ctx = minter.GetLatestMinterBlockAndNonce(ctx, cosmos.GetLastMinterNonce(orcAddress.String(), cosmosConn))
+	println("Starting with block", ctx.LastCheckedMinterBlock, "event nonce", ctx.LastEventNonce, "batch nonce", ctx.LastBatchNonce, "valset nonce", ctx.LastValsetNonce)
 
 	if true { // todo: check if we have address
 		privateKey, err := ethCrypto.HexToECDSA(minterWallet.PrivateKey)
@@ -80,24 +92,23 @@ func main() {
 		}, orcAddress, orcPriv, cosmosConn)
 	}
 
+	// main loop
 	for {
-		relayBatches(minterClient, cosmosConn, orcAddress, orcPriv, minterWallet, lastBatchNonce)
+		relayBatches(ctx)
+		relayValsets(ctx)
+		ctx = relayMinterEvents(ctx)
 
-		relayValsets(minterClient, cosmosConn, orcAddress, orcPriv, minterWallet, lastValsetNonce)
-
-		lastCheckedMinterBlock, lastEventNonce, lastBatchNonce, lastValsetNonce = relayMinterEvents(minterClient, minterWallet, cosmosConn, orcAddress, orcPriv, lastCheckedMinterBlock, lastEventNonce, lastBatchNonce, lastValsetNonce)
-		println("lastCheckedMinterBlock", lastCheckedMinterBlock, "event nonce", lastEventNonce, "batch nonce", lastBatchNonce, "valset nonce", lastValsetNonce)
-
-		time.Sleep(5 * time.Second)
+		println("lastCheckedMinterBlock", ctx.LastCheckedMinterBlock, "event nonce", ctx.LastEventNonce, "batch nonce", ctx.LastBatchNonce, "valset nonce", ctx.LastValsetNonce)
+		time.Sleep(2 * time.Second)
 	}
 }
 
-func relayBatches(minterClient *http_client.Client, cosmosConn *grpc.ClientConn, orcAddress sdk.AccAddress, orcPriv *secp256k1.PrivKey, minterWallet *wallet.Wallet, lastBatchNonce uint64) {
-	cosmosClient := types.NewQueryClient(cosmosConn)
+func relayBatches(ctx context.Context) {
+	cosmosClient := types.NewQueryClient(ctx.CosmosConn)
 
 	{
-		response, err := cosmosClient.LastPendingBatchRequestByAddr(context.Background(), &types.QueryLastPendingBatchRequestByAddrRequest{
-			Address: orcAddress.String(),
+		response, err := cosmosClient.LastPendingBatchRequestByAddr(c.Background(), &types.QueryLastPendingBatchRequestByAddrRequest{
+			Address: ctx.OrcAddress.String(),
 		})
 		if err != nil {
 			println("ERROR: ", err.Error())
@@ -115,7 +126,7 @@ func relayBatches(minterClient *http_client.Client, cosmosConn *grpc.ClientConn,
 			tx, _ := transaction.NewBuilder(cfg.Minter.ChainID).NewTransaction(txData)
 			signedTx, _ := tx.SetNonce(response.Batch.MinterNonce).SetGasPrice(1).SetGasCoin(0).SetSignatureType(transaction.SignatureTypeMulti).Sign(
 				cfg.Minter.MultisigAddr,
-				minterWallet.PrivateKey,
+				ctx.MinterWallet.PrivateKey,
 			)
 
 			sigData, err := signedTx.SingleSignatureData()
@@ -125,16 +136,16 @@ func relayBatches(minterClient *http_client.Client, cosmosConn *grpc.ClientConn,
 
 			msg := &types.MsgConfirmBatch{
 				Nonce:        response.Batch.BatchNonce,
-				MinterSigner: minterWallet.Address,
-				Validator:    orcAddress.String(),
+				MinterSigner: ctx.MinterWallet.Address,
+				Validator:    ctx.OrcAddress.String(),
 				Signature:    sigData,
 			}
 
-			cosmos.SendCosmosTx([]sdk.Msg{msg}, orcAddress, orcPriv, cosmosConn)
+			cosmos.SendCosmosTx([]sdk.Msg{msg}, ctx.OrcAddress, ctx.OrcPriv, ctx.CosmosConn)
 		}
 	}
 
-	latestBatches, err := cosmosClient.OutgoingTxBatches(context.Background(), &types.QueryOutgoingTxBatchesRequest{})
+	latestBatches, err := cosmosClient.OutgoingTxBatches(c.Background(), &types.QueryOutgoingTxBatchesRequest{})
 	if err != nil {
 		println(err.Error())
 		return
@@ -144,7 +155,7 @@ func relayBatches(minterClient *http_client.Client, cosmosConn *grpc.ClientConn,
 	var oldestSignatures []*types.MsgConfirmBatch
 
 	for _, batch := range latestBatches.Batches {
-		sigs, err := cosmosClient.BatchConfirms(context.Background(), &types.QueryBatchConfirmsRequest{
+		sigs, err := cosmosClient.BatchConfirms(c.Background(), &types.QueryBatchConfirmsRequest{
 			Nonce: batch.BatchNonce,
 		})
 		if err != nil {
@@ -162,7 +173,7 @@ func relayBatches(minterClient *http_client.Client, cosmosConn *grpc.ClientConn,
 		return
 	}
 
-	if oldestSignedBatch.BatchNonce < lastBatchNonce {
+	if oldestSignedBatch.BatchNonce < ctx.LastBatchNonce {
 		return
 	}
 
@@ -193,7 +204,7 @@ func relayBatches(minterClient *http_client.Client, cosmosConn *grpc.ClientConn,
 	}
 
 	println(encodedTx)
-	response, err := minterClient.SendTransaction(encodedTx)
+	response, err := ctx.MinterClient.SendTransaction(encodedTx)
 	if err != nil {
 		code, body, err := http_client.ErrorBody(err)
 		println(code, body.Error.Message, err)
@@ -202,12 +213,12 @@ func relayBatches(minterClient *http_client.Client, cosmosConn *grpc.ClientConn,
 	}
 }
 
-func relayValsets(minterClient *http_client.Client, cosmosConn *grpc.ClientConn, orcAddress sdk.AccAddress, orcPriv *secp256k1.PrivKey, minterWallet *wallet.Wallet, lastValsetNonce uint64) {
-	cosmosClient := types.NewQueryClient(cosmosConn)
+func relayValsets(ctx context.Context) {
+	cosmosClient := types.NewQueryClient(ctx.CosmosConn)
 
 	{
-		response, err := cosmosClient.LastPendingValsetRequestByAddr(context.Background(), &types.QueryLastPendingValsetRequestByAddrRequest{
-			Address: orcAddress.String(),
+		response, err := cosmosClient.LastPendingValsetRequestByAddr(c.Background(), &types.QueryLastPendingValsetRequestByAddrRequest{
+			Address: ctx.OrcAddress.String(),
 		})
 		if err != nil {
 			println("ERROR: ", err.Error())
@@ -240,7 +251,7 @@ func relayValsets(minterClient *http_client.Client, cosmosConn *grpc.ClientConn,
 			tx.SetPayload([]byte(strconv.Itoa(int(response.Valset.Nonce))))
 			signedTx, _ := tx.SetNonce(response.Valset.MinterNonce).SetGasPrice(1).SetGasCoin(0).SetSignatureType(transaction.SignatureTypeMulti).Sign(
 				cfg.Minter.MultisigAddr,
-				minterWallet.PrivateKey,
+				ctx.MinterWallet.PrivateKey,
 			)
 
 			sigData, err := signedTx.SingleSignatureData()
@@ -250,16 +261,16 @@ func relayValsets(minterClient *http_client.Client, cosmosConn *grpc.ClientConn,
 
 			msg := &types.MsgValsetConfirm{
 				Nonce:         response.Valset.Nonce,
-				Validator:     orcAddress.String(),
-				MinterAddress: minterWallet.Address,
+				Validator:     ctx.OrcAddress.String(),
+				MinterAddress: ctx.MinterWallet.Address,
 				Signature:     sigData,
 			}
 
-			cosmos.SendCosmosTx([]sdk.Msg{msg}, orcAddress, orcPriv, cosmosConn)
+			cosmos.SendCosmosTx([]sdk.Msg{msg}, ctx.OrcAddress, ctx.OrcPriv, ctx.CosmosConn)
 		}
 	}
 
-	latestValsets, err := cosmosClient.LastValsetRequests(context.Background(), &types.QueryLastValsetRequestsRequest{})
+	latestValsets, err := cosmosClient.LastValsetRequests(c.Background(), &types.QueryLastValsetRequestsRequest{})
 	if err != nil {
 		println(err.Error())
 		return
@@ -269,7 +280,7 @@ func relayValsets(minterClient *http_client.Client, cosmosConn *grpc.ClientConn,
 	var oldestSignatures []*types.MsgValsetConfirm
 
 	for _, valset := range latestValsets.Valsets {
-		sigs, err := cosmosClient.ValsetConfirmsByNonce(context.Background(), &types.QueryValsetConfirmsByNonceRequest{
+		sigs, err := cosmosClient.ValsetConfirmsByNonce(c.Background(), &types.QueryValsetConfirmsByNonceRequest{
 			Nonce: valset.Nonce,
 		})
 		if err != nil {
@@ -287,7 +298,7 @@ func relayValsets(minterClient *http_client.Client, cosmosConn *grpc.ClientConn,
 		return
 	}
 
-	if oldestSignedValset.Nonce <= lastValsetNonce {
+	if oldestSignedValset.Nonce <= ctx.LastValsetNonce {
 		return
 	}
 
@@ -333,7 +344,7 @@ func relayValsets(minterClient *http_client.Client, cosmosConn *grpc.ClientConn,
 	}
 
 	println(encodedTx)
-	response, err := minterClient.SendTransaction(encodedTx)
+	response, err := ctx.MinterClient.SendTransaction(encodedTx)
 	if err != nil {
 		code, body, err2 := http_client.ErrorBody(err)
 		if err2 != nil {
@@ -346,18 +357,18 @@ func relayValsets(minterClient *http_client.Client, cosmosConn *grpc.ClientConn,
 	}
 }
 
-func relayMinterEvents(minterClient *http_client.Client, minterWallet *wallet.Wallet, cosmosConn *grpc.ClientConn, orcAddress sdk.AccAddress, orcPriv crypto.PrivKey, lastCheckedBlock, lastEventNonce, lastBatchNonce, lastValsetNonce uint64) (lastBlock, eventNonce, batchNonce, valsetNonce uint64) {
-	latestBlock := minter.GetLatestMinterBlock(minterClient)
-	if latestBlock-lastCheckedBlock > 100 {
-		latestBlock = lastCheckedBlock + 100
+func relayMinterEvents(ctx context.Context) context.Context {
+	latestBlock := minter.GetLatestMinterBlock(ctx.MinterClient)
+	if latestBlock-ctx.LastCheckedMinterBlock > 100 {
+		latestBlock = ctx.LastCheckedMinterBlock + 100
 	}
 
-	oracleClient := oracleTypes.NewQueryClient(cosmosConn)
-	coinList, err := oracleClient.Coins(context.Background(), &oracleTypes.QueryCoinsRequest{})
+	oracleClient := oracleTypes.NewQueryClient(ctx.CosmosConn)
+	coinList, err := oracleClient.Coins(c.Background(), &oracleTypes.QueryCoinsRequest{})
 	if err != nil {
 		println("ERROR: ", err.Error())
 		time.Sleep(time.Second)
-		return lastCheckedBlock, lastEventNonce, lastBatchNonce, lastValsetNonce
+		return ctx
 	}
 
 	var deposits []cosmos.Deposit
@@ -365,15 +376,15 @@ func relayMinterEvents(minterClient *http_client.Client, minterWallet *wallet.Wa
 	var valsets []cosmos.Valset
 
 	const blocksPerBatch = 100
-	for i := uint64(0); i <= uint64(math.Ceil(float64(latestBlock-lastCheckedBlock)/blocksPerBatch)); i++ {
-		from := lastCheckedBlock + 1 + i*blocksPerBatch
-		to := lastCheckedBlock + (i+1)*blocksPerBatch
+	for i := uint64(0); i <= uint64(math.Ceil(float64(latestBlock-ctx.LastCheckedMinterBlock)/blocksPerBatch)); i++ {
+		from := ctx.LastCheckedMinterBlock + 1 + i*blocksPerBatch
+		to := ctx.LastCheckedMinterBlock + (i+1)*blocksPerBatch
 
 		if to > latestBlock {
 			to = latestBlock
 		}
 
-		blocks, err := minterClient.Blocks(from, to, false)
+		blocks, err := ctx.MinterClient.Blocks(from, to, false)
 		if err != nil {
 			println("ERROR: ", err.Error())
 			time.Sleep(time.Second)
@@ -382,6 +393,8 @@ func relayMinterEvents(minterClient *http_client.Client, minterWallet *wallet.Wa
 		}
 
 		for _, block := range blocks.Blocks {
+			ctx.LastCheckedMinterBlock = block.Height
+
 			println("Checking block at height", block.Height)
 			for _, tx := range block.Transactions {
 				if tx.Type == uint64(transaction.TypeSend) {
@@ -401,8 +414,8 @@ func relayMinterEvents(minterClient *http_client.Client, minterWallet *wallet.Wa
 						continue
 					}
 
-					for _, c := range coinList.GetCoins() {
-						if sendData.Coin.ID == c.MinterId {
+					for _, hubCoin := range coinList.GetCoins() {
+						if sendData.Coin.ID == hubCoin.MinterId {
 							println("Found new deposit from", tx.From, "to", string(tx.Payload), "amount", sendData.Value, "coin", sendData.Coin.ID)
 							deposits = append(deposits, cosmos.Deposit{
 								Sender:     tx.From,
@@ -410,12 +423,12 @@ func relayMinterEvents(minterClient *http_client.Client, minterWallet *wallet.Wa
 								Recipient:  cmd.Recipient,
 								Amount:     sendData.Value,
 								Fee:        cmd.Fee,
-								EventNonce: lastEventNonce,
+								EventNonce: ctx.LastEventNonce,
 								CoinID:     sendData.Coin.ID,
 								TxHash:     tx.Hash,
 							})
 
-							lastEventNonce++
+							ctx.LastEventNonce++
 						}
 					}
 				}
@@ -423,13 +436,13 @@ func relayMinterEvents(minterClient *http_client.Client, minterWallet *wallet.Wa
 				if tx.Type == uint64(transaction.TypeMultisend) && tx.From == cfg.Minter.MultisigAddr {
 					println("Found withdrawal")
 					batches = append(batches, cosmos.Batch{
-						BatchNonce: lastBatchNonce,
-						EventNonce: lastEventNonce,
+						BatchNonce: ctx.LastBatchNonce,
+						EventNonce: ctx.LastEventNonce,
 						TxHash:     tx.Hash,
 					})
 
-					lastEventNonce++
-					lastBatchNonce++
+					ctx.LastEventNonce++
+					ctx.LastBatchNonce++
 				}
 
 				if tx.Type == uint64(transaction.TypeEditMultisig) && tx.From == cfg.Minter.MultisigAddr {
@@ -441,11 +454,11 @@ func relayMinterEvents(minterClient *http_client.Client, minterWallet *wallet.Wa
 					} else {
 						valsets = append(valsets, cosmos.Valset{
 							ValsetNonce: uint64(nonce),
-							EventNonce:  lastEventNonce,
+							EventNonce:  ctx.LastEventNonce,
 						})
 
-						lastEventNonce++
-						lastValsetNonce = uint64(nonce)
+						ctx.LastEventNonce++
+						ctx.LastValsetNonce = uint64(nonce)
 					}
 				}
 			}
@@ -453,8 +466,8 @@ func relayMinterEvents(minterClient *http_client.Client, minterWallet *wallet.Wa
 	}
 
 	if len(deposits) > 0 || len(batches) > 0 || len(valsets) > 0 {
-		cosmos.SendCosmosTx(cosmos.CreateClaims(cosmosConn, orcAddress, deposits, batches, valsets), orcAddress, orcPriv, cosmosConn)
+		cosmos.SendCosmosTx(cosmos.CreateClaims(ctx.CosmosConn, ctx.OrcAddress, deposits, batches, valsets), ctx.OrcAddress, ctx.OrcPriv, ctx.CosmosConn)
 	}
 
-	return latestBlock, lastEventNonce, lastBatchNonce, lastValsetNonce
+	return ctx
 }

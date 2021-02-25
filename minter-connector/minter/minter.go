@@ -1,7 +1,7 @@
 package minter
 
 import (
-	"context"
+	c "context"
 	"encoding/json"
 	"fmt"
 	oracleTypes "github.com/MinterTeam/mhub/chain/x/oracle/types"
@@ -9,8 +9,8 @@ import (
 	"github.com/MinterTeam/minter-go-sdk/v2/api/http_client/models"
 	"github.com/MinterTeam/minter-go-sdk/v2/transaction"
 	"github.com/MinterTeam/minter-hub-connector/command"
+	"github.com/MinterTeam/minter-hub-connector/context"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"google.golang.org/grpc"
 	"math"
 	"sort"
 	"strconv"
@@ -28,31 +28,27 @@ func GetLatestMinterBlock(client *http_client.Client) uint64 {
 	return status.LatestBlockHeight
 }
 
-func GetLatestMinterBlockAndNonce(cosmosConn *grpc.ClientConn, startMinterBlock uint64, startEventNonce uint64, startBatchNonce uint64, startValsetNonce uint64, multisigAddr string, currentNonce uint64, client *http_client.Client) (block, eventNonce, batchNonce, valsetNonce uint64) {
+func GetLatestMinterBlockAndNonce(ctx context.Context, currentNonce uint64) context.Context {
 	println("Current nonce @ hub", currentNonce)
 
-	latestBlock := GetLatestMinterBlock(client)
+	latestBlock := GetLatestMinterBlock(ctx.MinterClient)
 
-	eventNonce = startEventNonce
-	batchNonce = startBatchNonce
-	valsetNonce = startValsetNonce
-
-	oracleClient := oracleTypes.NewQueryClient(cosmosConn)
-	coinList, err := oracleClient.Coins(context.Background(), &oracleTypes.QueryCoinsRequest{})
+	oracleClient := oracleTypes.NewQueryClient(ctx.CosmosConn)
+	coinList, err := oracleClient.Coins(c.Background(), &oracleTypes.QueryCoinsRequest{})
 	if err != nil {
 		panic(err)
 	}
 
 	const blocksPerBatch = 100
-	for i := uint64(0); i <= uint64(math.Ceil(float64(latestBlock-startMinterBlock)/blocksPerBatch)); i++ {
-		from := startMinterBlock + 1 + i*blocksPerBatch
-		to := startMinterBlock + (i+1)*blocksPerBatch
+	for i := uint64(0); i <= uint64(math.Ceil(float64(latestBlock-ctx.LastCheckedMinterBlock)/blocksPerBatch)); i++ {
+		from := ctx.LastCheckedMinterBlock + 1 + i*blocksPerBatch
+		to := ctx.LastCheckedMinterBlock + (i+1)*blocksPerBatch
 
 		if to > latestBlock {
 			to = latestBlock
 		}
 
-		blocks, err := client.Blocks(from, to, false)
+		blocks, err := ctx.MinterClient.Blocks(from, to, false)
 		if err != nil {
 			println("ERROR: ", err.Error())
 			time.Sleep(time.Second)
@@ -74,46 +70,51 @@ func GetLatestMinterBlockAndNonce(cosmosConn *grpc.ClientConn, startMinterBlock 
 					json.Unmarshal(tx.Payload, &cmd)
 
 					value, _ := sdk.NewIntFromString(sendData.Value)
-					if sendData.To == multisigAddr && cmd.Validate(value) == nil {
+					if sendData.To == ctx.MinterMultisigAddr && cmd.Validate(value) == nil {
 						for _, c := range coinList.GetCoins() {
 							if sendData.Coin.ID == c.MinterId {
-								if currentNonce < eventNonce {
-									return block.Height - 1, eventNonce, batchNonce, valsetNonce
+								if currentNonce < ctx.LastEventNonce {
+									ctx.LastCheckedMinterBlock = block.Height - 1
+									return ctx
 								}
 
-								eventNonce++
+								ctx.LastEventNonce++
 							}
 						}
 					}
 				}
 
-				if tx.Type == uint64(transaction.TypeMultisend) && tx.From == multisigAddr {
-					if currentNonce < eventNonce {
-						return block.Height - 1, eventNonce, batchNonce, valsetNonce
+				if tx.Type == uint64(transaction.TypeMultisend) && tx.From == ctx.MinterMultisigAddr {
+					if currentNonce < ctx.LastEventNonce {
+						ctx.LastCheckedMinterBlock = block.Height - 1
+						return ctx
 					}
 
-					eventNonce++
-					batchNonce++
+					ctx.LastEventNonce++
+					ctx.LastBatchNonce++
 				}
 
-				if tx.Type == uint64(transaction.TypeEditMultisig) && tx.From == multisigAddr {
+				if tx.Type == uint64(transaction.TypeEditMultisig) && tx.From == ctx.MinterMultisigAddr {
 					nonce, err := strconv.Atoi(string(tx.Payload))
 					if err != nil {
 						println("ERROR:", err.Error())
 					} else {
-						if currentNonce < eventNonce {
-							return block.Height - 1, eventNonce, batchNonce, valsetNonce
+						if currentNonce < ctx.LastEventNonce {
+							ctx.LastCheckedMinterBlock = block.Height - 1
+							return ctx
 						}
 
-						valsetNonce = uint64(nonce)
-						eventNonce++
+						ctx.LastValsetNonce = uint64(nonce)
+						ctx.LastEventNonce++
 					}
 				}
 			}
+
+			ctx.LastCheckedMinterBlock = block.Height
 		}
 	}
 
 	println()
 
-	return latestBlock, eventNonce, batchNonce, valsetNonce
+	return ctx
 }
