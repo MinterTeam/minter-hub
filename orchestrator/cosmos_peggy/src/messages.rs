@@ -45,42 +45,20 @@ pub enum PeggyMsg {
     RequestMinterBatchMsg(RequestMinterBatchMsg),
 }
 
+impl PeggyMsg {
+    pub fn event_nonce(&self) -> Uint256 {
+        match self {
+            PeggyMsg::DepositClaimMsg(msg) => msg.clone().event_nonce,
+            PeggyMsg::SendToMinterClaimMsg(msg) => msg.clone().event_nonce,
+            PeggyMsg::WithdrawClaimMsg(msg) => msg.clone().event_nonce,
+            _ => 99999999999u64.into()
+        }
+    }
+}
+
 impl Ord for PeggyMsg {
     fn cmp(&self, other: &Self) -> Ordering {
-        let self_nonce;
-        let other_nonce;
-
-        match self {
-            PeggyMsg::DepositClaimMsg(msg) => {
-                self_nonce = msg.clone().event_nonce
-            }
-            PeggyMsg::SendToMinterClaimMsg(msg) => {
-                self_nonce = msg.clone().event_nonce
-            }
-            PeggyMsg::WithdrawClaimMsg(msg) => {
-                self_nonce = msg.clone().event_nonce
-            }
-            _ => {
-                self_nonce = 99999999999u64.into()
-            }
-        }
-
-        match other {
-            PeggyMsg::DepositClaimMsg(msg) => {
-                other_nonce = msg.clone().event_nonce
-            }
-            PeggyMsg::SendToMinterClaimMsg(msg) => {
-                other_nonce = msg.clone().event_nonce
-            }
-            PeggyMsg::WithdrawClaimMsg(msg) => {
-                other_nonce = msg.clone().event_nonce
-            }
-            _ => {
-                other_nonce = 99999999999u64.into()
-            }
-        }
-
-        self_nonce.cmp(&other_nonce)
+        self.event_nonce().cmp(&other.event_nonce())
     }
 }
 
