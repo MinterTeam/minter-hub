@@ -13,10 +13,8 @@ use deep_space::{coin::Coin, utils::bytes_to_hex_str};
 use ethereum_peggy::message_signatures::{encode_tx_batch_confirm, encode_valset_confirm};
 use peggy_utils::types::*;
 use ethereum_peggy::utils::downcast_nonce;
-use std::collections::HashMap;
 use peggy_proto::oracle::query_client::QueryClient as OracleQueryClient;
 use tonic::transport::Channel;
-use crate::query::get_coins;
 
 /// Send a transaction updating the eth address for the sending
 /// Cosmos address. The sending Cosmos address should be a validator
@@ -181,13 +179,7 @@ pub async fn send_ethereum_claims(
     let tx_info = maybe_get_optional_tx_info(our_address, None, None, None, contact).await?;
 
     let mut msgs = Vec::new();
-    for transfer in transfers {
-        let mut coins = HashMap::new();
-        let hub_coins = get_coins(oracle_grpc_client).await.unwrap();
-        for coin in hub_coins {
-            coins.insert(coin.eth_addr, coin.denom);
-        }
-
+    for transfer in transfers.clone() {
         msgs.push(PeggyMsg::SendToMinterClaimMsg(SendToMinterClaimMsg {
             event_nonce: downcast_nonce(transfer.event_nonce)
                 .expect("Event nonce overflow! Bridge Halt!")
@@ -198,10 +190,6 @@ pub async fn send_ethereum_claims(
             minter_receiver: transfer.destination,
             orchestrator: our_address,
             tx_hash: transfer.tx_hash,
-        }));
-
-        msgs.push(PeggyMsg::RequestMinterBatchMsg(RequestMinterBatchMsg {
-            requester: our_address
         }))
     }
 
@@ -209,7 +197,7 @@ pub async fn send_ethereum_claims(
         msgs.push(PeggyMsg::DepositClaimMsg(DepositClaimMsg::from_event(
             deposit,
             our_address,
-        )));
+        )))
     }
 
     for withdraw in withdraws {
@@ -219,7 +207,13 @@ pub async fn send_ethereum_claims(
         )))
     }
 
-    msgs.sort_unstable();
+    if !transfers.is_empty() {
+        msgs.push(PeggyMsg::RequestMinterBatchMsg(RequestMinterBatchMsg {
+            requester: our_address
+        }))
+    }
+
+    msgs.sort();
 
     let std_sign_msg = StdSignMsg {
         chain_id: tx_info.chain_id,

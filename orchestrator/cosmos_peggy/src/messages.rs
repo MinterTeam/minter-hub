@@ -8,7 +8,7 @@ use std::cmp::Ordering;
 use num256::Uint256;
 use peggy_utils::types::{ERC20Token, SendToCosmosEvent, SendToMinterEvent, TransactionBatchExecutedEvent};
 /// Any arbitrary message
-#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialOrd)]
+#[derive(Serialize, Deserialize, Debug, Clone, Eq)]
 #[serde(tag = "type", content = "value")]
 pub enum PeggyMsg {
     #[serde(rename = "peggy/MsgSetOrchestratorAddress")]
@@ -59,6 +59,12 @@ impl PeggyMsg {
 impl Ord for PeggyMsg {
     fn cmp(&self, other: &Self) -> Ordering {
         self.event_nonce().cmp(&other.event_nonce())
+    }
+}
+
+impl PartialOrd for PeggyMsg {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.event_nonce().cmp(&other.event_nonce()))
     }
 }
 
