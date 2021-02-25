@@ -225,7 +225,7 @@ func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, c
 	}
 
 	if result.DeliverTx.GetCode() != 0 || result.CheckTx.GetCode() != 0 {
-		println("Error on sending cosmos tx with code", result.CheckTx.GetCode())
+		println("Error on sending cosmos tx with code", result.CheckTx.GetCode(), result.DeliverTx.GetLog())
 		time.Sleep(1 * time.Second)
 		SendCosmosTx(msgs, address, priv, cosmosConn)
 	}
