@@ -382,6 +382,7 @@ func relayMinterEvents(minterClient *http_client.Client, minterWallet *wallet.Wa
 		}
 
 		for _, block := range blocks.Blocks {
+			println("Checking block at height", block.Height)
 			for _, tx := range block.Transactions {
 				if tx.Type == uint64(transaction.TypeSend) {
 					data, _ := tx.Data.UnmarshalNew()
