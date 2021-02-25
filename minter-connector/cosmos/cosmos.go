@@ -18,6 +18,7 @@ import (
 	"github.com/cosmos/go-bip39"
 	tmClient "github.com/tendermint/tendermint/rpc/client/http"
 	"google.golang.org/grpc"
+	"sort"
 	"strings"
 	"time"
 )
@@ -118,7 +119,26 @@ func CreateClaims(cosmosConn *grpc.ClientConn, orcAddress sdk.AccAddress, deposi
 		})
 	}
 
+	sort.Slice(msgs, func(i, j int) bool {
+		return getEventNonceFromMsg(msgs[i]) < getEventNonceFromMsg(msgs[j])
+	})
+
 	return msgs
+}
+
+func getEventNonceFromMsg(msg sdk.Msg) uint64 {
+	switch m := msg.(type) {
+	case *mhub.MsgValsetClaim:
+		return m.EventNonce
+	case *mhub.MsgDepositClaim:
+		return m.EventNonce
+	case *mhub.MsgSendToEthClaim:
+		return m.EventNonce
+	case *mhub.MsgWithdrawClaim:
+		return m.EventNonce
+	}
+
+	return 999999999
 }
 
 func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, cosmosConn *grpc.ClientConn) {
