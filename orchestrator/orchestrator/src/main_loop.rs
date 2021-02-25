@@ -14,7 +14,6 @@ use deep_space::{coin::Coin, private_key::PrivateKey as CosmosPrivateKey};
 use ethereum_peggy::utils::get_peggy_id;
 use futures::future::join3;
 use peggy_proto::peggy::query_client::QueryClient as PeggyQueryClient;
-use peggy_proto::oracle::query_client::QueryClient as OracleQueryClient;
 use relayer::main_loop::relayer_main_loop;
 use std::time::Duration;
 use std::time::Instant;
@@ -38,7 +37,6 @@ pub async fn orchestrator_main_loop(
     web3: Web3,
     contact: Contact,
     grpc_client: PeggyQueryClient<Channel>,
-    oracle_grpc_client: OracleQueryClient<Channel>,
     peggy_contract_address: EthAddress,
     pay_fees_in: String,
 ) {
@@ -52,7 +50,6 @@ pub async fn orchestrator_main_loop(
         web3.clone(),
         contact.clone(),
         grpc_client.clone(),
-        oracle_grpc_client.clone(),
         peggy_contract_address,
         fee.clone(),
     );
@@ -82,7 +79,6 @@ pub async fn eth_oracle_main_loop(
     web3: Web3,
     contact: Contact,
     grpc_client: PeggyQueryClient<Channel>,
-    oracle_grpc_client: OracleQueryClient<Channel>,
     peggy_contract_address: EthAddress,
     fee: Coin,
 ) {
@@ -97,7 +93,6 @@ pub async fn eth_oracle_main_loop(
     .await;
     info!("Oracle resync complete, Oracle now operational");
     let mut grpc_client = grpc_client;
-    let mut oracle_grpc_client = oracle_grpc_client;
 
     loop {
         let loop_start = Instant::now();
@@ -119,7 +114,6 @@ pub async fn eth_oracle_main_loop(
             &web3,
             &contact,
             &mut grpc_client,
-            &mut oracle_grpc_client,
             peggy_contract_address,
             cosmos_key,
             fee.clone(),

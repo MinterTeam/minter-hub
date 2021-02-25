@@ -9,10 +9,10 @@ use cosmos_peggy::query::get_transaction_batch_signatures;
 use ethereum_peggy::submit_batch::send_eth_transaction_batch;
 use ethereum_peggy::utils::get_tx_batch_nonce;
 use peggy_proto::peggy::query_client::QueryClient as PeggyQueryClient;
+use std::ops::Add;
 use std::time::Duration;
 use tonic::transport::Channel;
 use web30::client::Web3;
-use std::ops::Add;
 
 /// Check the last validator set on Ethereum, if it's lower than our latest validator
 /// set then we should package and submit the update as an Ethereum transaction
@@ -55,7 +55,7 @@ pub async fn relay_batches(
                 our_ethereum_address,
                 web3,
             )
-                .await;
+            .await;
             if latest_ethereum_batch.is_err() {
                 error!(
                     "Failed to get latest Ethereum batch with {:?}",
@@ -75,13 +75,10 @@ pub async fn relay_batches(
                     peggy_contract_address,
                     web3,
                 )
-                    .await;
+                .await;
                 if let Ok(current_valset) = current_valset {
                     let current_nonce = nonce.clone().add(i.clone().into());
-                    info!(
-                        "Sending eth tx with nonce {}",
-                        current_nonce
-                    );
+                    info!("Sending eth tx with nonce {}", current_nonce);
 
                     let _res = send_eth_transaction_batch(
                         current_valset,
@@ -91,8 +88,9 @@ pub async fn relay_batches(
                         timeout,
                         peggy_contract_address,
                         ethereum_key,
-                        current_nonce
-                    ).await;
+                        current_nonce,
+                    )
+                    .await;
 
                     i += 1;
                 } else {

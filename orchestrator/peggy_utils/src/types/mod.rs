@@ -8,8 +8,8 @@ mod signatures;
 mod valsets;
 use crate::error::PeggyError;
 
-pub use coins::*;
 pub use batches::*;
+pub use coins::*;
 pub use ethereum_events::*;
 pub use signatures::*;
 pub use valsets::*;

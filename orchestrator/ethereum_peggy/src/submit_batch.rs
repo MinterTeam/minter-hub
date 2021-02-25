@@ -1,12 +1,12 @@
 use crate::utils::get_tx_batch_nonce;
 use clarity::Address as EthAddress;
 use clarity::PrivateKey as EthPrivateKey;
+use num256::Uint256;
 use peggy_utils::error::PeggyError;
 use peggy_utils::types::*;
 use std::time::Duration;
 use web30::client::Web3;
 use web30::types::SendTxOption;
-use num256::Uint256;
 
 /// this function generates an appropriate Ethereum transaction
 /// to submit the provided transaction batch and validator set update.
@@ -88,21 +88,19 @@ pub async fn send_eth_transaction_batch(
             0u32.into(),
             eth_address,
             our_eth_key,
-            vec![SendTxOption::GasLimit(1_000_000u32.into()), SendTxOption::Nonce(nonce)],
+            vec![
+                SendTxOption::GasLimit(1_000_000u32.into()),
+                SendTxOption::Nonce(nonce),
+            ],
         )
         .await;
     let tx;
     match tx_result {
-        Ok(t) => {
-            tx = t
-        }
+        Ok(t) => tx = t,
         Err(e) => {
-            error!(
-                "Error while sending tx: {}",
-                e
-            );
+            error!("Error while sending tx: {}", e);
 
-            return Ok(())
+            return Ok(());
         }
     }
 

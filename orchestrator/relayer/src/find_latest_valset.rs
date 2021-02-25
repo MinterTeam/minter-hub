@@ -50,9 +50,7 @@ pub async fn find_latest_valset(
             Ok(events) => {
                 all_valset_events = events;
             }
-            Err(e) => {
-                return Err(PeggyError::EthereumRestError(e))
-            }
+            Err(e) => return Err(PeggyError::EthereumRestError(e)),
         }
 
         // by default the lowest found valset goes first, we want the highest.

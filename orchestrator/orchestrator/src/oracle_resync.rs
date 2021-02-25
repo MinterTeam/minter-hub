@@ -5,10 +5,10 @@ use cosmos_peggy::query::get_last_event_nonce;
 use deep_space::address::Address as CosmosAddress;
 use peggy_proto::peggy::query_client::QueryClient as PeggyQueryClient;
 use peggy_utils::types::{SendToCosmosEvent, SendToMinterEvent, TransactionBatchExecutedEvent};
+use std::ops::Sub;
 use tokio::time::delay_for;
 use tonic::transport::Channel;
 use web30::client::Web3;
-use std::ops::{Sub};
 
 const RETRY_TIME: Duration = Duration::from_secs(5);
 
@@ -24,7 +24,7 @@ pub async fn get_last_checked_block(
 ) -> Uint256 {
     let mut grpc_client = grpc_client;
     const BLOCKS_TO_SEARCH: u128 = 50_000u128;
-    
+
     let latest_block = (get_block_number_with_retry(web3).await).sub(Uint256::from(5u64));
     let mut last_event_nonce: Uint256 =
         get_last_event_nonce_with_retry(&mut grpc_client, our_cosmos_address)
@@ -78,7 +78,10 @@ pub async fn get_last_checked_block(
                 vec!["SendToMinterEvent(address,address,bytes32,uint256,uint256)"],
             )
             .await;
-        if all_batch_events.is_err() || all_send_to_cosmos_events.is_err() || all_send_to_minter_events.is_err() {
+        if all_batch_events.is_err()
+            || all_send_to_cosmos_events.is_err()
+            || all_send_to_minter_events.is_err()
+        {
             error!("Failed to get blockchain events while resyncing, is your Eth node working?");
             delay_for(RETRY_TIME).await;
             continue;
@@ -153,7 +156,10 @@ async fn get_last_event_nonce_with_retry(
 ) -> u64 {
     let mut res = get_last_event_nonce(client, our_cosmos_address).await;
     while res.is_err() {
-        error!("Failed to get last event nonce ({}), is the Cosmos GRPC working?", res.err().unwrap().to_string());
+        error!(
+            "Failed to get last event nonce ({}), is the Cosmos GRPC working?",
+            res.err().unwrap().to_string()
+        );
         delay_for(RETRY_TIME).await;
         res = get_last_event_nonce(client, our_cosmos_address).await;
     }

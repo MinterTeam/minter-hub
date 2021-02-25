@@ -11,10 +11,8 @@ use deep_space::stdsignmsg::StdSignMsg;
 use deep_space::transaction::TransactionSendType;
 use deep_space::{coin::Coin, utils::bytes_to_hex_str};
 use ethereum_peggy::message_signatures::{encode_tx_batch_confirm, encode_valset_confirm};
-use peggy_utils::types::*;
 use ethereum_peggy::utils::downcast_nonce;
-use peggy_proto::oracle::query_client::QueryClient as OracleQueryClient;
-use tonic::transport::Channel;
+use peggy_utils::types::*;
 
 /// Send a transaction updating the eth address for the sending
 /// Cosmos address. The sending Cosmos address should be a validator
@@ -164,7 +162,6 @@ pub async fn send_batch_confirm(
 
 pub async fn send_ethereum_claims(
     contact: &Contact,
-    oracle_grpc_client: &mut OracleQueryClient<Channel>,
     private_key: PrivateKey,
     deposits: Vec<SendToCosmosEvent>,
     withdraws: Vec<TransactionBatchExecutedEvent>,
@@ -209,7 +206,7 @@ pub async fn send_ethereum_claims(
 
     if !transfers.is_empty() {
         msgs.push(PeggyMsg::RequestMinterBatchMsg(RequestMinterBatchMsg {
-            requester: our_address
+            requester: our_address,
         }))
     }
 

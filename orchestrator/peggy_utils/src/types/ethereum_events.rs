@@ -1,11 +1,11 @@
 use super::ValsetMember;
 use crate::error::PeggyError;
+use clarity::utils::bytes_to_hex_str;
 use clarity::Address as EthAddress;
 use deep_space::address::Address as CosmosAddress;
 use num256::Uint256;
-use web30::types::Log;
 use serde::Serialize;
-use clarity::utils::bytes_to_hex_str;
+use web30::types::Log;
 
 /// A parsed struct representing the Ethereum event fired by the Peggy contract
 /// when the validator set is updated.
@@ -132,9 +132,11 @@ pub struct TransactionBatchExecutedEvent {
 
 impl TransactionBatchExecutedEvent {
     pub fn from_log(input: &Log) -> Result<TransactionBatchExecutedEvent, PeggyError> {
-        if let (Some(batch_nonce_data), Some(erc20_data), Some(sender_data)) =
-            (input.topics.get(1), input.topics.get(2), input.topics.get(3))
-        {
+        if let (Some(batch_nonce_data), Some(erc20_data), Some(sender_data)) = (
+            input.topics.get(1),
+            input.topics.get(2),
+            input.topics.get(3),
+        ) {
             let batch_nonce = Uint256::from_bytes_be(batch_nonce_data);
             let erc20 = EthAddress::from_slice(&erc20_data[12..32])?;
             let sender = EthAddress::from_slice(&sender_data[12..32])?;
@@ -149,7 +151,11 @@ impl TransactionBatchExecutedEvent {
                     erc20,
                     event_nonce,
                     sender,
-                    tx_hash: format!("0x{}", bytes_to_hex_str(input.transaction_hash.as_deref().unwrap())).into()
+                    tx_hash: format!(
+                        "0x{}",
+                        bytes_to_hex_str(input.transaction_hash.as_deref().unwrap())
+                    )
+                    .into(),
                 })
             }
         } else {
@@ -225,7 +231,11 @@ impl SendToCosmosEvent {
                     destination,
                     amount,
                     event_nonce,
-                    tx_hash: format!("0x{}", bytes_to_hex_str(input.transaction_hash.as_deref().unwrap())).into()
+                    tx_hash: format!(
+                        "0x{}",
+                        bytes_to_hex_str(input.transaction_hash.as_deref().unwrap())
+                    )
+                    .into(),
                 })
             }
         } else {
@@ -281,7 +291,9 @@ impl SendToMinterEvent {
         if let (Some(erc20_data), Some(sender_data), Some(destination_data)) = topics {
             let erc20 = EthAddress::from_slice(&erc20_data[12..32])?;
             let sender = EthAddress::from_slice(&sender_data[12..32])?;
-            let destination = EthAddress::from_slice(&destination_data[12..32])?.to_string().replace("0x", "Mx");
+            let destination = EthAddress::from_slice(&destination_data[12..32])?
+                .to_string()
+                .replace("0x", "Mx");
             let amount = Uint256::from_bytes_be(&input.data[..32]);
 
             let event_nonce = Uint256::from_bytes_be(&input.data[32..64]);
@@ -296,7 +308,11 @@ impl SendToMinterEvent {
                     destination,
                     amount,
                     event_nonce,
-                    tx_hash: format!("0x{}", bytes_to_hex_str(input.transaction_hash.as_deref().unwrap())).into()
+                    tx_hash: format!(
+                        "0x{}",
+                        bytes_to_hex_str(input.transaction_hash.as_deref().unwrap())
+                    )
+                    .into(),
                 })
             }
         } else {

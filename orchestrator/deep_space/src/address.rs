@@ -118,9 +118,7 @@ impl Serialize for Address {
         S: Serializer,
     {
         // Serialize address as a string with a default prefix for addresses
-        let s = self
-            .to_bech32("hub")
-            .map_err(serde::ser::Error::custom)?;
+        let s = self.to_bech32("hub").map_err(serde::ser::Error::custom)?;
         serializer.serialize_str(&s)
     }
 }

@@ -1,10 +1,10 @@
 use clarity::Address as EthAddress;
 use deep_space::address::Address;
-use peggy_proto::peggy::query_client::QueryClient as PeggyQueryClient;
 use peggy_proto::oracle::query_client::QueryClient as OracleQueryClient;
+use peggy_proto::oracle::QueryCoinsRequest;
+use peggy_proto::peggy::query_client::QueryClient as PeggyQueryClient;
 use peggy_proto::peggy::QueryBatchConfirmsRequest;
 use peggy_proto::peggy::QueryCurrentValsetRequest;
-use peggy_proto::oracle::{QueryCoinsRequest};
 use peggy_proto::peggy::QueryLastEventNonceByAddrRequest;
 use peggy_proto::peggy::QueryLastPendingBatchRequestByAddrRequest;
 use peggy_proto::peggy::QueryLastPendingValsetRequestByAddrRequest;
@@ -163,12 +163,8 @@ pub async fn get_last_event_nonce(
     Ok(request.into_inner().event_nonce)
 }
 
-pub async fn get_coins(
-    client: &mut OracleQueryClient<Channel>,
-) -> Result<Vec<Coin>, PeggyError> {
-    let request = client
-        .coins(QueryCoinsRequest {})
-        .await?;
+pub async fn get_coins(client: &mut OracleQueryClient<Channel>) -> Result<Vec<Coin>, PeggyError> {
+    let request = client.coins(QueryCoinsRequest {}).await?;
     let coins = request.into_inner().coins;
     let mut out = Vec::new();
     for c in coins {

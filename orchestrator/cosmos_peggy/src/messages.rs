@@ -4,9 +4,11 @@ use deep_space::canonical_json::{to_canonical_json, CanonicalJsonError};
 use deep_space::coin::Coin;
 use deep_space::msg::DeepSpaceMsg;
 use ethereum_peggy::utils::downcast_nonce;
-use std::cmp::Ordering;
 use num256::Uint256;
-use peggy_utils::types::{ERC20Token, SendToCosmosEvent, SendToMinterEvent, TransactionBatchExecutedEvent};
+use peggy_utils::types::{
+    ERC20Token, SendToCosmosEvent, SendToMinterEvent, TransactionBatchExecutedEvent,
+};
+use std::cmp::Ordering;
 /// Any arbitrary message
 #[derive(Serialize, Deserialize, Debug, Clone, Eq)]
 #[serde(tag = "type", content = "value")]
@@ -51,7 +53,7 @@ impl PeggyMsg {
             PeggyMsg::DepositClaimMsg(msg) => msg.clone().event_nonce,
             PeggyMsg::SendToMinterClaimMsg(msg) => msg.clone().event_nonce,
             PeggyMsg::WithdrawClaimMsg(msg) => msg.clone().event_nonce,
-            _ => 99999999999u64.into()
+            _ => 99999999999u64.into(),
         }
     }
 }

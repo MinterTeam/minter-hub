@@ -1,4 +1,4 @@
-use crate::jsonrpc::{client::HTTPClient};
+use crate::jsonrpc::client::HTTPClient;
 use std::sync::Arc;
 use std::time::Duration;
 

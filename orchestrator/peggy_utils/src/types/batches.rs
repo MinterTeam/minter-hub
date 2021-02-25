@@ -58,10 +58,7 @@ impl TransactionBatch {
             destinations.push(item.destination)
         }
         assert_eq!(amounts.len(), destinations.len());
-        (
-            Token::Dynamic(amounts),
-            destinations.into(),
-        )
+        (Token::Dynamic(amounts), destinations.into())
     }
 
     pub fn from_proto(input: peggy_proto::peggy::OutgoingTxBatch) -> Result<Self, PeggyError> {
