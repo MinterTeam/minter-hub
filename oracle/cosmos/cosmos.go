@@ -108,7 +108,7 @@ func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, c
 	}
 
 	cj, _ := result.DeliverTx.MarshalJSON()
-	logger.Info("Sent tx", "result", cj)
+	logger.Info("Sent tx", "result", string(cj))
 }
 
 func getAccount(address string, conn *grpc.ClientConn, logger log.Logger) (number, sequence uint64) {
