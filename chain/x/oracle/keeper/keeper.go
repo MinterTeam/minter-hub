@@ -223,10 +223,14 @@ func convertDecimals(fromDecimals uint64, toDecimals uint64, amount sdk.Int) sdk
 		return amount
 	}
 
-	to := sdk.NewIntFromBigInt(big.NewInt(0).Exp(big.NewInt(10), big.NewInt(int64(toDecimals)), nil))
-	from := sdk.NewIntFromBigInt(big.NewInt(0).Exp(big.NewInt(10), big.NewInt(int64(fromDecimals)), nil))
+	to := big.NewInt(0).Exp(big.NewInt(10), big.NewInt(int64(toDecimals)), nil)
+	from := big.NewInt(0).Exp(big.NewInt(10), big.NewInt(int64(fromDecimals)), nil)
 
-	return amount.ToDec().MulInt(to).QuoInt(from).TruncateInt()
+	result := amount.BigInt()
+	result.Mul(result, to)
+	result.Div(result, from)
+
+	return sdk.NewIntFromBigInt(result)
 }
 
 // prefixRange turns a prefix into a (start, end) range. The start is the given prefix value and
