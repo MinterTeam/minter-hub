@@ -22,7 +22,8 @@ func (k Keeper) AddToOutgoingPool(ctx sdk.Context, sender sdk.AccAddress, counte
 	totalInVouchers := sdk.Coins{totalAmount}
 
 	// Ensure that the coin is a peggy voucher
-	if _, err := types.ValidatePeggyCoin(totalAmount, ctx, k.oracleKeeper); err != nil {
+	contractAddr, err := types.ValidatePeggyCoin(totalAmount, ctx, k.oracleKeeper)
+	if err != nil {
 		return 0, fmt.Errorf("amount not a peggy voucher coin: %s", err)
 	}
 
@@ -45,7 +46,7 @@ func (k Keeper) AddToOutgoingPool(ctx sdk.Context, sender sdk.AccAddress, counte
 		DestAddr:       counterpartReceiver,
 		RefundAddr:     refundAddr,
 		ExpirationTime: ctx.BlockTime().Add(time.Hour).Unix(),
-		Amount:         amount,
+		Amount:         sdk.NewCoin(amount.Denom, k.oracleKeeper.ConvertToEthValue(ctx, contractAddr, amount.Amount)),
 		BridgeFee:      fee,
 		TxHash:         txHash,
 	}

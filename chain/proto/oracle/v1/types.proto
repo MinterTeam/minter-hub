@@ -35,4 +35,5 @@ message Coin {
   string denom = 1;
   string eth_addr = 2;
   uint64 minter_id = 3;
+  uint64 eth_decimals = 4;
 }
