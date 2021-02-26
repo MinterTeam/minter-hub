@@ -1,5 +1,5 @@
 use crate::utils::get_tx_batch_nonce;
-use clarity::Address as EthAddress;
+use clarity::{Address as EthAddress, Transaction};
 use clarity::PrivateKey as EthPrivateKey;
 use num256::Uint256;
 use peggy_utils::error::PeggyError;
@@ -80,6 +80,20 @@ pub async fn send_eth_transaction_batch(
         );
         return Ok(());
     }
+
+    let transaction = Transaction {
+        to: peggy_contract_address,
+        nonce: nonce.clone(),
+        gas_price: web3.eth_gas_price().await?,
+        gas_limit: 1_000_000u32.into(),
+        value: 0u32.into(),
+        data: payload.clone(),
+        signature: None,
+    };
+
+    let transaction = transaction.sign(&our_eth_key, Some(web3.net_version().await?));
+    
+    info!("tx: {:x?}", transaction.to_bytes().unwrap());
 
     let tx_result = web3
         .send_transaction(
