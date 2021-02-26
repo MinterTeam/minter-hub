@@ -64,6 +64,10 @@ func GetLatestMinterBlockAndNonce(ctx context.Context, currentNonce uint64) cont
 				if tx.Type == uint64(transaction.TypeSend) {
 					data, _ := tx.Data.UnmarshalNew()
 					sendData := data.(*models.SendData)
+					if sendData.To != ctx.MinterMultisigAddr {
+						continue
+					}
+
 					cmd := command.Command{}
 					if err := json.Unmarshal(tx.Payload, &cmd); err != nil {
 						ctx.Logger.Error("Cannot validate incoming tx", "err", err.Error())
@@ -71,7 +75,7 @@ func GetLatestMinterBlockAndNonce(ctx context.Context, currentNonce uint64) cont
 					}
 
 					value, _ := sdk.NewIntFromString(sendData.Value)
-					if sendData.To == ctx.MinterMultisigAddr && cmd.Validate(value) == nil {
+					if cmd.Validate(value) == nil {
 						for _, c := range coinList.GetCoins() {
 							if sendData.Coin.ID == c.MinterId {
 								ctx.Logger.Debug("Found deposit")
