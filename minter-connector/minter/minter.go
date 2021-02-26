@@ -55,7 +55,7 @@ func GetLatestMinterBlockAndNonce(ctx context.Context, currentNonce uint64) cont
 			continue
 		}
 
-		ctx.Logger.Debug("Scanning blocks", "from", from, "to", to)
+		ctx.Logger.Debug("Scanning blocks", "from", from, "to", to, "nonce", ctx.LastEventNonce)
 
 		for _, block := range blocks.Blocks {
 			for _, tx := range block.Transactions {
@@ -63,7 +63,10 @@ func GetLatestMinterBlockAndNonce(ctx context.Context, currentNonce uint64) cont
 					data, _ := tx.Data.UnmarshalNew()
 					sendData := data.(*models.SendData)
 					cmd := command.Command{}
-					json.Unmarshal(tx.Payload, &cmd)
+					if err := json.Unmarshal(tx.Payload, &cmd); err != nil {
+						ctx.Logger.Error("Cannot validate incoming tx", "err", err.Error())
+						continue
+					}
 
 					value, _ := sdk.NewIntFromString(sendData.Value)
 					if sendData.To == ctx.MinterMultisigAddr && cmd.Validate(value) == nil {

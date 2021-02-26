@@ -430,7 +430,10 @@ func relayMinterEvents(ctx context.Context) context.Context {
 					}
 
 					cmd := command.Command{}
-					json.Unmarshal(tx.Payload, &cmd)
+					if err := json.Unmarshal(tx.Payload, &cmd); err != nil {
+						ctx.Logger.Error("Cannot validate incoming tx", "err", err.Error())
+						continue
+					}
 
 					value, _ := sdk.NewIntFromString(sendData.Value)
 
