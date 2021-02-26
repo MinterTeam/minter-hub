@@ -70,7 +70,7 @@ func AddPrepGenesisCmd(defaultNodeHome string) *cobra.Command {
 			var govGenState govtypes.GenesisState
 			cdc.MustUnmarshalJSON(appState[govtypes.ModuleName], &govGenState)
 			govGenState.DepositParams.MinDeposit = sdk.Coins{sdk.NewInt64Coin("hub", 10000)}
-			govGenState.VotingParams.VotingPeriod = time.Hour
+			govGenState.VotingParams.VotingPeriod = time.Minute * 20
 			govGenStateBz, err := cdc.MarshalJSON(&govGenState)
 			if err != nil {
 				return fmt.Errorf("failed to marshal auth genesis state: %w", err)
