@@ -9,6 +9,7 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/tendermint/tendermint/libs/log"
 	"math"
+	"math/big"
 )
 
 const minterDecimals = 18
@@ -222,7 +223,10 @@ func convertDecimals(fromDecimals uint64, toDecimals uint64, amount sdk.Int) sdk
 		return amount
 	}
 
-	return amount.ToDec().MulInt(sdk.NewInt(10).MulRaw(int64(toDecimals))).QuoInt(sdk.NewInt(10).MulRaw(int64(fromDecimals))).TruncateInt()
+	to := sdk.NewIntFromBigInt(big.NewInt(0).Exp(big.NewInt(10), big.NewInt(int64(toDecimals)), nil))
+	from := sdk.NewIntFromBigInt(big.NewInt(0).Exp(big.NewInt(10), big.NewInt(int64(fromDecimals)), nil))
+
+	return amount.ToDec().MulInt(to).QuoInt(from).TruncateInt()
 }
 
 // prefixRange turns a prefix into a (start, end) range. The start is the given prefix value and
