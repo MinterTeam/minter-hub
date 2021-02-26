@@ -107,6 +107,8 @@ pub struct Coin {
     pub eth_addr: std::string::String,
     #[prost(uint64, tag="3")]
     pub minter_id: u64,
+    #[prost(uint64, tag="4")]
+    pub eth_decimals: u64,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct QueryCurrentEpochRequest {
@@ -144,6 +146,10 @@ pub struct Params {
     pub slash_fraction_conflicting_claim: std::vec::Vec<u8>,
     #[prost(message, repeated, tag="4")]
     pub coins: ::std::vec::Vec<Coin>,
+    #[prost(uint64, tag="5")]
+    pub min_single_withdraw_gas: u64,
+    #[prost(uint64, tag="6")]
+    pub min_batch_gas: u64,
 }
 /// GenesisState struct
 #[derive(Clone, PartialEq, ::prost::Message)]
