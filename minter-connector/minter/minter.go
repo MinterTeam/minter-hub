@@ -12,7 +12,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/tendermint/tendermint/libs/log"
 	"math"
-	"sort"
 	"strconv"
 	"time"
 )
@@ -56,12 +55,9 @@ func GetLatestMinterBlockAndNonce(ctx context.Context, currentNonce uint64) cont
 			continue
 		}
 
-		sort.Slice(blocks.Blocks, func(i, j int) bool {
-			return blocks.Blocks[i].Height < blocks.Blocks[j].Height
-		})
+		ctx.Logger.Debug("Scanning blocks", "from", from, "to", to)
 
 		for _, block := range blocks.Blocks {
-			ctx.Logger.Debug("Scanning blocks", "from", block.Height, "to", latestBlock)
 			for _, tx := range block.Transactions {
 				if tx.Type == uint64(transaction.TypeSend) {
 					data, _ := tx.Data.UnmarshalNew()
