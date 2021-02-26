@@ -56,9 +56,16 @@ func DefaultParams() *Params {
 		SlashFractionConflictingClaim: sdk.NewDec(1).Quo(sdk.NewDec(1000)),
 		Coins: []*Coin{
 			{
-				Denom:    "hub",
-				EthAddr:  "0x8C2B6949590bEBE6BC1124B670e58DA85b081b2E",
-				MinterId: 1,
+				Denom:       "hub",
+				EthAddr:     "0x8C2B6949590bEBE6BC1124B670e58DA85b081b2E",
+				MinterId:    1,
+				EthDecimals: 18,
+			},
+			{
+				Denom:       "usdc",
+				EthAddr:     "0x07865c6E87B9F70255377e024ace6630C1Eaa37F",
+				MinterId:    207,
+				EthDecimals: 6,
 			},
 		},
 		MinBatchGas:          100000,
