@@ -63,7 +63,7 @@ func DefaultParams() *Params {
 			},
 			{
 				Denom:       "usdc",
-				EthAddr:     "0x4d153722a1b75204c52cd8681eaed174b90fd1a8",
+				EthAddr:     "0x4d153722A1b75204c52CD8681eaED174b90fD1A8",
 				MinterId:    207,
 				EthDecimals: 6,
 			},
