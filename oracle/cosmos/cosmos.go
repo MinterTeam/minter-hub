@@ -12,6 +12,7 @@ import (
 	signing2 "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/go-bip39"
+	"github.com/tendermint/tendermint/libs/log"
 	tmClient "github.com/tendermint/tendermint/rpc/client/http"
 	"google.golang.org/grpc"
 	"strings"
@@ -27,8 +28,8 @@ func Setup() {
 	config.Seal()
 }
 
-func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, cosmosConn *grpc.ClientConn) {
-	number, sequence := getAccount(address.String(), cosmosConn)
+func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, cosmosConn *grpc.ClientConn, logger log.Logger) {
+	number, sequence := getAccount(address.String(), cosmosConn, logger)
 
 	fee := sdk.NewCoins(sdk.NewCoin("hub", sdk.NewInt(1)))
 
@@ -95,43 +96,36 @@ func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, c
 		panic(err)
 	}
 
-	_, err = client.BroadcastTxCommit(context.Background(), txBytes)
+	result, err := client.BroadcastTxCommit(context.Background(), txBytes)
 	if err != nil {
 		if !strings.Contains(err.Error(), "incorrect account sequence") {
-			println(err.Error())
+			logger.Error("Error sending tx", "err", err.Error())
 		}
 
 		time.Sleep(1 * time.Second)
-		SendCosmosTx(msgs, address, priv, cosmosConn)
+		SendCosmosTx(msgs, address, priv, cosmosConn, logger)
 		return
 	}
 
-	//{
-	//	cj, _ := result.CheckTx.MarshalJSON()
-	//	println(string(cj))
-	//}
-	//
-	//{
-	//	cj, _ := result.DeliverTx.MarshalJSON()
-	//	println(string(cj))
-	//}
+	cj, _ := result.DeliverTx.MarshalJSON()
+	logger.Info("Sent tx", "result", cj)
 }
 
-func getAccount(address string, conn *grpc.ClientConn) (number, sequence uint64) {
+func getAccount(address string, conn *grpc.ClientConn, logger log.Logger) (number, sequence uint64) {
 	authClient := types.NewQueryClient(conn)
 
 	response, err := authClient.Account(context.Background(), &types.QueryAccountRequest{Address: address})
 	if err != nil {
-		println(err.Error())
+		logger.Error("Error getting account", "err", err.Error())
 		time.Sleep(1 * time.Second)
-		return getAccount(address, conn)
+		return getAccount(address, conn, logger)
 	}
 
 	var account types.AccountI
 	if err := encoding.Marshaler.UnpackAny(response.Account, &account); err != nil {
-		println(err.Error())
+		logger.Error("Error getting account", "err", err.Error())
 		time.Sleep(1 * time.Second)
-		return getAccount(address, conn)
+		return getAccount(address, conn, logger)
 	}
 
 	return account.GetAccountNumber(), account.GetSequence()
