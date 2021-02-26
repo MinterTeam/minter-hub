@@ -67,9 +67,9 @@ func main() {
 
 	ctx = minter.GetLatestMinterBlockAndNonce(ctx, cosmos.GetLastMinterNonce(orcAddress.String(), cosmosConn))
 
-	ctx.Logger.Info("Starting with block", ctx.LastCheckedMinterBlock, "event nonce", ctx.LastEventNonce, "batch nonce", ctx.LastBatchNonce, "valset nonce", ctx.LastValsetNonce)
+	ctx.Logger.Info("Starting with block", "height", ctx.LastCheckedMinterBlock, "eventNonce", ctx.LastEventNonce, "batchNonce", ctx.LastBatchNonce, "valsetNonce", ctx.LastValsetNonce)
 
-	if true { // todo: check if we have address
+	{
 		privateKey, err := ethCrypto.HexToECDSA(minterWallet.PrivateKey)
 		if err != nil {
 			panic(err)
@@ -88,13 +88,29 @@ func main() {
 		}
 		minterAddress := ethCrypto.PubkeyToAddress(*publicKeyECDSA)
 
-		cosmos.SendCosmosTx([]sdk.Msg{
-			types.NewMsgSetMinterAddress("Mx"+minterAddress.String()[2:], orcAddress, hex.EncodeToString(signature)),
-		}, orcAddress, orcPriv, cosmosConn, ctx.Logger)
+		cosmosClient := types.NewQueryClient(ctx.CosmosConn)
+		response, err := cosmosClient.CurrentValset(c.TODO(), &types.QueryCurrentValsetRequest{})
+		if err != nil {
+			panic(err)
+		}
 
-		go cosmos.SendCosmosTx([]sdk.Msg{
-			types.NewMsgValsetRequest(orcAddress),
-		}, orcAddress, orcPriv, cosmosConn, ctx.Logger)
+		hasAddress := false
+		for _, member := range response.Valset.Members {
+			if member.MinterAddress == "Mx"+minterAddress.String()[2:] {
+				hasAddress = true
+				break
+			}
+		}
+
+		if !hasAddress {
+			cosmos.SendCosmosTx([]sdk.Msg{
+				types.NewMsgSetMinterAddress("Mx"+minterAddress.String()[2:], orcAddress, hex.EncodeToString(signature)),
+			}, orcAddress, orcPriv, cosmosConn, ctx.Logger)
+
+			go cosmos.SendCosmosTx([]sdk.Msg{
+				types.NewMsgValsetRequest(orcAddress),
+			}, orcAddress, orcPriv, cosmosConn, ctx.Logger)
+		}
 	}
 
 	// main loop
@@ -103,7 +119,7 @@ func main() {
 		relayValsets(ctx)
 		ctx = relayMinterEvents(ctx)
 
-		ctx.Logger.Info("Last checked minter block", "height", ctx.LastCheckedMinterBlock, "event nonce", ctx.LastEventNonce, "batch nonce", ctx.LastBatchNonce, "valset nonce", ctx.LastValsetNonce)
+		ctx.Logger.Info("Last checked minter block", "height", ctx.LastCheckedMinterBlock, "eventNonce", ctx.LastEventNonce, "batchNonce", ctx.LastBatchNonce, "valsetNonce", ctx.LastValsetNonce)
 		time.Sleep(2 * time.Second)
 	}
 }
