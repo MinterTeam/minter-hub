@@ -7,6 +7,8 @@ use peggy_utils::types::*;
 use std::time::Duration;
 use web30::client::Web3;
 use web30::types::SendTxOption;
+use hex::encode;
+use clarity::utils::bytes_to_hex_str;
 
 /// this function generates an appropriate Ethereum transaction
 /// to submit the provided transaction batch and validator set update.
@@ -93,7 +95,7 @@ pub async fn send_eth_transaction_batch(
         signature: None,
     };
 
-    info!("tx: {:x?}", transaction.sign(&our_eth_key, Some(web3.net_version().await?)).to_bytes().unwrap());
+    info!("tx: {}", bytes_to_hex_str(&transaction.sign(&our_eth_key, Some(web3.net_version().await?)).to_bytes().unwrap()));
 
     let tx_result = web3
         .send_transaction(
