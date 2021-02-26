@@ -7,7 +7,6 @@ use peggy_utils::types::*;
 use std::time::Duration;
 use web30::client::Web3;
 use web30::types::SendTxOption;
-use hex::encode;
 use clarity::utils::bytes_to_hex_str;
 
 /// this function generates an appropriate Ethereum transaction
