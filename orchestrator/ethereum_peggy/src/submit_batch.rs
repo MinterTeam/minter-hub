@@ -81,6 +81,8 @@ pub async fn send_eth_transaction_batch(
         return Ok(());
     }
 
+    info!("Sending ethereum tx");
+
     let transaction = Transaction {
         to: peggy_contract_address,
         nonce: nonce.clone(),
@@ -91,9 +93,7 @@ pub async fn send_eth_transaction_batch(
         signature: None,
     };
 
-    let transaction = transaction.sign(&our_eth_key, Some(web3.net_version().await?));
-    
-    info!("tx: {:x?}", transaction.to_bytes().unwrap());
+    info!("tx: {:x?}", transaction.sign(&our_eth_key, Some(web3.net_version().await?)).to_bytes().unwrap());
 
     let tx_result = web3
         .send_transaction(
@@ -108,15 +108,15 @@ pub async fn send_eth_transaction_batch(
             ],
         )
         .await;
-    let tx;
-    match tx_result {
-        Ok(t) => tx = t,
+
+    let tx = match tx_result {
+        Ok(t) => t,
         Err(e) => {
             error!("Error while sending tx: {}", e);
 
             return Ok(());
         }
-    }
+    };
 
     info!("Sent batch update with txid {:#066x}", tx);
 
