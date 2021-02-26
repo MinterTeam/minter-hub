@@ -61,7 +61,7 @@ func GetLatestMinterBlockAndNonce(ctx context.Context, currentNonce uint64) cont
 		})
 
 		for _, block := range blocks.Blocks {
-			ctx.Logger.Info("Scanning blocks", "from", block.Height, "to", latestBlock)
+			ctx.Logger.Debug("Scanning blocks", "from", block.Height, "to", latestBlock)
 			for _, tx := range block.Transactions {
 				if tx.Type == uint64(transaction.TypeSend) {
 					data, _ := tx.Data.UnmarshalNew()

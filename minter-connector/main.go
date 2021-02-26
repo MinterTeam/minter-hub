@@ -103,7 +103,7 @@ func main() {
 		relayValsets(ctx)
 		ctx = relayMinterEvents(ctx)
 
-		ctx.Logger.Info("lastCheckedMinterBlock", ctx.LastCheckedMinterBlock, "event nonce", ctx.LastEventNonce, "batch nonce", ctx.LastBatchNonce, "valset nonce", ctx.LastValsetNonce)
+		ctx.Logger.Info("Last checked minter block", "height", ctx.LastCheckedMinterBlock, "event nonce", ctx.LastEventNonce, "batch nonce", ctx.LastBatchNonce, "valset nonce", ctx.LastValsetNonce)
 		time.Sleep(2 * time.Second)
 	}
 }
@@ -404,7 +404,7 @@ func relayMinterEvents(ctx context.Context) context.Context {
 		for _, block := range blocks.Blocks {
 			ctx.LastCheckedMinterBlock = block.Height
 
-			ctx.Logger.Info("Checking block", "height", block.Height)
+			ctx.Logger.Debug("Checking block", "height", block.Height)
 			for _, tx := range block.Transactions {
 				if tx.Type == uint64(transaction.TypeSend) {
 					data, _ := tx.Data.UnmarshalNew()
