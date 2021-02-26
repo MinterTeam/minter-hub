@@ -3,7 +3,6 @@ package minter
 import (
 	c "context"
 	"encoding/json"
-	"fmt"
 	oracleTypes "github.com/MinterTeam/mhub/chain/x/oracle/types"
 	"github.com/MinterTeam/minter-go-sdk/v2/api/http_client"
 	"github.com/MinterTeam/minter-go-sdk/v2/api/http_client/models"
@@ -11,27 +10,28 @@ import (
 	"github.com/MinterTeam/minter-hub-connector/command"
 	"github.com/MinterTeam/minter-hub-connector/context"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/tendermint/tendermint/libs/log"
 	"math"
 	"sort"
 	"strconv"
 	"time"
 )
 
-func GetLatestMinterBlock(client *http_client.Client) uint64 {
+func GetLatestMinterBlock(client *http_client.Client, logger log.Logger) uint64 {
 	status, err := client.Status()
 	if err != nil {
-		println(err.Error())
+		logger.Error("Cannot get Minter status", "err", err.Error())
 		time.Sleep(1 * time.Second)
-		return GetLatestMinterBlock(client)
+		return GetLatestMinterBlock(client, logger)
 	}
 
 	return status.LatestBlockHeight
 }
 
 func GetLatestMinterBlockAndNonce(ctx context.Context, currentNonce uint64) context.Context {
-	println("Current nonce @ hub", currentNonce)
+	ctx.Logger.Info("Current nonce @ hub", "nonce", currentNonce)
 
-	latestBlock := GetLatestMinterBlock(ctx.MinterClient)
+	latestBlock := GetLatestMinterBlock(ctx.MinterClient, ctx.Logger)
 
 	oracleClient := oracleTypes.NewQueryClient(ctx.CosmosConn)
 	coinList, err := oracleClient.Coins(c.Background(), &oracleTypes.QueryCoinsRequest{})
@@ -50,7 +50,7 @@ func GetLatestMinterBlockAndNonce(ctx context.Context, currentNonce uint64) cont
 
 		blocks, err := ctx.MinterClient.Blocks(from, to, false)
 		if err != nil {
-			println("ERROR: ", err.Error())
+			ctx.Logger.Error("Error while getting minter blocks", "err", err.Error())
 			time.Sleep(time.Second)
 			i--
 			continue
@@ -61,7 +61,7 @@ func GetLatestMinterBlockAndNonce(ctx context.Context, currentNonce uint64) cont
 		})
 
 		for _, block := range blocks.Blocks {
-			fmt.Printf("\r%d of %d", block.Height, latestBlock)
+			ctx.Logger.Info("Scanning blocks", "from", block.Height, "to", latestBlock)
 			for _, tx := range block.Transactions {
 				if tx.Type == uint64(transaction.TypeSend) {
 					data, _ := tx.Data.UnmarshalNew()
@@ -97,7 +97,7 @@ func GetLatestMinterBlockAndNonce(ctx context.Context, currentNonce uint64) cont
 				if tx.Type == uint64(transaction.TypeEditMultisig) && tx.From == ctx.MinterMultisigAddr {
 					nonce, err := strconv.Atoi(string(tx.Payload))
 					if err != nil {
-						println("ERROR:", err.Error())
+						ctx.Logger.Error("Error on decoding valset nonce", "err", err.Error())
 					} else {
 						if currentNonce < ctx.LastEventNonce {
 							ctx.LastCheckedMinterBlock = block.Height - 1
@@ -113,8 +113,6 @@ func GetLatestMinterBlockAndNonce(ctx context.Context, currentNonce uint64) cont
 			ctx.LastCheckedMinterBlock = block.Height
 		}
 	}
-
-	println()
 
 	return ctx
 }

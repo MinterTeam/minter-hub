@@ -16,6 +16,7 @@ import (
 	signing2 "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/go-bip39"
+	"github.com/tendermint/tendermint/libs/log"
 	tmClient "github.com/tendermint/tendermint/rpc/client/http"
 	"google.golang.org/grpc"
 	"sort"
@@ -54,13 +55,13 @@ func Setup() {
 	config.Seal()
 }
 
-func CreateClaims(cosmosConn *grpc.ClientConn, orcAddress sdk.AccAddress, deposits []Deposit, batches []Batch, valsets []Valset) []sdk.Msg {
+func CreateClaims(cosmosConn *grpc.ClientConn, orcAddress sdk.AccAddress, deposits []Deposit, batches []Batch, valsets []Valset, logger log.Logger) []sdk.Msg {
 	oracleClient := oracleTypes.NewQueryClient(cosmosConn)
 	coinList, err := oracleClient.Coins(context.Background(), &oracleTypes.QueryCoinsRequest{})
 	if err != nil {
-		println("ERROR: ", err.Error())
+		logger.Error("Error getting hub coins", "err", err.Error())
 		time.Sleep(time.Second)
-		return CreateClaims(cosmosConn, orcAddress, deposits, batches, valsets)
+		return CreateClaims(cosmosConn, orcAddress, deposits, batches, valsets, logger)
 	}
 
 	coins := oracleTypes.NewCoins(coinList.GetCoins())
@@ -141,8 +142,8 @@ func getEventNonceFromMsg(msg sdk.Msg) uint64 {
 	return 999999999
 }
 
-func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, cosmosConn *grpc.ClientConn) {
-	number, sequence := getAccount(address.String(), cosmosConn)
+func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, cosmosConn *grpc.ClientConn, logger log.Logger) {
+	number, sequence := getAccount(address.String(), cosmosConn, logger)
 
 	fee := sdk.NewCoins(sdk.NewCoin("hub", sdk.NewInt(1)))
 
@@ -207,30 +208,30 @@ func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, c
 
 	client, err := tmClient.New("http://"+cfg.Cosmos.TmUrl, "")
 	if err != nil {
-		println(err.Error())
+		logger.Error("Error connecting to tm node", "err", err.Error())
 		time.Sleep(1 * time.Second)
-		SendCosmosTx(msgs, address, priv, cosmosConn)
+		SendCosmosTx(msgs, address, priv, cosmosConn, logger)
 		return
 	}
 
 	result, err := client.BroadcastTxCommit(context.Background(), txBytes)
 	if err != nil {
 		if !strings.Contains(err.Error(), "incorrect account sequence") {
-			println(err.Error())
+			logger.Error("Failed broadcast tx", "err", err.Error())
 		}
 
 		time.Sleep(1 * time.Second)
-		SendCosmosTx(msgs, address, priv, cosmosConn)
+		SendCosmosTx(msgs, address, priv, cosmosConn, logger)
 		return
 	}
 
 	if result.DeliverTx.GetCode() != 0 || result.CheckTx.GetCode() != 0 {
-		println("Error on sending cosmos tx with code", result.CheckTx.GetCode(), result.DeliverTx.GetLog())
+		logger.Error("Error on sending cosmos tx with", "code", result.CheckTx.GetCode(), "log", result.DeliverTx.GetLog())
 		time.Sleep(1 * time.Second)
-		SendCosmosTx(msgs, address, priv, cosmosConn)
+		SendCosmosTx(msgs, address, priv, cosmosConn, logger)
 	}
 
-	println(result.DeliverTx.GetCode(), result.DeliverTx.GetLog(), result.DeliverTx.GetInfo())
+	logger.Info("Sending cosmos tx", "code", result.DeliverTx.GetCode(), "log", result.DeliverTx.GetLog(), "info", result.DeliverTx.GetInfo())
 }
 
 func GetLastMinterNonce(address string, conn *grpc.ClientConn) uint64 {
@@ -244,21 +245,21 @@ func GetLastMinterNonce(address string, conn *grpc.ClientConn) uint64 {
 	return result.EventNonce
 }
 
-func getAccount(address string, conn *grpc.ClientConn) (number, sequence uint64) {
+func getAccount(address string, conn *grpc.ClientConn, logger log.Logger) (number, sequence uint64) {
 	authClient := types.NewQueryClient(conn)
 
 	response, err := authClient.Account(context.Background(), &types.QueryAccountRequest{Address: address})
 	if err != nil {
-		println(err.Error())
+		logger.Error("Error getting cosmos account", "err", err.Error())
 		time.Sleep(1 * time.Second)
-		return getAccount(address, conn)
+		return getAccount(address, conn, logger)
 	}
 
 	var account types.AccountI
 	if err := encoding.Marshaler.UnpackAny(response.Account, &account); err != nil {
-		println(err.Error())
+		logger.Error("Error unpacking cosmos account", "err", err.Error())
 		time.Sleep(1 * time.Second)
-		return getAccount(address, conn)
+		return getAccount(address, conn, logger)
 	}
 
 	return account.GetAccountNumber(), account.GetSequence()

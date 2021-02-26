@@ -18,9 +18,11 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	ethCrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/tendermint/tendermint/libs/json"
+	"github.com/tendermint/tendermint/libs/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/backoff"
 	"math"
+	"os"
 	"strconv"
 	"time"
 )
@@ -47,7 +49,6 @@ func main() {
 		MinConnectTimeout: time.Second * 5,
 	}))
 
-	println("Syncing with Minter")
 	ctx := context.Context{
 		LastCheckedMinterBlock: cfg.Minter.StartBlock,
 		LastEventNonce:         cfg.Minter.StartEventNonce,
@@ -59,10 +60,14 @@ func main() {
 		OrcAddress:             orcAddress,
 		OrcPriv:                orcPriv,
 		MinterWallet:           minterWallet,
+		Logger:                 log.NewTMLogger(os.Stdout),
 	}
 
+	ctx.Logger.Info("Syncing with Minter")
+
 	ctx = minter.GetLatestMinterBlockAndNonce(ctx, cosmos.GetLastMinterNonce(orcAddress.String(), cosmosConn))
-	println("Starting with block", ctx.LastCheckedMinterBlock, "event nonce", ctx.LastEventNonce, "batch nonce", ctx.LastBatchNonce, "valset nonce", ctx.LastValsetNonce)
+
+	ctx.Logger.Info("Starting with block", ctx.LastCheckedMinterBlock, "event nonce", ctx.LastEventNonce, "batch nonce", ctx.LastBatchNonce, "valset nonce", ctx.LastValsetNonce)
 
 	if true { // todo: check if we have address
 		privateKey, err := ethCrypto.HexToECDSA(minterWallet.PrivateKey)
@@ -85,11 +90,11 @@ func main() {
 
 		cosmos.SendCosmosTx([]sdk.Msg{
 			types.NewMsgSetMinterAddress("Mx"+minterAddress.String()[2:], orcAddress, hex.EncodeToString(signature)),
-		}, orcAddress, orcPriv, cosmosConn)
+		}, orcAddress, orcPriv, cosmosConn, ctx.Logger)
 
 		go cosmos.SendCosmosTx([]sdk.Msg{
 			types.NewMsgValsetRequest(orcAddress),
-		}, orcAddress, orcPriv, cosmosConn)
+		}, orcAddress, orcPriv, cosmosConn, ctx.Logger)
 	}
 
 	// main loop
@@ -98,7 +103,7 @@ func main() {
 		relayValsets(ctx)
 		ctx = relayMinterEvents(ctx)
 
-		println("lastCheckedMinterBlock", ctx.LastCheckedMinterBlock, "event nonce", ctx.LastEventNonce, "batch nonce", ctx.LastBatchNonce, "valset nonce", ctx.LastValsetNonce)
+		ctx.Logger.Info("lastCheckedMinterBlock", ctx.LastCheckedMinterBlock, "event nonce", ctx.LastEventNonce, "batch nonce", ctx.LastBatchNonce, "valset nonce", ctx.LastValsetNonce)
 		time.Sleep(2 * time.Second)
 	}
 }
@@ -111,12 +116,12 @@ func relayBatches(ctx context.Context) {
 			Address: ctx.OrcAddress.String(),
 		})
 		if err != nil {
-			println("ERROR: ", err.Error())
+			ctx.Logger.Error("Error while getting last pending batch", "err", err.Error())
 			return
 		}
 
 		if response.Batch != nil {
-			println("Sending batch confirm for", response.Batch.BatchNonce)
+			ctx.Logger.Info("Sending batch confirm", "batch nonce", response.Batch.BatchNonce)
 
 			txData := transaction.NewMultisendData()
 			for _, out := range response.Batch.Transactions {
@@ -141,13 +146,13 @@ func relayBatches(ctx context.Context) {
 				Signature:    sigData,
 			}
 
-			cosmos.SendCosmosTx([]sdk.Msg{msg}, ctx.OrcAddress, ctx.OrcPriv, ctx.CosmosConn)
+			cosmos.SendCosmosTx([]sdk.Msg{msg}, ctx.OrcAddress, ctx.OrcPriv, ctx.CosmosConn, ctx.Logger)
 		}
 	}
 
 	latestBatches, err := cosmosClient.OutgoingTxBatches(c.Background(), &types.QueryOutgoingTxBatchesRequest{})
 	if err != nil {
-		println(err.Error())
+		ctx.Logger.Error("Error getting last batches", "err", err.Error())
 		return
 	}
 
@@ -159,7 +164,7 @@ func relayBatches(ctx context.Context) {
 			Nonce: batch.BatchNonce,
 		})
 		if err != nil {
-			println("ERROR: ", err.Error())
+			ctx.Logger.Error("Error while getting batch confirms", "err", err.Error())
 			return
 		}
 
@@ -177,7 +182,7 @@ func relayBatches(ctx context.Context) {
 		return
 	}
 
-	println("Sending batch to Minter")
+	ctx.Logger.Info("Sending batch to Minter")
 
 	txData := transaction.NewMultisendData()
 	for _, out := range oldestSignedBatch.Transactions {
@@ -203,13 +208,17 @@ func relayBatches(ctx context.Context) {
 		panic(err)
 	}
 
-	println(encodedTx)
+	ctx.Logger.Debug("Batch tx", "tx", encodedTx)
 	response, err := ctx.MinterClient.SendTransaction(encodedTx)
 	if err != nil {
 		code, body, err := http_client.ErrorBody(err)
-		println(code, body.Error.Message, err)
+		if err != nil {
+			ctx.Logger.Error("Error on sending Minter Tx", "err", err.Error())
+		} else {
+			ctx.Logger.Error("Error on sending Minter Tx", "code", code, "err", body.Error.Message)
+		}
 	} else if response.Code != 0 {
-		println(response.Log)
+		ctx.Logger.Error("Error on sending Minter Tx", "err", response.Log)
 	}
 }
 
@@ -221,12 +230,12 @@ func relayValsets(ctx context.Context) {
 			Address: ctx.OrcAddress.String(),
 		})
 		if err != nil {
-			println("ERROR: ", err.Error())
+			ctx.Logger.Error("Error while getting last pending valset", "err", err.Error())
 			return
 		}
 
 		if response.Valset != nil {
-			println("Sending valset confirm for", response.Valset.Nonce)
+			ctx.Logger.Info("Sending valset confirm", "valset nonce", response.Valset.Nonce)
 
 			txData := transaction.NewEditMultisigData()
 			txData.Threshold = threshold
@@ -266,13 +275,13 @@ func relayValsets(ctx context.Context) {
 				Signature:     sigData,
 			}
 
-			cosmos.SendCosmosTx([]sdk.Msg{msg}, ctx.OrcAddress, ctx.OrcPriv, ctx.CosmosConn)
+			cosmos.SendCosmosTx([]sdk.Msg{msg}, ctx.OrcAddress, ctx.OrcPriv, ctx.CosmosConn, ctx.Logger)
 		}
 	}
 
 	latestValsets, err := cosmosClient.LastValsetRequests(c.Background(), &types.QueryLastValsetRequestsRequest{})
 	if err != nil {
-		println(err.Error())
+		ctx.Logger.Error("Error on getting last valset requests", "err", err.Error())
 		return
 	}
 
@@ -284,7 +293,7 @@ func relayValsets(ctx context.Context) {
 			Nonce: valset.Nonce,
 		})
 		if err != nil {
-			println("ERROR: ", err.Error())
+			ctx.Logger.Error("Error while getting valset confirms", "err", err.Error())
 			return
 		}
 
@@ -302,7 +311,7 @@ func relayValsets(ctx context.Context) {
 		return
 	}
 
-	println("Sending valset to Minter")
+	ctx.Logger.Info("Sending valset to Minter")
 
 	txData := transaction.NewEditMultisigData()
 	txData.Threshold = threshold
@@ -343,22 +352,22 @@ func relayValsets(ctx context.Context) {
 		panic(err)
 	}
 
-	println(encodedTx)
+	ctx.Logger.Debug("Valset update tx", "tx", encodedTx)
 	response, err := ctx.MinterClient.SendTransaction(encodedTx)
 	if err != nil {
-		code, body, err2 := http_client.ErrorBody(err)
-		if err2 != nil {
-			println(err, err2)
+		code, body, err := http_client.ErrorBody(err)
+		if err != nil {
+			ctx.Logger.Error("Error on sending Minter Tx", "err", err.Error())
 		} else {
-			println(code, body.Error.Message, err)
+			ctx.Logger.Error("Error on sending Minter Tx", "code", code, "err", body.Error.Message)
 		}
 	} else if response.Code != 0 {
-		println(response.Log)
+		ctx.Logger.Error("Error on sending Minter Tx", "err", response.Log)
 	}
 }
 
 func relayMinterEvents(ctx context.Context) context.Context {
-	latestBlock := minter.GetLatestMinterBlock(ctx.MinterClient)
+	latestBlock := minter.GetLatestMinterBlock(ctx.MinterClient, ctx.Logger)
 	if latestBlock-ctx.LastCheckedMinterBlock > 100 {
 		latestBlock = ctx.LastCheckedMinterBlock + 100
 	}
@@ -366,7 +375,7 @@ func relayMinterEvents(ctx context.Context) context.Context {
 	oracleClient := oracleTypes.NewQueryClient(ctx.CosmosConn)
 	coinList, err := oracleClient.Coins(c.Background(), &oracleTypes.QueryCoinsRequest{})
 	if err != nil {
-		println("ERROR: ", err.Error())
+		ctx.Logger.Info("Error getting coins from hub", "err", err.Error())
 		time.Sleep(time.Second)
 		return ctx
 	}
@@ -386,7 +395,7 @@ func relayMinterEvents(ctx context.Context) context.Context {
 
 		blocks, err := ctx.MinterClient.Blocks(from, to, false)
 		if err != nil {
-			println("ERROR: ", err.Error())
+			ctx.Logger.Info("Error getting minter blocks", "err", err.Error())
 			time.Sleep(time.Second)
 			i--
 			continue
@@ -395,7 +404,7 @@ func relayMinterEvents(ctx context.Context) context.Context {
 		for _, block := range blocks.Blocks {
 			ctx.LastCheckedMinterBlock = block.Height
 
-			println("Checking block at height", block.Height)
+			ctx.Logger.Info("Checking block", "height", block.Height)
 			for _, tx := range block.Transactions {
 				if tx.Type == uint64(transaction.TypeSend) {
 					data, _ := tx.Data.UnmarshalNew()
@@ -410,13 +419,13 @@ func relayMinterEvents(ctx context.Context) context.Context {
 					value, _ := sdk.NewIntFromString(sendData.Value)
 
 					if err := cmd.Validate(value); err != nil {
-						println(err.Error())
+						ctx.Logger.Error("Cannot validate incoming tx", "err", err.Error())
 						continue
 					}
 
 					for _, hubCoin := range coinList.GetCoins() {
 						if sendData.Coin.ID == hubCoin.MinterId {
-							println("Found new deposit from", tx.From, "to", string(tx.Payload), "amount", sendData.Value, "coin", sendData.Coin.ID)
+							ctx.Logger.Info("Found new deposit", "from", tx.From, "to", string(tx.Payload), "amount", sendData.Value, "coin", sendData.Coin.ID)
 							deposits = append(deposits, cosmos.Deposit{
 								Sender:     tx.From,
 								Type:       cmd.Type,
@@ -434,7 +443,7 @@ func relayMinterEvents(ctx context.Context) context.Context {
 				}
 
 				if tx.Type == uint64(transaction.TypeMultisend) && tx.From == cfg.Minter.MultisigAddr {
-					println("Found withdrawal")
+					ctx.Logger.Info("Found withdrawal")
 					batches = append(batches, cosmos.Batch{
 						BatchNonce: ctx.LastBatchNonce,
 						EventNonce: ctx.LastEventNonce,
@@ -446,11 +455,11 @@ func relayMinterEvents(ctx context.Context) context.Context {
 				}
 
 				if tx.Type == uint64(transaction.TypeEditMultisig) && tx.From == cfg.Minter.MultisigAddr {
-					println("Found valset update")
+					ctx.Logger.Info("Found valset update")
 
 					nonce, err := strconv.Atoi(string(tx.Payload))
 					if err != nil {
-						println("ERROR:", err.Error())
+						ctx.Logger.Error("Error while decoding valset update nonce", "err", err.Error())
 					} else {
 						valsets = append(valsets, cosmos.Valset{
 							ValsetNonce: uint64(nonce),
@@ -466,7 +475,7 @@ func relayMinterEvents(ctx context.Context) context.Context {
 	}
 
 	if len(deposits) > 0 || len(batches) > 0 || len(valsets) > 0 {
-		cosmos.SendCosmosTx(cosmos.CreateClaims(ctx.CosmosConn, ctx.OrcAddress, deposits, batches, valsets), ctx.OrcAddress, ctx.OrcPriv, ctx.CosmosConn)
+		cosmos.SendCosmosTx(cosmos.CreateClaims(ctx.CosmosConn, ctx.OrcAddress, deposits, batches, valsets, ctx.Logger), ctx.OrcAddress, ctx.OrcPriv, ctx.CosmosConn, ctx.Logger)
 	}
 
 	return ctx
