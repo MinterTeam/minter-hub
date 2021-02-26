@@ -20,12 +20,13 @@ type AttestationHandler struct {
 func (a AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, claim types.EthereumClaim) error {
 	switch claim := claim.(type) {
 	case *types.MsgDepositClaim:
-		if claim.Amount.LT(minDepositAmount) {
+		amount := a.keeper.oracleKeeper.ConvertFromEthValue(ctx, claim.TokenContract, claim.Amount)
+		if amount.LT(minDepositAmount) {
 			return sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, "amount is too small to be deposited")
 		}
 
 		token := types.ERC20Token{
-			Amount:   claim.Amount,
+			Amount:   amount,
 			Contract: claim.TokenContract,
 		}
 		coin := token.PeggyCoin(ctx, a.keeper.oracleKeeper)
@@ -81,7 +82,8 @@ func (a AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, claim
 		ctx.EventManager().EmitEvent(depositEvent)
 
 	case *types.MsgSendToMinterClaim:
-		if claim.Amount.LT(minDepositAmount) {
+		amount := a.keeper.oracleKeeper.ConvertFromEthValue(ctx, claim.TokenContract, claim.Amount)
+		if amount.LT(minDepositAmount) {
 			return sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, "amount is too small to be deposited")
 		}
 
@@ -103,8 +105,8 @@ func (a AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, claim
 			return sdkerrors.Wrap(err, "coin not found")
 		}
 
-		commission := sdk.NewCoin(denom, claim.Amount.QuoRaw(100))
-		_, err = a.minterKeeper.AddToOutgoingPool(ctx, receiver, claim.MinterReceiver, claim.TxHash, sdk.NewCoin(denom, claim.Amount).Sub(commission))
+		commission := sdk.NewCoin(denom, amount.QuoRaw(100))
+		_, err = a.minterKeeper.AddToOutgoingPool(ctx, receiver, claim.MinterReceiver, claim.TxHash, sdk.NewCoin(denom, amount).Sub(commission))
 		if err != nil {
 			return sdkerrors.Wrap(err, "withdraw")
 		}

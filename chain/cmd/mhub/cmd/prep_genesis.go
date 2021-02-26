@@ -26,8 +26,8 @@ func AddPrepGenesisCmd(defaultNodeHome string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "prep-genesis [hub-coin-id]",
 		Short: "Prepare genesis values",
-		Long: ``,
-		Args: cobra.ExactArgs(1),
+		Long:  ``,
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx := client.GetClientContextFromCmd(cmd)
 			depCdc := clientCtx.JSONMarshaler
@@ -76,7 +76,6 @@ func AddPrepGenesisCmd(defaultNodeHome string) *cobra.Command {
 				return fmt.Errorf("failed to marshal auth genesis state: %w", err)
 			}
 			appState[govtypes.ModuleName] = govGenStateBz
-
 
 			// mint
 

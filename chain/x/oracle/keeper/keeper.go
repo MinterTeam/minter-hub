@@ -11,6 +11,8 @@ import (
 	"math"
 )
 
+const minterDecimals = 18
+
 // Keeper maintains the link to storage and exposes getter/setter methods for the various parts of the state machine
 type Keeper struct {
 	StakingKeeper types.StakingKeeper
@@ -195,6 +197,32 @@ func (k Keeper) GetNormalizedValPowers(ctx sdk.Context) map[string]uint64 {
 	}
 
 	return bridgeValidators
+}
+
+func (k Keeper) ConvertFromEthValue(ctx sdk.Context, tokenContract string, amount sdk.Int) sdk.Int {
+	coin, err := k.GetCoins(ctx).GetByEthereumAddress(tokenContract)
+	if err != nil {
+		return amount
+	}
+
+	return convertDecimals(coin.EthDecimals, minterDecimals, amount)
+}
+
+func (k Keeper) ConvertToEthValue(ctx sdk.Context, tokenContract string, amount sdk.Int) sdk.Int {
+	coin, err := k.GetCoins(ctx).GetByEthereumAddress(tokenContract)
+	if err != nil {
+		return amount
+	}
+
+	return convertDecimals(minterDecimals, coin.EthDecimals, amount)
+}
+
+func convertDecimals(fromDecimals uint64, toDecimals uint64, amount sdk.Int) sdk.Int {
+	if fromDecimals == toDecimals {
+		return amount
+	}
+
+	return amount.ToDec().MulInt(sdk.NewInt(10).MulRaw(int64(toDecimals))).QuoInt(sdk.NewInt(10).MulRaw(int64(fromDecimals))).TruncateInt()
 }
 
 // prefixRange turns a prefix into a (start, end) range. The start is the given prefix value and

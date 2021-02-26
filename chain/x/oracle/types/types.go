@@ -34,14 +34,23 @@ func (c Coins) List() []*Coin {
 	return c.list
 }
 
-func (c Coins) GetDenomByEthereumAddress(address string) (string, error) {
+func (c Coins) GetByEthereumAddress(address string) (*Coin, error) {
 	for _, coin := range c.list {
 		if coin.EthAddr == address {
-			return coin.Denom, nil
+			return coin, nil
 		}
 	}
 
-	return "", errors.New("coin not found")
+	return nil, errors.New("coin not found")
+}
+
+func (c Coins) GetDenomByEthereumAddress(address string) (string, error) {
+	coin, err := c.GetByEthereumAddress(address)
+	if err != nil {
+		return "", errors.New("coin not found")
+	}
+
+	return coin.Denom, nil
 }
 
 func (c Coins) GetDenomByMinterId(id uint64) (string, error) {
