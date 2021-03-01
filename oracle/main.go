@@ -82,6 +82,15 @@ func relayPrices(minterClient *http_client.Client, cosmosConn *grpc.ClientConn, 
 
 	basecoinPrice := getBasecoinPrice(logger)
 	for _, coin := range coins.GetCoins() {
+		if coin.MinterId == 0 {
+			prices.List = append(prices.List, &types.Price{
+				Name:  fmt.Sprintf("minter/%d", coin.MinterId),
+				Value: basecoinPrice,
+			})
+
+			continue
+		}
+
 		response, err := minterClient.EstimateCoinIDSell(0, coin.MinterId, pipInBip.String())
 		if err != nil {
 			_, payload, err := http_client.ErrorBody(err)
