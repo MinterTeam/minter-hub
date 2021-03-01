@@ -2,6 +2,7 @@ syntax = "proto3";
 package oracle.v1;
 
 import "oracle/v1/msgs.proto";
+import "gogoproto/gogo.proto";
 
 option go_package = "github.com/MinterTeam/mhub/chain/x/oracle/types";
 
@@ -34,6 +35,6 @@ message Vote {
 message Coin {
   string denom = 1;
   string eth_addr = 2;
-  uint64 minter_id = 3;
+  uint64 minter_id = 3 [(gogoproto.jsontag) = "minter_id"];
   uint64 eth_decimals = 4;
 }
