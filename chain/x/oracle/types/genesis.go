@@ -141,6 +141,21 @@ func validateCoins(i interface{}) error {
 	if _, ok := i.([]*Coin); !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
+
+	for _, coin := range i.([]*Coin) {
+		if coin.Denom == "" {
+			return fmt.Errorf("empty denom is not allowed")
+		}
+
+		if coin.EthDecimals == 0 {
+			return fmt.Errorf("incorrect eth decimals")
+		}
+
+		if coin.EthAddr == "" { // todo: check
+			return fmt.Errorf("incorrect eth addr")
+		}
+	}
+
 	return nil
 }
 
