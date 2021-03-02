@@ -40,9 +40,9 @@ message Coin {
 }
 
 message TxStatus {
-  string in_tx_hash = 1;
-  string out_tx_hash = 2;
-  TxStatusType status = 3;
+  string in_tx_hash = 1 [(gogoproto.jsontag) = "in_tx_hash"];
+  string out_tx_hash = 2 [(gogoproto.jsontag) = "out_tx_hash"];
+  TxStatusType status = 3 [(gogoproto.jsontag) = "status"];
 }
 
 enum TxStatusType {

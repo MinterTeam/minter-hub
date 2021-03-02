@@ -83,7 +83,7 @@ func queryTxStatus(ctx sdk.Context, keeper Keeper, txHash string) ([]byte, error
 	if err := m.Marshal(&msg, keeper.GetTxStatus(ctx, txHash)); err != nil {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error())
 	}
-	
+
 	return msg.Bytes(), nil
 }
 
