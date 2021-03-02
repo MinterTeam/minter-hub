@@ -59,11 +59,22 @@ pub fn to_arrays(input: Vec<PeggySignature>) -> PeggySignatureArrays {
     let mut r = Vec::new();
     let mut s = Vec::new();
     for val in input {
+        let mut r_val = val.r.to_bytes_be();
+        let mut s_val = val.r.to_bytes_be();
+
+        r_val.reverse();
+        r_val.append((0..32-r_val.len()).collect());
+        r_val.reverse();
+
+        s_val.reverse();
+        s_val.append((0..32-s_val.len()).collect());
+        s_val.reverse();
+
         addresses.push(val.eth_address);
         powers.push(val.power);
         v.push(val.v);
-        r.push(Token::Bytes(val.r.to_bytes_be()));
-        s.push(Token::Bytes(val.s.to_bytes_be()));
+        r.push(Token::Bytes(r_val));
+        s.push(Token::Bytes(s_val));
     }
     PeggySignatureArrays {
         addresses,
