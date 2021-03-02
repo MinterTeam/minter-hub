@@ -60,7 +60,7 @@ pub fn to_arrays(input: Vec<PeggySignature>) -> PeggySignatureArrays {
     let mut s = Vec::new();
     for val in input {
         let mut r_val = val.r.to_bytes_be();
-        let mut s_val = val.r.to_bytes_be();
+        let mut s_val = val.s.to_bytes_be();
 
         r_val.reverse();
         r_val.append(&mut vec![0; 32-r_val.len() as usize]);
