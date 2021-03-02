@@ -63,11 +63,11 @@ pub fn to_arrays(input: Vec<PeggySignature>) -> PeggySignatureArrays {
         let mut s_val = val.r.to_bytes_be();
 
         r_val.reverse();
-        r_val.append((0..32-r_val.len()).collect());
+        r_val.append(&mut vec![0; 32-r_val.len() as usize]);
         r_val.reverse();
 
         s_val.reverse();
-        s_val.append((0..32-s_val.len()).collect());
+        s_val.append(&mut vec![0; 32-s_val.len() as usize]);
         s_val.reverse();
 
         addresses.push(val.eth_address);
