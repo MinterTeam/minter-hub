@@ -1,10 +1,12 @@
 package keeper
 
 import (
+	"bytes"
 	"github.com/MinterTeam/mhub/chain/x/oracle/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/gogo/protobuf/jsonpb"
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
@@ -76,11 +78,13 @@ func queryCoins(ctx sdk.Context, keeper Keeper) ([]byte, error) {
 }
 
 func queryTxStatus(ctx sdk.Context, keeper Keeper, txHash string) ([]byte, error) {
-	res, err := codec.MarshalJSONIndent(types.ModuleCdc, keeper.GetTxStatus(ctx, txHash))
-	if err != nil {
+	var msg bytes.Buffer
+	m := jsonpb.Marshaler{}
+	if err := m.Marshal(&msg, keeper.GetTxStatus(ctx, txHash)); err != nil {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error())
 	}
-	return res, nil
+	
+	return msg.Bytes(), nil
 }
 
 func queryEthFee(ctx sdk.Context, keeper Keeper) ([]byte, error) {
