@@ -13,6 +13,7 @@ const (
 	QueryPrices       = "prices"
 	QueryEthFee       = "eth_fee"
 	QueryCoins        = "coins"
+	QueryTxStatus     = "tx_status"
 )
 
 // NewQuerier is the module level router for state queries
@@ -27,6 +28,8 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return queryEthFee(ctx, keeper)
 		case QueryCoins:
 			return queryCoins(ctx, keeper)
+		case QueryTxStatus:
+			return queryTxStatus(ctx, keeper, path[1])
 		default:
 			return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "unknown %s query endpoint", types.ModuleName)
 		}
@@ -66,6 +69,14 @@ func queryPrices(ctx sdk.Context, keeper Keeper) ([]byte, error) {
 
 func queryCoins(ctx sdk.Context, keeper Keeper) ([]byte, error) {
 	res, err := codec.MarshalJSONIndent(types.ModuleCdc, keeper.GetCoins(ctx).List())
+	if err != nil {
+		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error())
+	}
+	return res, nil
+}
+
+func queryTxStatus(ctx sdk.Context, keeper Keeper, txHash string) ([]byte, error) {
+	res, err := codec.MarshalJSONIndent(types.ModuleCdc, keeper.GetTxStatus(ctx, txHash))
 	if err != nil {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error())
 	}

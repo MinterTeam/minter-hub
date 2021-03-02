@@ -38,3 +38,19 @@ message Coin {
   uint64 minter_id = 3 [(gogoproto.jsontag) = "minter_id"];
   uint64 eth_decimals = 4;
 }
+
+message TxStatus {
+  string in_tx_hash = 1;
+  string out_tx_hash = 2;
+  TxStatusType status = 3;
+}
+
+enum TxStatusType {
+  option (gogoproto.goproto_enum_prefix) = false;
+
+  TX_STATUS_NOT_FOUND  = 0 [(gogoproto.enumvalue_customname) = "TX_STATUS_NOT_FOUND" ];
+  TX_STATUS_DEPOSIT_RECEIVED  = 1 [(gogoproto.enumvalue_customname) = "TX_STATUS_DEPOSIT_RECEIVED" ];
+  TX_STATUS_BATCH_CREATED = 2 [(gogoproto.enumvalue_customname) = "TX_STATUS_BATCH_CREATED"];
+  TX_STATUS_BATCH_EXECUTED   = 3 [(gogoproto.enumvalue_customname) = "TX_STATUS_BATCH_EXECUTED"];
+  TX_STATUS_REFUNDED   = 4 [(gogoproto.enumvalue_customname) = "TX_STATUS_REFUNDED"];
+}

@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	oracletypes "github.com/MinterTeam/mhub/chain/x/oracle/types"
 	"strconv"
 
 	"github.com/MinterTeam/mhub/chain/x/peggy/types"
@@ -84,6 +85,7 @@ func (k Keeper) BuildOutgoingTXBatch(ctx sdk.Context, contractAddress string, ma
 
 	for _, tx := range selectedTx {
 		batchEvent = batchEvent.AppendAttributes(sdk.NewAttribute(types.AttributeKeyTxHash, tx.TxHash))
+		k.oracleKeeper.SetTxStatus(ctx, tx.TxHash, oracletypes.TX_STATUS_BATCH_CREATED, "txHash")
 	}
 
 	ctx.EventManager().EmitEvent(batchEvent)
@@ -140,6 +142,7 @@ func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, tokenContract string, n
 
 	for _, tx := range b.Transactions {
 		batchEventExecuted = batchEventExecuted.AppendAttributes(sdk.NewAttribute(types.AttributeKeyTxHash, tx.TxHash))
+		k.oracleKeeper.SetTxStatus(ctx, tx.TxHash, oracletypes.TX_STATUS_BATCH_EXECUTED, txHash)
 	}
 
 	ctx.EventManager().EmitEvent(batchEventExecuted)

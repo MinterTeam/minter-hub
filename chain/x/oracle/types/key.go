@@ -38,6 +38,8 @@ var (
 	CurrentEpochKey = []byte{0x3}
 
 	CurrentPricesKey = []byte{0x4}
+
+	TxStatusKey = []byte{0x5}
 )
 
 // GetClaimKey returns the following key format
@@ -98,4 +100,11 @@ func GetAttestationKeyWithHash(epoch uint64, claimHash []byte) []byte {
 	copy(key[len(OracleAttestationKey):], UInt64Bytes(epoch))
 	copy(key[len(OracleAttestationKey)+len(UInt64Bytes(0)):], claimHash)
 	return key
+}
+
+// GetValsetRequestKey returns the following key format
+// prefix    nonce
+// [0x0][0 0 0 0 0 0 0 1]
+func GetTxStatusKey(inTxHash string) []byte {
+	return append(TxStatusKey, []byte(inTxHash)...)
 }

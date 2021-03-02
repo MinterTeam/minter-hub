@@ -182,70 +182,15 @@ func currentValsetHandler(cliCtx client.Context, storeName string) http.HandlerF
 	}
 }
 
-func txStatusHandler(cliCtx client.Context, storeName string) http.HandlerFunc {
+func txStatusHandler(cliCtx client.Context, _ string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		node, err := cliCtx.GetNode()
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		status, err := node.Status(r.Context())
-		if err != nil {
-			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		height := status.SyncInfo.LatestBlockHeight
-
 		vars := mux.Vars(r)
-		tx_hash := vars[txHash]
 
-		statuses := []string{
-			"eth_outgoing_batch_executed",
-			"eth_outgoing_batch",
-			"minter_refund",
-			"eth_refund",
-			"minter_deposit_received",
+		res, height, err := cliCtx.Query(fmt.Sprintf("custom/oracle/tx_status/%s", vars[txHash]))
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
+			return
 		}
-
-		for _, status := range statuses {
-			result, err := node.TxSearch(r.Context(), fmt.Sprintf("%s.tx_hash='%s'", status, tx_hash), false, nil, nil, "")
-			if err != nil {
-				rest.WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
-				return
-			}
-
-			if result.TotalCount > 0 {
-				if status == "eth_outgoing_batch_executed" {
-					var hash string
-					for _, event := range result.Txs[0].TxResult.Events {
-						for _, att := range event.Attributes {
-							if string(att.GetKey()) == "batch_tx_hash" {
-								hash = string(att.GetValue())
-							}
-						}
-					}
-					rest.PostProcessResponse(w, cliCtx.WithHeight(height), cliCtx.LegacyAmino.MustMarshalJSON(struct {
-						Status string `json:"status"`
-						TxHash string `json:"tx_hash"`
-					}{
-						Status: status,
-						TxHash: hash,
-					}))
-					return
-				}
-
-				rest.PostProcessResponse(w, cliCtx.WithHeight(height), cliCtx.LegacyAmino.MustMarshalJSON(struct {
-					Status string `json:"status"`
-				}{
-					Status: status,
-				}))
-
-				return
-			}
-		}
-
-		rest.PostProcessResponse(w, cliCtx.WithHeight(height), "not found")
+		rest.PostProcessResponse(w, cliCtx.WithHeight(height), res)
 	}
 }

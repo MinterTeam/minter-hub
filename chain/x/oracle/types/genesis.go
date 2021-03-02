@@ -154,6 +154,8 @@ func validateCoins(i interface{}) error {
 		if coin.EthAddr == "" { // todo: check
 			return fmt.Errorf("incorrect eth addr")
 		}
+
+		// todo: check duplicates
 	}
 
 	return nil

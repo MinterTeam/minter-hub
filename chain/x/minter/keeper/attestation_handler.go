@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"github.com/MinterTeam/mhub/chain/x/minter/types"
+	oracletypes "github.com/MinterTeam/mhub/chain/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
@@ -82,6 +83,8 @@ func (a *AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, clai
 		)
 		ctx.EventManager().EmitEvent(depositEvent)
 
+		a.keeper.oracleKeeper.SetTxStatus(ctx, claim.TxHash, oracletypes.TX_STATUS_DEPOSIT_RECEIVED, claim.TxHash)
+
 	case *types.MsgSendToEthClaim:
 		if claim.Amount.LT(minDepositAmount) {
 			return sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, "amount is too small to be deposited")
@@ -151,6 +154,9 @@ func (a *AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, clai
 				sdk.NewAttribute(types.AttributeKeyTxHash, claim.TxHash),
 			)
 			ctx.EventManager().EmitEvent(refundEvent)
+
+			a.keeper.oracleKeeper.SetTxStatus(ctx, claim.TxHash, oracletypes.TX_STATUS_REFUNDED, "")
+
 			_, err := a.keeper.AddToOutgoingPool(ctx, receiver, claim.MinterSender, claim.TxHash, sdk.NewCoin(denom, claim.Amount).Sub(commission))
 			if err != nil {
 				return sdkerrors.Wrap(err, "refund")

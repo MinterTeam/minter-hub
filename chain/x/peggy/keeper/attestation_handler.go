@@ -2,6 +2,7 @@ package keeper
 
 import (
 	minterkeeper "github.com/MinterTeam/mhub/chain/x/minter/keeper"
+	oracletypes "github.com/MinterTeam/mhub/chain/x/oracle/types"
 	"github.com/MinterTeam/mhub/chain/x/peggy/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -80,6 +81,8 @@ func (a AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, claim
 			sdk.NewAttribute(types.AttributeKeyTxHash, claim.TxHash),
 		)
 		ctx.EventManager().EmitEvent(depositEvent)
+
+		a.keeper.oracleKeeper.SetTxStatus(ctx, claim.TxHash, oracletypes.TX_STATUS_DEPOSIT_RECEIVED, "")
 
 	case *types.MsgSendToMinterClaim:
 		amount := a.keeper.oracleKeeper.ConvertFromEthValue(ctx, claim.TokenContract, claim.Amount)

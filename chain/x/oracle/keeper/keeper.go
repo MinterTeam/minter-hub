@@ -71,6 +71,31 @@ func (k Keeper) GetPipInBip() sdk.Int {
 	return t
 }
 
+func (k Keeper) SetTxStatus(ctx sdk.Context, inTxHash string, status types.TxStatusType, outTxHash string) {
+	ctx.KVStore(k.storeKey).Set(types.GetTxStatusKey(inTxHash), k.cdc.MustMarshalBinaryBare(&types.TxStatus{
+		InTxHash:  inTxHash,
+		OutTxHash: outTxHash,
+		Status:    status,
+	}))
+}
+
+func (k Keeper) GetTxStatus(ctx sdk.Context, inTxHash string) *types.TxStatus {
+	store := ctx.KVStore(k.storeKey)
+	bytes := store.Get(types.GetTxStatusKey(inTxHash))
+
+	if len(bytes) == 0 {
+		return &types.TxStatus{
+			InTxHash: inTxHash,
+			Status:   types.TX_STATUS_NOT_FOUND,
+		}
+	}
+
+	var status types.TxStatus
+	k.cdc.MustUnmarshalBinaryBare(bytes, &status)
+
+	return &status
+}
+
 func (k Keeper) GetMinterPrice(ctx sdk.Context, id uint64) (sdk.Int, error) {
 	return k.getPrice(ctx, fmt.Sprintf("minter/%d", id))
 }

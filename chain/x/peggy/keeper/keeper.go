@@ -4,6 +4,7 @@ import (
 	"fmt"
 	minterkeeper "github.com/MinterTeam/mhub/chain/x/minter/keeper"
 	oraclekeeper "github.com/MinterTeam/mhub/chain/x/oracle/keeper"
+	oracletypes "github.com/MinterTeam/mhub/chain/x/oracle/types"
 	"github.com/MinterTeam/mhub/chain/x/peggy/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
@@ -56,6 +57,10 @@ func NewKeeper(cdc codec.BinaryMarshaler, storeKey sdk.StoreKey, paramSpace para
 	}
 
 	return k
+}
+
+func (k Keeper) MinterKeeper() minterkeeper.Keeper {
+	return k.minterKeeper
 }
 
 func (k Keeper) OracleKeeper() oraclekeeper.Keeper {
@@ -440,6 +445,8 @@ func (k Keeper) RefundOutgoingTx(ctx sdk.Context, id uint64, tx *types.OutgoingT
 		sdk.NewAttribute(types.AttributeKeyTxHash, tx.TxHash),
 	)
 	ctx.EventManager().EmitEvent(refundEvent)
+
+	k.oracleKeeper.SetTxStatus(ctx, tx.TxHash, oracletypes.TX_STATUS_REFUNDED, "")
 }
 
 func (k Keeper) SetLockedCoins(ctx sdk.Context, coins sdk.Coins) {
