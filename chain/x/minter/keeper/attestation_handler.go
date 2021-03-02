@@ -83,7 +83,7 @@ func (a *AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, clai
 		)
 		ctx.EventManager().EmitEvent(depositEvent)
 
-		a.keeper.oracleKeeper.SetTxStatus(ctx, claim.TxHash, oracletypes.TX_STATUS_DEPOSIT_RECEIVED, claim.TxHash)
+		a.keeper.oracleKeeper.SetTxStatus(ctx, claim.TxHash, oracletypes.TX_STATUS_DEPOSIT_RECEIVED, "")
 
 	case *types.MsgSendToEthClaim:
 		if claim.Amount.LT(minDepositAmount) {

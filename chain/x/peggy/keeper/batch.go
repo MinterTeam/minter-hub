@@ -85,7 +85,7 @@ func (k Keeper) BuildOutgoingTXBatch(ctx sdk.Context, contractAddress string, ma
 
 	for _, tx := range selectedTx {
 		batchEvent = batchEvent.AppendAttributes(sdk.NewAttribute(types.AttributeKeyTxHash, tx.TxHash))
-		k.oracleKeeper.SetTxStatus(ctx, tx.TxHash, oracletypes.TX_STATUS_BATCH_CREATED, "txHash")
+		k.oracleKeeper.SetTxStatus(ctx, tx.TxHash, oracletypes.TX_STATUS_BATCH_CREATED, "")
 	}
 
 	ctx.EventManager().EmitEvent(batchEvent)
