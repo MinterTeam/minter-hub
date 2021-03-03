@@ -80,7 +80,8 @@ func queryCoins(ctx sdk.Context, keeper Keeper) ([]byte, error) {
 func queryTxStatus(ctx sdk.Context, keeper Keeper, txHash string) ([]byte, error) {
 	var msg bytes.Buffer
 	m := jsonpb.Marshaler{
-		OrigName: true,
+		EmitDefaults: true,
+		OrigName:     true,
 	}
 	if err := m.Marshal(&msg, keeper.GetTxStatus(ctx, txHash)); err != nil {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error())
