@@ -36,8 +36,16 @@ func (a AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, claim
 			}
 		}
 
+		var priceNames []string
+		for name := range pricesSum {
+			priceNames = append(priceNames, name)
+		}
+		sort.Strings(priceNames)
+
 		prices := types.Prices{}
-		for name, price := range pricesSum {
+		for _, name := range priceNames {
+			price := pricesSum[name]
+
 			sort.Slice(price, func(i, j int) bool {
 				return price[i].LT(price[j])
 			})
