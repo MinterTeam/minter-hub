@@ -58,7 +58,7 @@ func DefaultParams() *Params {
 			{
 				Denom:       "hub",
 				EthAddr:     "0x8C2B6949590bEBE6BC1124B670e58DA85b081b2E",
-				MinterId:    1,
+				MinterId:    3,
 				EthDecimals: 18,
 			},
 			{
@@ -66,6 +66,12 @@ func DefaultParams() *Params {
 				EthAddr:     "0x4d153722A1b75204c52CD8681eaED174b90fD1A8",
 				MinterId:    207,
 				EthDecimals: 6,
+			},
+			{
+				Denom:       "mntx",
+				EthAddr:     "0xc5aFf52d62e9062327b3b2ECfe00E8E64F8B045f",
+				MinterId:    0,
+				EthDecimals: 18,
 			},
 		},
 		MinBatchGas:          100000,
