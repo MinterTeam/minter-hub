@@ -7,7 +7,6 @@ import (
 	crisistypes "github.com/cosmos/cosmos-sdk/x/crisis/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
-	"strconv"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -24,7 +23,7 @@ import (
 
 func AddPrepGenesisCmd(defaultNodeHome string) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "prep-genesis [hub-coin-id]",
+		Use:   "prep-genesis",
 		Short: "Prepare genesis values",
 		Long:  ``,
 		Args:  cobra.ExactArgs(1),
@@ -96,8 +95,6 @@ func AddPrepGenesisCmd(defaultNodeHome string) *cobra.Command {
 
 			var oracleGenState oracletypes.GenesisState
 			cdc.MustUnmarshalJSON(appState[oracletypes.ModuleName], &oracleGenState)
-			minterId, _ := strconv.Atoi(args[0])
-			oracleGenState.Params.Coins[0].MinterId = uint64(minterId)
 			oracleGenStateBz, err := cdc.MarshalJSON(&oracleGenState)
 			if err != nil {
 				return fmt.Errorf("failed to marshal auth genesis state: %w", err)
