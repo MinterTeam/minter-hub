@@ -105,8 +105,6 @@ func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, tokenContract string, n
 	for _, tx := range b.Transactions {
 		totalFee = totalFee.Add(tx.Erc20Fee.PeggyCoin(ctx, k.oracleKeeper))
 		k.removePoolEntry(ctx, tx.Id)
-
-		k.SubLockedCoins(ctx, sdk.Coins{tx.Erc20Token.PeggyCoin(ctx, k.oracleKeeper)})
 	}
 	commissionKeeperAddress := sdk.AccAddress{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 	vouchers := sdk.Coins{totalFee}

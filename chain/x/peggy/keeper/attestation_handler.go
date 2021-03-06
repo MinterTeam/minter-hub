@@ -35,8 +35,6 @@ func (a AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, claim
 			return sdkerrors.Wrap(err, "invalid coin")
 		}
 
-		a.keeper.AddLockedCoins(ctx, sdk.NewCoins(coin))
-
 		vouchers := sdk.Coins{coin}
 		if err := a.bankKeeper.MintCoins(ctx, types.ModuleName, vouchers); err != nil {
 			return sdkerrors.Wrapf(err, "mint vouchers coins: %s", vouchers)

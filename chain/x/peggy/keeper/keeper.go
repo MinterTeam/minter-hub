@@ -449,36 +449,6 @@ func (k Keeper) RefundOutgoingTx(ctx sdk.Context, id uint64, tx *types.OutgoingT
 	k.oracleKeeper.SetTxStatus(ctx, tx.TxHash, oracletypes.TX_STATUS_REFUNDED, "")
 }
 
-func (k Keeper) SetLockedCoins(ctx sdk.Context, coins sdk.Coins) {
-	store := ctx.KVStore(k.storeKey)
-	store.Set(types.LockedCoinsKey, k.cdc.MustMarshalBinaryBare(&types.LockedCoins{List: coins}))
-}
-
-func (k Keeper) AddLockedCoins(ctx sdk.Context, coins sdk.Coins) {
-	k.SetLockedCoins(ctx, k.GetLockedCoins(ctx).Add(coins...))
-}
-
-func (k Keeper) SubLockedCoins(ctx sdk.Context, coins sdk.Coins) {
-	list, success := k.GetLockedCoins(ctx).SafeSub(coins)
-	if !success {
-		panic("fatal error")
-	}
-	k.SetLockedCoins(ctx, list)
-}
-
-func (k Keeper) GetLockedCoins(ctx sdk.Context) sdk.Coins {
-	store := ctx.KVStore(k.storeKey)
-	data := store.Get(types.LockedCoinsKey)
-	if len(data) == 0 {
-		return sdk.Coins{}
-	}
-
-	lc := types.LockedCoins{}
-	k.cdc.MustUnmarshalBinaryBare(data, &lc)
-
-	return lc.GetList()
-}
-
 // prefixRange turns a prefix into a (start, end) range. The start is the given prefix value and
 // the end is calculated by adding 1 bit to the start value. Nil is not allowed as prefix.
 // 		Example: []byte{1, 3, 4} becomes []byte{1, 3, 5}
