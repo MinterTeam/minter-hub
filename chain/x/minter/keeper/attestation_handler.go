@@ -70,6 +70,8 @@ func (a *AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, clai
 					return sdkerrors.Wrap(err, "commission withdrawal")
 				}
 			}
+
+			a.keeper.BuildOutgoingTXBatch(ctx, OutgoingTxBatchSize)
 		}
 
 		if err = a.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, addr, vouchers); err != nil {
