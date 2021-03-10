@@ -30,10 +30,11 @@ message Params {
                                                (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
                                                (gogoproto.nullable)   = false
                                                ];
-  bool stopped      = 11;
+  bool stopped                            = 11;
 }
 
 // GenesisState struct
 message GenesisState {
-  Params params = 1;
+  Params params             = 1;
+  uint64 start_minter_nonce = 2;
 }

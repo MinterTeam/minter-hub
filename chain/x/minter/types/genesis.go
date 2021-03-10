@@ -74,7 +74,8 @@ func (s GenesisState) ValidateBasic() error {
 // TODO: set some better defaults here
 func DefaultGenesisState() *GenesisState {
 	return &GenesisState{
-		Params: DefaultParams(),
+		Params:           DefaultParams(),
+		StartMinterNonce: 1,
 	}
 }
 
