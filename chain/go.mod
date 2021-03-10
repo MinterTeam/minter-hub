@@ -3,7 +3,7 @@ module github.com/MinterTeam/mhub/chain
 go 1.15
 
 require (
-	github.com/cosmos/cosmos-sdk v0.41.4
+	github.com/cosmos/cosmos-sdk v0.42.0
 	github.com/ethereum/go-ethereum v1.9.21
 	github.com/gogo/protobuf v1.3.3
 	github.com/golang/protobuf v1.4.3
