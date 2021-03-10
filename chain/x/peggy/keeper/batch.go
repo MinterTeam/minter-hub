@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	minterkeeper "github.com/MinterTeam/mhub/chain/x/minter/keeper"
 	oracletypes "github.com/MinterTeam/mhub/chain/x/oracle/types"
 	"strconv"
 
@@ -117,6 +118,7 @@ func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, tokenContract string, n
 	}
 
 	k.minterKeeper.AddToOutgoingPool(ctx, commissionKeeperAddress, "Mx"+txSender[2:], txHash, totalFee)
+	k.minterKeeper.BuildOutgoingTXBatch(ctx, minterkeeper.OutgoingTxBatchSize)
 
 	// Iterate through remaining batches
 	k.IterateOutgoingTXBatches(ctx, func(key []byte, iterBatch *types.OutgoingTxBatch) bool {
