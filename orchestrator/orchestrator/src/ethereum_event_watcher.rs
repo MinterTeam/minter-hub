@@ -27,7 +27,7 @@ pub async fn check_for_events(
     starting_block: Uint256,
 ) -> Result<Uint256, PeggyError> {
     let our_cosmos_address = our_private_key.to_public_key().unwrap().to_address();
-    let latest_block = (web3.eth_block_number().await?).sub(Uint256::from(5u64));
+    let latest_block = web3.eth_block_number().await?.sub(5u64.into());
 
     let deposits = web3
         .check_for_events(
