@@ -40,7 +40,7 @@ func GetLatestMinterBlockAndNonce(ctx context.Context, currentNonce uint64) cont
 
 	firstBlock := ctx.LastCheckedMinterBlock
 
-	const blocksPerBatch = 50
+	const blocksPerBatch = 100
 	for i := uint64(0); i <= uint64(math.Ceil(float64(latestBlock-firstBlock)/blocksPerBatch)); i++ {
 		from := firstBlock + 1 + i*blocksPerBatch
 		to := firstBlock + (i+1)*blocksPerBatch
