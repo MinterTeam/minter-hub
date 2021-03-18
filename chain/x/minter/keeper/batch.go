@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	oracletypes "github.com/MinterTeam/mhub/chain/x/oracle/types"
 	"strconv"
 
 	"github.com/MinterTeam/mhub/chain/x/minter/types"
@@ -54,7 +55,7 @@ func (k Keeper) BuildOutgoingTXBatch(ctx sdk.Context, maxElements int) (*types.O
 
 // OutgoingTxBatchExecuted is run when the Cosmos chain detects that a batch has been executed on Ethereum
 // It frees all the transactions in the batch, then cancels all earlier batches
-func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, nonce uint64) error {
+func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, nonce uint64, hash string) error {
 	b := k.GetOutgoingTXBatch(ctx, nonce)
 	if b == nil {
 		return sdkerrors.Wrap(types.ErrUnknown, "nonce")
@@ -87,6 +88,7 @@ func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, nonce uint64) error {
 
 	for _, tx := range b.Transactions {
 		batchEventExecuted = batchEventExecuted.AppendAttributes(sdk.NewAttribute(types.AttributeKeyTxHash, tx.TxHash))
+		k.oracleKeeper.SetTxStatus(ctx, tx.TxHash, oracletypes.TX_STATUS_BATCH_EXECUTED, hash)
 	}
 
 	ctx.EventManager().EmitEvent(batchEventExecuted)

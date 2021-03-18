@@ -166,7 +166,7 @@ func (a *AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, clai
 		}
 
 	case *types.MsgWithdrawClaim:
-		return a.keeper.OutgoingTxBatchExecuted(ctx, claim.BatchNonce)
+		return a.keeper.OutgoingTxBatchExecuted(ctx, claim.BatchNonce, claim.TxHash)
 	case *types.MsgValsetClaim:
 		return a.keeper.ValsetExecuted(ctx, claim.ValsetNonce)
 
