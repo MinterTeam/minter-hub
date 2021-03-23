@@ -3,7 +3,7 @@
 ## Install
 
 ```bash
-apt-get install git build-essential wget curl
+apt-get install git build-essential wget curl libssl-dev pkg-config
 wget https://golang.org/dl/go1.16.2.linux-amd64.tar.gz
 rm -rf /usr/local/go && tar -C /usr/local -xzf go1.16.2.linux-amd64.tar.gz
 echo 'export PATH=$PATH:/usr/local/go/bin:~/go/bin' >> ~/.profile
@@ -40,4 +40,19 @@ make install
 cd ~/minter-hub/orchestrator
 cargo install --path orchestrator
 cargo install --path register_delegate_keys
+```
+
+## Run
+
+1. Install and sync Minter Node
+2. Install and sync Ethereum node
+3. Install and sync Minter Hub node:
+
+```bash
+mhub init
+curl https://raw.githubusercontent.com/MinterTeam/minter-hub/master/testnet-genesis.json > ~/.mhub/config/genesis.json
+```
+
+```bash
+mhub start --p2p.persistent_peers="7fa4682d269d95a61146741f7fad404bb45f52cd@138.68.24.68:36656"
 ```
