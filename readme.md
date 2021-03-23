@@ -56,3 +56,12 @@ curl https://raw.githubusercontent.com/MinterTeam/minter-hub/master/testnet-gene
 ```bash
 mhub start --p2p.persistent_peers="7fa4682d269d95a61146741f7fad404bb45f52cd@138.68.24.68:36656"
 ```
+
+```bash
+mhub keys add --keyring-backend test validator1
+```
+
+```bash
+mhub tendermint show-validator
+mhub tx staking create-validator --from=validator1 --keyring-backend test --amount=10hub --pubkey=cosmosvalconspub1zcjduepqfhcsrg04lmyyyzu9g2t72stduvt6j89lrsjxxww906g8zl69999qp05uhf  --commission-max-change-rate="0.1" --commission-max-rate="1" --commission-rate="0.1" --min-self-delegation="1"
+```
