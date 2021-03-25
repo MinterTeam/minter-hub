@@ -51,12 +51,12 @@ cargo install --path register_delegate_keys
 3. Install and sync Minter Hub node:
 
 ```bash
-mhub init
+mkdir -p ~/.mhub/config/
 curl https://raw.githubusercontent.com/MinterTeam/minter-hub/master/testnet-genesis.json > ~/.mhub/config/genesis.json
 ```
 
 ```bash
-mhub start --p2p.persistent_peers="7fa4682d269d95a61146741f7fad404bb45f52cd@138.68.24.68:36656"
+mhub start --p2p.persistent_peers="ee7b7f26caa6ef1dc2ff610f18e8b520482f9b01@46.101.215.17:36656"
 ```
 
 ```bash
