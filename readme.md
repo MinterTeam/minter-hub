@@ -39,6 +39,11 @@ make install
 ```
 
 ```bash
+cd ~/minter-hub/keys-generator
+make install
+```
+
+```bash
 cd ~/minter-hub/orchestrator
 cargo install --path orchestrator
 cargo install --path register_delegate_keys
