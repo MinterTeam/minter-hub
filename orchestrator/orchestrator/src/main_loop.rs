@@ -155,7 +155,7 @@ pub async fn eth_signer_main_loop(
     let mut grpc_client = grpc_client;
     let peggy_id = get_peggy_id(peggy_contract_address, our_ethereum_address, &web3).await;
     if peggy_id.is_err() {
-        error!("Failed to get PeggyID, check your Eth node");
+        error!("Failed to get PeggyID, check your Eth node: {}", peggy_id.unwrap_err());
         return;
     }
     let peggy_id = peggy_id.unwrap();
