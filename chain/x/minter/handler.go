@@ -292,6 +292,13 @@ func handleMsgRequestBatch(ctx sdk.Context, k keeper.Keeper, msg *types.MsgReque
 	if err != nil {
 		return nil, err
 	}
+
+	if batchID == nil {
+		return &sdk.Result{
+			Events: ctx.EventManager().Events().ToABCIEvents(),
+		}, nil
+	}
+
 	return &sdk.Result{
 		Data:   types.UInt64Bytes(batchID.BatchNonce),
 		Events: ctx.EventManager().Events().ToABCIEvents(),

@@ -27,6 +27,7 @@ func (k Keeper) BuildOutgoingTXBatch(ctx sdk.Context, maxElements int) (*types.O
 	if len(selectedTx) == 0 || err != nil {
 		return nil, err
 	}
+
 	nextID := k.autoIncrementID(ctx, types.KeyLastOutgoingBatchID)
 	minterNonce := k.autoIncrementID(ctx, types.MinterNonce)
 	batch := &types.OutgoingTxBatch{
