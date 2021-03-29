@@ -56,7 +56,7 @@ curl https://raw.githubusercontent.com/MinterTeam/minter-hub/master/testnet-gene
 ```
 
 ```bash
-mhub start --p2p.persistent_peers="ee7b7f26caa6ef1dc2ff610f18e8b520482f9b01@46.101.215.17:36656"
+mhub start --p2p.persistent_peers="ade35bb1f94a9297be97a1cfb29b16bd4e81ccf0@46.101.215.17:36656"
 ```
 
 ```bash
