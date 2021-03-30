@@ -103,6 +103,7 @@ func (k Keeper) ValsetExecuted(ctx sdk.Context, nonce uint64) error {
 		return sdkerrors.Wrap(types.ErrUnknown, "nonce")
 	}
 
+	k.setLastValset(ctx, b)
 	k.deleteValset(ctx, b)
 
 	return nil

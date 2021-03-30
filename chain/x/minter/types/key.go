@@ -59,6 +59,9 @@ var (
 	// LastObservedEventNonceKey indexes the latest event nonce
 	LastObservedEventNonceKey = []byte{0xf2}
 
+	// LastValsetKey
+	LastValsetKey = []byte{0xf3}
+
 	// SequenceKeyPrefix indexes different txids
 	SequenceKeyPrefix = []byte{0x7}
 

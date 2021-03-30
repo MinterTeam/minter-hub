@@ -157,53 +157,9 @@ func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 
 // EndBlock implements app module
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
-	currentBondedSet := am.keeper.StakingKeeper.GetBondedValidatorsByPower(ctx)
-	params := am.keeper.GetParams(ctx)
-
-	// valsets are sorted so the most recent one is first
-	valsets := am.keeper.GetValsets(ctx)
-	if len(valsets) == 0 {
+	lastValset := am.keeper.GetLastValset(ctx)
+	if lastValset == nil || types.BridgeValidators(am.keeper.GetCurrentValset(ctx).Members).PowerDiff(lastValset.Members) > 0.01 {
 		am.keeper.SetValsetRequest(ctx)
-	}
-
-	for i, vs := range valsets {
-		signedWithinWindow := uint64(ctx.BlockHeight()) > params.SignedValsetsWindow && uint64(ctx.BlockHeight())-params.SignedValsetsWindow > vs.Nonce
-		switch {
-		// #1 condition
-		// We look through the full bonded validator set (not just the active set, include unbonding validators)
-		// and we slash users who haven't signed a valset that is currentHeight - signedBlocksWindow old
-		case signedWithinWindow:
-
-			// first we need to see which validators in the active set
-			// haven't signed the valdiator set and slash them,
-			confirms := am.keeper.GetAllValsetConfirmsByNonce(ctx, vs.Nonce)
-			for _, val := range currentBondedSet {
-				found := false
-				for _, conf := range confirms {
-					if conf.MinterAddress == am.keeper.GetMinterAddress(ctx, sdk.AccAddress(val.GetOperator())) {
-						found = true
-						break
-					}
-				}
-				if !found {
-					cons, _ := val.GetConsAddr()
-					//k.StakingKeeper.Slash(ctx, cons,
-					//	ctx.BlockHeight(), val.ConsensusPower(),
-					//	params.SlashFractionValset)
-					am.keeper.StakingKeeper.Jail(ctx, cons)
-				}
-			}
-
-			// then we prune the valset from state
-			am.keeper.DeleteValset(ctx, vs.Nonce)
-
-		// on the latest validator set, check for change in power against
-		// current, and emit a new validator set if the change in power >1%
-		case i == 0:
-			if types.BridgeValidators(am.keeper.GetCurrentValset(ctx).Members).PowerDiff(vs.Members) > 0.01 {
-				am.keeper.SetValsetRequest(ctx)
-			}
-		}
 	}
 
 	return []abci.ValidatorUpdate{}

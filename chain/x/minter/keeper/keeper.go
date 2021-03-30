@@ -393,6 +393,21 @@ func (k Keeper) DeleteValset(ctx sdk.Context, nonce uint64) {
 	ctx.KVStore(k.storeKey).Delete(types.GetValsetRequestKey(nonce))
 }
 
+func (k Keeper) setLastValset(ctx sdk.Context, valset *types.Valset) {
+	ctx.KVStore(k.storeKey).Set(types.LastValsetKey, k.cdc.MustMarshalBinaryBare(valset))
+}
+
+func (k Keeper) GetLastValset(ctx sdk.Context) *types.Valset {
+	entity := ctx.KVStore(k.storeKey).Get(types.LastValsetKey)
+	if entity == nil {
+		return nil
+	}
+
+	valset := types.Valset{}
+	k.cdc.MustUnmarshalBinaryBare(entity, &valset)
+	return &valset
+}
+
 // prefixRange turns a prefix into a (start, end) range. The start is the given prefix value and
 // the end is calculated by adding 1 bit to the start value. Nil is not allowed as prefix.
 // 		Example: []byte{1, 3, 4} becomes []byte{1, 3, 5}
