@@ -159,7 +159,15 @@ func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
 	lastValset := am.keeper.GetLastValset(ctx)
 	if lastValset == nil || types.BridgeValidators(am.keeper.GetCurrentValset(ctx).Members).PowerDiff(lastValset.Members) > 0.01 {
-		am.keeper.SetValsetRequest(ctx)
+		hasPendingValset := false
+		am.keeper.IterateValsetRequest(ctx, func(_ []byte, _ *types.Valset) bool {
+			hasPendingValset = true
+			return true
+		})
+
+		if !hasPendingValset {
+			am.keeper.SetValsetRequest(ctx)
+		}
 	}
 
 	return []abci.ValidatorUpdate{}
