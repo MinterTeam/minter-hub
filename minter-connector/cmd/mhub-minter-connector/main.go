@@ -24,6 +24,7 @@ import (
 	"math"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -70,45 +71,42 @@ func main() {
 	ctx.Logger.Info("Starting with block", "height", ctx.LastCheckedMinterBlock, "eventNonce", ctx.LastEventNonce, "batchNonce", ctx.LastBatchNonce, "valsetNonce", ctx.LastValsetNonce)
 
 	{
-		privateKey, err := ethCrypto.HexToECDSA(minterWallet.PrivateKey)
-		if err != nil {
-			panic(err)
-		}
-
-		hash := ethCrypto.Keccak256(orcAddress.Bytes())
-		signature, err := types.NewMinterSignature(hash, privateKey)
-		if err != nil {
-			panic("signing cosmos address with Minter key")
-		}
-		// You've got to do all this to get an Eth address from the private key
-		publicKey := privateKey.Public()
-		publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
-		if !ok {
-			panic("casting public key to ECDSA")
-		}
-		minterAddress := ethCrypto.PubkeyToAddress(*publicKeyECDSA)
-
 		cosmosClient := types.NewQueryClient(ctx.CosmosConn)
 		response, err := cosmosClient.CurrentValset(c.TODO(), &types.QueryCurrentValsetRequest{})
 		if err != nil {
 			panic(err)
 		}
 
-		hasAddress := false
+		hasAddress := false // TODO
 		for _, member := range response.Valset.Members {
-			if member.MinterAddress == "Mx"+minterAddress.String()[2:] {
+			if strings.ToLower(member.MinterAddress) == strings.ToLower(minterWallet.Address) {
 				hasAddress = true
 				break
 			}
 		}
 
 		if !hasAddress {
+			ctx.Logger.Info("Updating our Minter address", "address", minterWallet.Address)
+
+			privateKey, err := ethCrypto.HexToECDSA(minterWallet.PrivateKey)
+			if err != nil {
+				panic(err)
+			}
+
+			hash := ethCrypto.Keccak256(orcAddress.Bytes())
+			signature, err := types.NewMinterSignature(hash, privateKey)
+			if err != nil {
+				panic("signing cosmos address with Minter key")
+			}
+			publicKey := privateKey.Public()
+			publicKeyECDSA, ok := publicKey.(*ecdsa.PublicKey)
+			if !ok {
+				panic("casting public key to ECDSA")
+			}
+			minterAddress := ethCrypto.PubkeyToAddress(*publicKeyECDSA)
+
 			cosmos.SendCosmosTx([]sdk.Msg{
 				types.NewMsgSetMinterAddress("Mx"+minterAddress.String()[2:], orcAddress, hex.EncodeToString(signature)),
-			}, orcAddress, orcPriv, cosmosConn, ctx.Logger)
-
-			go cosmos.SendCosmosTx([]sdk.Msg{
-				types.NewMsgValsetRequest(orcAddress),
 			}, orcAddress, orcPriv, cosmosConn, ctx.Logger)
 		}
 	}

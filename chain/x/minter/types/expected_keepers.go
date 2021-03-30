@@ -10,6 +10,7 @@ type StakingKeeper interface {
 	GetBondedValidatorsByPower(ctx sdk.Context) []stakingtypes.Validator
 	GetLastValidatorPower(ctx sdk.Context, operator sdk.ValAddress) int64
 	GetLastTotalPower(ctx sdk.Context) (power sdk.Int)
+	Jail(sdk.Context, sdk.ConsAddress)
 }
 
 // BankKeeper defines the expected bank keeper methods

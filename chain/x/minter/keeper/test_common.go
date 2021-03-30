@@ -311,6 +311,10 @@ type StakingKeeperMock struct {
 	ValidatorPower   map[string]int64
 }
 
+func (s *StakingKeeperMock) Jail(context sdk.Context, address sdk.ConsAddress) {
+	panic("implement me")
+}
+
 // GetBondedValidatorsByPower implements the interface for staking keeper required by peggy
 func (s *StakingKeeperMock) GetBondedValidatorsByPower(ctx sdk.Context) []stakingtypes.Validator {
 	return s.BondedValidators

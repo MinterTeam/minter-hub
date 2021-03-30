@@ -58,9 +58,9 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) {
 				}
 				if !found {
 					cons, _ := val.GetConsAddr()
-					k.StakingKeeper.Slash(ctx, cons,
-						ctx.BlockHeight(), val.ConsensusPower(),
-						params.SlashFractionValset)
+					//k.StakingKeeper.Slash(ctx, cons,
+					//	ctx.BlockHeight(), val.ConsensusPower(),
+					//	params.SlashFractionValset)
 					k.StakingKeeper.Jail(ctx, cons)
 				}
 			}
@@ -97,7 +97,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) {
 				}
 				if !found {
 					cons, _ := val.GetConsAddr()
-					k.StakingKeeper.Slash(ctx, cons, ctx.BlockHeight(), val.ConsensusPower(), params.SlashFractionBatch)
+					//k.StakingKeeper.Slash(ctx, cons, ctx.BlockHeight(), val.ConsensusPower(), params.SlashFractionBatch)
 					k.StakingKeeper.Jail(ctx, cons)
 				}
 			}
@@ -130,7 +130,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) {
 						validator, _ := sdk.ValAddressFromBech32(valaddr)
 						val := k.StakingKeeper.Validator(ctx, validator)
 						cons, _ := val.GetConsAddr()
-						k.StakingKeeper.Slash(ctx, cons, ctx.BlockHeight(), k.StakingKeeper.GetLastValidatorPower(ctx, validator), params.SlashFractionConflictingClaim)
+						//k.StakingKeeper.Slash(ctx, cons, ctx.BlockHeight(), k.StakingKeeper.GetLastValidatorPower(ctx, validator), params.SlashFractionConflictingClaim)
 						k.StakingKeeper.Jail(ctx, cons)
 					}
 					k.DeleteAttestation(ctx, att)
@@ -154,7 +154,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) {
 					}
 					if !found {
 						cons, _ := bv.GetConsAddr()
-						k.StakingKeeper.Slash(ctx, cons, ctx.BlockHeight(), k.StakingKeeper.GetLastValidatorPower(ctx, bv.GetOperator()), params.SlashFractionClaim)
+						//k.StakingKeeper.Slash(ctx, cons, ctx.BlockHeight(), k.StakingKeeper.GetLastValidatorPower(ctx, bv.GetOperator()), params.SlashFractionClaim)
 						k.StakingKeeper.Jail(ctx, cons)
 					}
 				}

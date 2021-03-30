@@ -4,6 +4,7 @@ import (
 	"fmt"
 	oraclekeeper "github.com/MinterTeam/mhub/chain/x/oracle/keeper"
 	"math"
+	"sort"
 	"strconv"
 
 	"github.com/MinterTeam/mhub/chain/x/minter/types"
@@ -361,6 +362,35 @@ func (k Keeper) IsStopped(ctx sdk.Context) bool {
 
 func (k Keeper) OracleKeeper() oraclekeeper.Keeper {
 	return k.oracleKeeper
+}
+
+func (k Keeper) GetValsets(ctx sdk.Context) (out []*types.Valset) {
+	k.IterateValsets(ctx, func(_ []byte, val *types.Valset) bool {
+		out = append(out, val)
+		return false
+	})
+	sort.Sort(types.Valsets(out))
+	return
+}
+
+// IterateValsets retruns all valsetRequests
+func (k Keeper) IterateValsets(ctx sdk.Context, cb func(key []byte, val *types.Valset) bool) {
+	prefixStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.ValsetRequestKey)
+	iter := prefixStore.ReverseIterator(nil, nil)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
+		var valset types.Valset
+		k.cdc.MustUnmarshalBinaryBare(iter.Value(), &valset)
+		// cb returns true to stop early
+		if cb(iter.Key(), &valset) {
+			break
+		}
+	}
+}
+
+// DeleteValset deletes the valset at a given nonce from state
+func (k Keeper) DeleteValset(ctx sdk.Context, nonce uint64) {
+	ctx.KVStore(k.storeKey).Delete(types.GetValsetRequestKey(nonce))
 }
 
 // prefixRange turns a prefix into a (start, end) range. The start is the given prefix value and
