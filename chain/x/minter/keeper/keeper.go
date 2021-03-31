@@ -63,6 +63,10 @@ func NewKeeper(cdc codec.BinaryMarshaler, storeKey sdk.StoreKey, paramSpace para
 // i.e. {"nonce": 1, "memebers": [{"eth_addr": "foo", "power": 11223}]}
 func (k Keeper) SetValsetRequest(ctx sdk.Context) *types.Valset {
 	valset := k.GetCurrentValset(ctx)
+	if len(valset.Members) == 0 {
+		return nil
+	}
+
 	valset.MinterNonce = k.autoIncrementID(ctx, types.MinterNonce)
 	k.storeValset(ctx, valset)
 
@@ -270,20 +274,22 @@ func (k Keeper) GetMinterAddress(ctx sdk.Context, validator sdk.AccAddress) stri
 // implementations are involved.
 func (k Keeper) GetCurrentValset(ctx sdk.Context) *types.Valset {
 	validators := k.StakingKeeper.GetBondedValidatorsByPower(ctx)
-	bridgeValidators := make([]*types.BridgeValidator, len(validators))
+	var bridgeValidators []*types.BridgeValidator
 	var totalPower uint64
 	// TODO someone with in depth info on Cosmos staking should determine
 	// if this is doing what I think it's doing
-	for i, validator := range validators {
+	for _, validator := range validators {
 		validatorAddress := validator.GetOperator()
 		valAddr := sdk.AccAddress(validatorAddress)
 
 		p := uint64(k.StakingKeeper.GetLastValidatorPower(ctx, validatorAddress))
 		totalPower += p
 
-		bridgeValidators[i] = &types.BridgeValidator{Power: p}
 		if minterAddr := k.GetMinterAddress(ctx, valAddr); minterAddr != "" {
-			bridgeValidators[i].MinterAddress = minterAddr
+			bridgeValidators = append(bridgeValidators, &types.BridgeValidator{
+				Power:         p,
+				MinterAddress: minterAddr,
+			})
 		}
 	}
 	// normalize power values
