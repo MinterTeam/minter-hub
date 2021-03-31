@@ -321,7 +321,7 @@ func relayValsets(ctx context.Context) {
 		return
 	}
 
-	if oldestSignedValset.Nonce <= ctx.LastValsetNonce {
+	if oldestSignedValset.Nonce < ctx.LastValsetNonce {
 		return
 	}
 

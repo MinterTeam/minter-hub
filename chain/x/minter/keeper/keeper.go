@@ -282,8 +282,8 @@ func (k Keeper) GetCurrentValset(ctx sdk.Context) *types.Valset {
 		totalPower += p
 
 		bridgeValidators[i] = &types.BridgeValidator{Power: p}
-		if ethAddr := k.GetMinterAddress(ctx, valAddr); ethAddr != "" {
-			bridgeValidators[i].MinterAddress = ethAddr
+		if minterAddr := k.GetMinterAddress(ctx, valAddr); minterAddr != "" {
+			bridgeValidators[i].MinterAddress = minterAddr
 		}
 	}
 	// normalize power values
