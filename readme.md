@@ -91,7 +91,8 @@ mhub tx staking create-validator \
 	--commission-max-change-rate="0.1" \
 	--commission-max-rate="1" \
 	--commission-rate="0.1" \
-	--min-self-delegation="1"
+	--min-self-delegation="1" \
+	--chain-id=mhub-test
 ```
 	- ***WARNING: save tendermint validator's key***
 
