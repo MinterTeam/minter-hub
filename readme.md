@@ -91,7 +91,7 @@ mhub tx staking create-validator \
 	--commission-max-change-rate="0.1" \
 	--commission-max-rate="1" \
 	--commission-rate="0.1" \
-	--min-self-delegation="0"
+	--min-self-delegation="1"
 ```
 	- ***WARNING: save tendermint validator's key***
 
@@ -114,7 +114,7 @@ register-peggy-delegate-keys \
 
 8. Start services. *You can set them up as services or run in different terminal screens.*
 
-	- **Start Hub ↔ Ethereum oracle**
+	- **Start Hub ↔ Ethereum oracle.** Ethereum Contract for testnet: 0xfe9E069E52986ac50614A51590eBe183cc87Fc30
 ```bash
 RUST_LOG=info orchestrator \
 	--cosmos-phrase=<COSMOS MNEMONIC> \
@@ -126,7 +126,8 @@ RUST_LOG=info orchestrator \
 	--contract-address=<ADDRESS OF ETHEREUM CONTRACT> 
 ```
 
-	- **Start Hub ↔ Minter oracle**
+	- **Start Hub ↔ Minter oracle.** Minter Multisig for testnet: Mxffffffffffffffffffffffffffffffffffffffff, Start Minter Block for testnet: 2561976
+
 ```bash
 mhub-minter-connector \
 	--minter-multisig=<ADDRESS OF MINTER MULTISIG> \
