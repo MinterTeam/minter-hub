@@ -120,7 +120,7 @@ register-peggy-delegate-keys \
 RUST_LOG=info orchestrator \
 	--cosmos-phrase=<COSMOS MNEMONIC> \
 	--ethereum-key=<ETHEREUM PRIVATE KEY> \
-	--cosmos-grpc="http://127.0.0.1:1090" \
+	--cosmos-grpc="http://127.0.0.1:9090" \
 	--cosmos-legacy-rpc="http://127.0.0.1:1317" \
 	--ethereum-rpc="http://127.0.0.1:8545/" \
 	--fees=hub \
