@@ -36,7 +36,7 @@ func (k Keeper) storeClaim(ctx sdk.Context, details types.EthereumClaim) error {
 	// Check that the nonce of this event is exactly one higher than the last nonce stored by this validator.
 	// We check the event nonce in processAttestation as well, but checking it here gives individual eth signers a chance to retry.
 	lastEventNonce := k.GetLastEventNonceByValidator(ctx, sdk.ValAddress(details.GetClaimer()))
-	if details.GetEventNonce() != lastEventNonce+1 {
+	if details.GetEventNonce() <= lastEventNonce {
 		return sdkerrors.Wrapf(types.ErrNonContiguousEventNonce, "got %d", details.GetEventNonce())
 	}
 	valAddr := k.GetOrchestratorValidator(ctx, details.GetClaimer())

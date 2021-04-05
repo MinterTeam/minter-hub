@@ -38,8 +38,9 @@ pub async fn get_last_checked_block(
     // on the first value. In order to determine which is which we will look for all
     // events, if we fail to find any only then can we go and start the chain.
     if last_event_nonce == 0u8.into() {
-        last_event_nonce = 1u8.into();
-        first_run = true;
+        // last_event_nonce = 1u8.into();
+        // first_run = true;
+        return current_block;
     }
 
     let mut current_block: Uint256 = latest_block.clone();

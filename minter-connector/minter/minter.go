@@ -80,7 +80,7 @@ func GetLatestMinterBlockAndNonce(ctx context.Context, currentNonce uint64) cont
 							if sendData.Coin.ID == c.MinterId {
 								ctx.Logger.Debug("Found deposit")
 
-								if currentNonce < ctx.LastEventNonce {
+								if currentNonce > 0 && currentNonce < ctx.LastEventNonce {
 									ctx.LastCheckedMinterBlock = block.Height - 1
 									return ctx
 								}
@@ -94,7 +94,7 @@ func GetLatestMinterBlockAndNonce(ctx context.Context, currentNonce uint64) cont
 				if tx.Type == uint64(transaction.TypeMultisend) && tx.From == ctx.MinterMultisigAddr {
 					ctx.Logger.Debug("Found batch")
 
-					if currentNonce < ctx.LastEventNonce {
+					if currentNonce > 0 && currentNonce < ctx.LastEventNonce {
 						ctx.LastCheckedMinterBlock = block.Height - 1
 						return ctx
 					}
@@ -110,7 +110,7 @@ func GetLatestMinterBlockAndNonce(ctx context.Context, currentNonce uint64) cont
 					} else {
 						ctx.Logger.Debug("Found valset update")
 
-						if currentNonce < ctx.LastEventNonce {
+						if currentNonce > 0 && currentNonce < ctx.LastEventNonce {
 							ctx.LastCheckedMinterBlock = block.Height - 1
 							return ctx
 						}

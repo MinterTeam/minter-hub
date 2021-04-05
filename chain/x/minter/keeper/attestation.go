@@ -32,10 +32,8 @@ func (k Keeper) AddClaim(ctx sdk.Context, claimType types.ClaimType, eventNonce 
 
 // storeClaim persists a claim. Fails when a claim submitted by an Eth signer does not increment the event nonce by exactly 1.
 func (k Keeper) storeClaim(ctx sdk.Context, claimType types.ClaimType, eventNonce uint64, validator sdk.ValAddress, details types.MinterClaim) error {
-	// Check that the nonce of this event is exactly one higher than the last nonce stored by this validator.
-	// We check the event nonce in processAttestation as well, but checking it here gives individual eth signers a chance to retry.
 	lastEventNonce := k.GetLastEventNonceByValidator(ctx, validator)
-	if eventNonce != lastEventNonce+1 {
+	if eventNonce <= lastEventNonce {
 		return types.ErrNonContiguousEventNonce
 	}
 	k.setLastEventNonceByValidator(ctx, validator, eventNonce)
