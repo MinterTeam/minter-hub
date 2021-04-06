@@ -115,7 +115,7 @@ register-peggy-delegate-keys \
 
 8. Start services. *You can set them up as services or run in different terminal screens.*
 
-	- **Start Hub ↔ Ethereum oracle.** Ethereum Contract for testnet: 0xfe9E069E52986ac50614A51590eBe183cc87Fc30
+	- **Start Hub ↔ Ethereum oracle.** Ethereum Contract for testnet: 0x9941227F82Ae6dBF57A0AC3621812BF8aB94b862
 ```bash
 RUST_LOG=info orchestrator \
 	--cosmos-phrase=<COSMOS MNEMONIC> \
