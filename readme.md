@@ -127,7 +127,7 @@ RUST_LOG=info orchestrator \
 	--contract-address=<ADDRESS OF ETHEREUM CONTRACT> 
 ```
 
-	- **Start Hub ↔ Minter oracle.** Minter Multisig for testnet: Mxffffffffffffffffffffffffffffffffffffffff, Start Minter Block for testnet: 2561976
+	- **Start Hub ↔ Minter oracle.** Minter Multisig for testnet: Mxffffffffffffffffffffffffffffffffffffffff, Start Minter Block for testnet: 2561080
 
 ```bash
 mhub-minter-connector \

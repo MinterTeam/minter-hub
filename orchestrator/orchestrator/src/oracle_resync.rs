@@ -40,7 +40,7 @@ pub async fn get_last_checked_block(
     if last_event_nonce == 0u8.into() {
         // last_event_nonce = 1u8.into();
         // first_run = true;
-        return current_block;
+        return latest_block;
     }
 
     let mut current_block: Uint256 = latest_block.clone();
