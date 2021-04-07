@@ -52,7 +52,7 @@ cargo install --locked --path register_delegate_keys
 ```
 
 ## Run
-1. Install and sync Minter Node
+1. Install and sync Minter Node (Taconet)
 ```bash
 minter node --testnet --genesis="https://node-api.taconet.minter.network/v2/genesis"
 ```
@@ -97,6 +97,7 @@ mhub tx staking create-validator \
 	--chain-id=mhub-test
 ```
 	- ***WARNING: save tendermint validator's key***
+	- An important point: the validator is turned off if it does not commit data for a long time. Here's an up-to-date list of validators: https://hub-api.dl-dev.ru/staking/validators. You can turn in on again by sending an unjail transaction. Docs: `mhub tx slashing unjail --help`
 
 6. Generate Minter & Ethereum keys
 ```bash
