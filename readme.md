@@ -119,7 +119,9 @@ register-peggy-delegate-keys \
 8. Start services. *You can set them up as services or run in different terminal screens.*
 
 	- **Start Hub ↔ Ethereum oracle.** 
-	- Ethereum Contract for testnet: 0x9941227F82Ae6dBF57A0AC3621812BF8aB94b862
+	```
+	Ethereum Contract for testnet: 0x9941227F82Ae6dBF57A0AC3621812BF8aB94b862
+	```
 ```bash
 RUST_LOG=info orchestrator \
 	--cosmos-phrase=<COSMOS MNEMONIC> \
@@ -132,9 +134,10 @@ RUST_LOG=info orchestrator \
 ```
 
 	- **Start Hub ↔ Minter oracle.** 
-	- Minter Multisig for testnet: Mxffffffffffffffffffffffffffffffffffffffff
-	- Start Minter Block for testnet: 2561080
-
+	```
+	Minter Multisig for testnet: Mxffffffffffffffffffffffffffffffffffffffff
+	Start Minter Block for testnet: 2561080
+	```
 ```bash
 mhub-minter-connector \
 	--minter-multisig=<ADDRESS OF MINTER MULTISIG> \
@@ -149,7 +152,7 @@ mhub-minter-connector \
 	--minter-start-batch-nonce=1 \
 	--minter-start-valset-nonce=1
 ```
-
+	
 	- **Start price oracle**
 ```bash
 mhub-oracle \
