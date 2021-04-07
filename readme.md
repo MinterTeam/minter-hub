@@ -73,14 +73,15 @@ mhub start \
 	--p2p.persistent_peers="78fb1deed292b317e8027a532f66fbf8c1b39485@46.101.215.17:36656"
 ```
 
-**IMPORTANT**: After syncing you must edit `~/.mhub/config/app.toml`: enable API in respective section.
+- **IMPORTANT**: After syncing you must edit `~/.mhub/config/app.toml`: enable API in respective section.
 
 4. Generate Hub account
 ```bash
 mhub keys add --keyring-backend test validator1
 ```
-	- ***WARNING: save generated key***
-	- Request some test HUB to your generated address
+
+- **WARNING: save generated key**
+- Request some test HUB to your generated address
 
 5. Create Hub validator
 ```bash
@@ -96,15 +97,16 @@ mhub tx staking create-validator \
 	--min-self-delegation="1" \
 	--chain-id=mhub-test
 ```
-	- ***WARNING: save tendermint validator's key***
-	- An important point: the validator is turned off if it does not commit data for a long time. Here's an up-to-date list of validators: https://hub-api.dl-dev.ru/staking/validators. You can turn in on again by sending an unjail transaction. Docs: `mhub tx slashing unjail --help`
+
+- **WARNING: save tendermint validator's key**
+- An important point: the validator is turned off if it does not commit data for a long time. Here's an up-to-date list of validators: https://hub-api.dl-dev.ru/staking/validators. You can turn in on again by sending an unjail transaction. Docs: `mhub tx slashing unjail --help`
 
 6. Generate Minter & Ethereum keys
 ```bash
 mhub-keys-generator
 ```
-	- ***WARNING: save generated keys***
-	- Request some test ETH to your generated address
+- **WARNING: save generated keys**
+- Request some test ETH to your generated address
 
 7. Register Ethereum keys
 ```bash
