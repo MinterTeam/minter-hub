@@ -54,7 +54,7 @@ cargo install --locked --path register_delegate_keys
 ## Run
 1. Install and sync Minter Node
 ```bash
-minter node --testnet
+minter node --testnet --genesis="https://node-api.taconet.minter.network/v2/genesis"
 ```
 
 2. Install and sync Ethereum node
@@ -70,7 +70,7 @@ curl https://raw.githubusercontent.com/MinterTeam/minter-hub/master/testnet-gene
 
 # Start and sync Minter Hub node
 mhub start \
-	--p2p.persistent_peers="bb75bf42dd14f55bb6528e7588d8e63cd2db2a44@46.101.215.17:36656"
+	--p2p.persistent_peers="78fb1deed292b317e8027a532f66fbf8c1b39485@46.101.215.17:36656"
 ```
 
 **IMPORTANT**: After syncing you must edit `~/.mhub/config/app.toml`: enable API in respective section.
