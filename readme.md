@@ -47,8 +47,8 @@ make install
 
 # Hub ↔ Ethereum oracle
 cd ~/minter-hub/orchestrator
-cargo install --path orchestrator
-cargo install --path register_delegate_keys
+cargo install --locked --path orchestrator
+cargo install --locked --path register_delegate_keys
 ```
 
 ## Run
@@ -72,6 +72,8 @@ curl https://raw.githubusercontent.com/MinterTeam/minter-hub/master/testnet-gene
 mhub start \
 	--p2p.persistent_peers="bb75bf42dd14f55bb6528e7588d8e63cd2db2a44@46.101.215.17:36656"
 ```
+
+**IMPORTANT**: After syncing you must edit `~/.mhub/config/app.toml`: enable API in respective section.
 
 4. Generate Hub account
 ```bash
@@ -115,7 +117,8 @@ register-peggy-delegate-keys \
 
 8. Start services. *You can set them up as services or run in different terminal screens.*
 
-	- **Start Hub ↔ Ethereum oracle.** Ethereum Contract for testnet: 0x9941227F82Ae6dBF57A0AC3621812BF8aB94b862
+	- **Start Hub ↔ Ethereum oracle.** 
+	- Ethereum Contract for testnet: 0x9941227F82Ae6dBF57A0AC3621812BF8aB94b862
 ```bash
 RUST_LOG=info orchestrator \
 	--cosmos-phrase=<COSMOS MNEMONIC> \
@@ -127,7 +130,9 @@ RUST_LOG=info orchestrator \
 	--contract-address=<ADDRESS OF ETHEREUM CONTRACT> 
 ```
 
-	- **Start Hub ↔ Minter oracle.** Minter Multisig for testnet: Mxffffffffffffffffffffffffffffffffffffffff, Start Minter Block for testnet: 2561080
+	- **Start Hub ↔ Minter oracle.** 
+	- Minter Multisig for testnet: Mxffffffffffffffffffffffffffffffffffffffff
+	- Start Minter Block for testnet: 2561080
 
 ```bash
 mhub-minter-connector \
