@@ -371,12 +371,17 @@ func relayValsets(ctx context.Context) {
 
 	// Check if signer is in the last confirmed valset
 	for _, sig := range oldestSignatures {
+		hasMember := false
 		for _, member := range lastValset.GetValset().GetMembers() {
 			if strings.ToLower(member.MinterAddress) == strings.ToLower(sig.MinterAddress) {
-				signedTx, err = signedTx.AddSignature(sig.Signature)
-				if err != nil {
-					panic(err)
-				}
+				hasMember = true
+			}
+		}
+		
+		if hasMember || len(lastValset.GetValset().GetMembers()) == 0 {
+			signedTx, err = signedTx.AddSignature(sig.Signature)
+			if err != nil {
+				panic(err)
 			}
 		}
 	}
