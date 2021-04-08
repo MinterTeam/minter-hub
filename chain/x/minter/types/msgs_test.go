@@ -62,7 +62,7 @@ func TestValidateMsgSetEthAddress(t *testing.T) {
 	}
 	for msg, spec := range specs {
 		t.Run(msg, func(t *testing.T) {
-			msg := NewMsgSetEthAddress(spec.srcETHAddr, spec.srcCosmosAddr, spec.srcSignature)
+			msg := NewMsgSetMinterAddress(spec.srcETHAddr, spec.srcCosmosAddr, spec.srcSignature)
 			// when
 			err := msg.ValidateBasic()
 			if spec.expErr {

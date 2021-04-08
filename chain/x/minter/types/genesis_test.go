@@ -1,6 +1,7 @@
 package types
 
 import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -15,10 +16,17 @@ func TestGenesisStateValidate(t *testing.T) {
 		"empty params":   {src: &GenesisState{Params: &Params{}}, expErr: false},
 		"invalid params": {src: &GenesisState{
 			Params: &Params{
-				PeggyId:            "foo",
-				ContractSourceHash: "laksdjflasdkfja",
-				EthereumAddress:    "invalid-eth-address",
-				BridgeChainId:      3279089,
+				StartThreshold:                0,
+				MinterAddress:                 "",
+				BridgeChainId:                 3279089,
+				SignedValsetsWindow:           0,
+				SignedBatchesWindow:           0,
+				SignedClaimsWindow:            0,
+				SlashFractionValset:           sdk.Dec{},
+				SlashFractionBatch:            sdk.Dec{},
+				SlashFractionClaim:            sdk.Dec{},
+				SlashFractionConflictingClaim: sdk.Dec{},
+				Stopped:                       false,
 			},
 		}, expErr: true},
 	}
