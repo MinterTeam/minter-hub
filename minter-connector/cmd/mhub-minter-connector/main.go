@@ -210,10 +210,20 @@ func relayBatches(ctx context.Context) {
 		panic(err)
 	}
 
+	lastValset, err := cosmosClient.LastValset(c.Background(), &types.QueryLastValsetRequest{})
+	if err != nil {
+		panic(err)
+	}
+
+	// Check if signer is in the last confirmed valset
 	for _, sig := range oldestSignatures {
-		signedTx, err = signedTx.AddSignature(sig.Signature)
-		if err != nil {
-			panic(err)
+		for _, member := range lastValset.GetValset().GetMembers() {
+			if member.MinterAddress == sig.MinterSigner {
+				signedTx, err = signedTx.AddSignature(sig.Signature)
+				if err != nil {
+					panic(err)
+				}
+			}
 		}
 	}
 
