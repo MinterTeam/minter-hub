@@ -172,7 +172,7 @@ func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, c
 	}
 
 	signBytes, err := encoding.TxConfig.SignModeHandler().GetSignBytes(signing.SignMode_SIGN_MODE_DIRECT, signing2.SignerData{
-		ChainID:       "mhub-test",
+		ChainID:       "mhub-test-1",
 		AccountNumber: number,
 		Sequence:      sequence,
 	}, tx.GetTx())
