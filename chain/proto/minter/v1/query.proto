@@ -49,6 +49,9 @@ service Query {
   rpc LastEventNonceByAddr(QueryLastEventNonceByAddrRequest) returns(QueryLastEventNonceByAddrResponse) {
     option (google.api.http).get = "/minter/v1beta/oracle/eventnonce/{address}";
   }
+  rpc LastValset(QueryLastValsetRequest) returns(QueryLastValsetResponse) {
+    option (google.api.http).get = "/minter/v1beta/valset/last";
+  }
 }
 
 message QueryParamsRequest {}
@@ -68,6 +71,9 @@ message QueryValsetConfirmsByNonceResponse { repeated MsgValsetConfirm confirms 
 
 message QueryLastValsetRequestsRequest {}
 message QueryLastValsetRequestsResponse { repeated Valset valsets = 1; }
+
+message QueryLastValsetRequest {}
+message QueryLastValsetResponse { Valset valset = 1; }
 
 message QueryLastPendingValsetRequestByAddrRequest { string address = 1; }
 message QueryLastPendingValsetRequestByAddrResponse { Valset valset = 1; }

@@ -18,6 +18,10 @@ func (k Keeper) Params(c context.Context, req *types.QueryParamsRequest) (*types
 
 }
 
+func (k Keeper) LastValset(c context.Context, _ *types.QueryLastValsetRequest) (*types.QueryLastValsetResponse, error) {
+	return &types.QueryLastValsetResponse{Valset: k.GetLastValset(sdk.UnwrapSDKContext(c))}, nil
+}
+
 // CurrentValset queries the CurrentValset of the peggy module
 func (k Keeper) CurrentValset(c context.Context, req *types.QueryCurrentValsetRequest) (*types.QueryCurrentValsetResponse, error) {
 	return &types.QueryCurrentValsetResponse{Valset: k.GetCurrentValset(sdk.UnwrapSDKContext(c))}, nil
