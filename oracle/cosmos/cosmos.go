@@ -56,8 +56,18 @@ func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, c
 		panic(err)
 	}
 
+	client, err := tmClient.New("http://"+cfg.Cosmos.TmUrl, "")
+	if err != nil {
+		panic(err)
+	}
+
+	status, err := client.Status(context.TODO())
+	if err != nil {
+		panic(err)
+	}
+
 	signBytes, err := encoding.TxConfig.SignModeHandler().GetSignBytes(signing.SignMode_SIGN_MODE_DIRECT, signing2.SignerData{
-		ChainID:       "mhub-test-1",
+		ChainID:       status.NodeInfo.Network,
 		AccountNumber: number,
 		Sequence:      sequence,
 	}, tx.GetTx())
@@ -87,11 +97,6 @@ func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, c
 	}
 
 	txBytes, err := encoding.TxConfig.TxEncoder()(tx.GetTx())
-	if err != nil {
-		panic(err)
-	}
-
-	client, err := tmClient.New("http://"+cfg.Cosmos.TmUrl, "")
 	if err != nil {
 		panic(err)
 	}

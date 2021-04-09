@@ -377,7 +377,7 @@ func relayValsets(ctx context.Context) {
 				hasMember = true
 			}
 		}
-		
+
 		if hasMember || len(lastValset.GetValset().GetMembers()) == 0 {
 			signedTx, err = signedTx.AddSignature(sig.Signature)
 			if err != nil {
