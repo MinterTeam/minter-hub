@@ -40,6 +40,13 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) {
 	for i, vs := range valsets {
 		signedWithinWindow := uint64(ctx.BlockHeight()) > params.SignedValsetsWindow && uint64(ctx.BlockHeight())-params.SignedValsetsWindow > vs.Height
 		switch {
+		// on the latest validator set, check for change in power against
+		// current, and emit a new validator set if the change in power >1%
+		case i == 0:
+			if types.BridgeValidators(k.GetCurrentValset(ctx).Members).PowerDiff(vs.Members) > 0.01 {
+				k.SetValsetRequest(ctx)
+			}
+
 		// #1 condition
 		// We look through the full bonded validator set (not just the active set, include unbonding validators)
 		// and we slash users who haven't signed a valset that is currentHeight - signedBlocksWindow old
@@ -67,13 +74,6 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) {
 
 			// then we prune the valset from state
 			k.DeleteValset(ctx, vs.Nonce)
-
-		// on the latest validator set, check for change in power against
-		// current, and emit a new validator set if the change in power >1%
-		case i == 0:
-			if types.BridgeValidators(k.GetCurrentValset(ctx).Members).PowerDiff(vs.Members) > 0.01 {
-				k.SetValsetRequest(ctx)
-			}
 		}
 	}
 

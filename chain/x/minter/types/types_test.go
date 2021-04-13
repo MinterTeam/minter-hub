@@ -94,9 +94,9 @@ func TestBridgeValidators_PowerDiff(t *testing.T) {
 	}{
 		{
 			name: "case 1",
-			b:    BridgeValidators{
+			b: BridgeValidators{
 				{
-					Power:         4286394505+8572789,
+					Power:         4286394505 + 8572789,
 					MinterAddress: "Mx000",
 				},
 			},
