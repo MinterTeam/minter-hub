@@ -366,7 +366,7 @@ contract Peggy {
 		guardian = _guardian;
 	}
 
-	function panicHalt(address[] _tokenContracts, address _safeAddress) {
+	function panicHalt(address[] memory _tokenContracts, address _safeAddress) public {
 		require(msg.sender == guardian, "permission denied");
 
 		halted = true;
@@ -374,7 +374,7 @@ contract Peggy {
 
 		for (uint256 i = 0; i < _tokenContracts.length; i++) {
 			IERC20 token = IERC20(_tokenContracts[i]);
-			token.safeTransfer(address(this), _safeAddress, token.balanceOf(address(this)));
+			token.safeTransfer(_safeAddress, token.balanceOf(address(this)));
 		}
 	}
 
