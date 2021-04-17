@@ -26,11 +26,11 @@ pub async fn get_last_checked_block(
     const BLOCKS_TO_SEARCH: u128 = 50_000u128;
 
     let latest_block = (get_block_number_with_retry(web3).await).sub(Uint256::from(5u64));
-    let mut last_event_nonce: Uint256 =
+    let last_event_nonce: Uint256 =
         get_last_event_nonce_with_retry(&mut grpc_client, our_cosmos_address)
             .await
             .into();
-    let mut first_run = false;
+    let first_run = false;
 
     // zero indicates this oracle has never submitted an event before
     // this can mean one of two things, there are actually no events in history

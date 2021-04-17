@@ -1,4 +1,4 @@
-use clarity::abi::Token;
+use clarity::abi::{Token, encode_call};
 use clarity::Uint256;
 use clarity::{abi::encode_tokens, Address as EthAddress};
 use deep_space::address::Address as CosmosAddress;
@@ -7,6 +7,7 @@ use peggy_utils::types::*;
 use sha3::{Digest, Keccak256};
 use std::u64::MAX as U64MAX;
 use web30::{client::Web3, jsonrpc::error::Web3Error};
+use web30::types::{TransactionRequest, Data, UnpaddedHex};
 
 pub fn get_correct_sig_for_address(
     address: CosmosAddress,
@@ -76,23 +77,26 @@ fn test_downcast_nonce() {
 /// Gets the latest validator set nonce
 pub async fn get_valset_nonce(
     contract_address: EthAddress,
-    caller_address: EthAddress,
+    _caller_address: EthAddress,
     web3: &Web3,
 ) -> Result<u64, Web3Error> {
-    let val = web3
-        .contract_call(
-            contract_address,
-            "state_lastValsetNonce()",
-            &[],
-            caller_address,
-        )
-        .await?;
-    // the go represents all nonces as u64, there's no
-    // reason they should ever overflow without a user
-    // submitting millions or tens of millions of dollars
-    // worth of transactions. But we properly check and
-    // handle that case here.
-    let real_num = Uint256::from_bytes_be(&val);
+    let payload = encode_call("state_lastValsetNonce()", &[])?;
+    let transaction = TransactionRequest {
+        from: None,
+        to: contract_address,
+        gas: Some((u64::MAX - 1).into()),
+        gas_price: None,
+        value: Some(UnpaddedHex(0u64.into())),
+        data: Some(Data(payload)),
+        nonce: None
+    };
+
+    let bytes = match web3.eth_call(transaction).await {
+        Ok(val) => val,
+        Err(e) => return Err(e),
+    };
+
+    let real_num = Uint256::from_bytes_be(&bytes.0);
     Ok(downcast_nonce(real_num).expect("Valset nonce overflow! Bridge Halt!"))
 }
 
@@ -100,48 +104,50 @@ pub async fn get_valset_nonce(
 pub async fn get_tx_batch_nonce(
     peggy_contract_address: EthAddress,
     erc20_contract_address: EthAddress,
-    caller_address: EthAddress,
+    _caller_address: EthAddress,
     web3: &Web3,
 ) -> Result<u64, Web3Error> {
-    let val = web3
-        .contract_call(
-            peggy_contract_address,
-            "lastBatchNonce(address)",
-            &[erc20_contract_address.into()],
-            caller_address,
-        )
-        .await?;
-    // the go represents all nonces as u64, there's no
-    // reason they should ever overflow without a user
-    // submitting millions or tens of millions of dollars
-    // worth of transactions. But we properly check and
-    // handle that case here.
-    let real_num = Uint256::from_bytes_be(&val);
+    let payload = encode_call("lastBatchNonce(address)", &[erc20_contract_address.into()])?;
+    let transaction = TransactionRequest {
+        from: None,
+        to: peggy_contract_address,
+        gas: Some((u64::MAX - 1).into()),
+        gas_price: None,
+        value: Some(UnpaddedHex(0u64.into())),
+        data: Some(Data(payload)),
+        nonce: None
+    };
+
+    let bytes = match web3.eth_call(transaction).await {
+        Ok(val) => val,
+        Err(e) => return Err(e),
+    };
+
+    let real_num = Uint256::from_bytes_be(&bytes.0);
     Ok(downcast_nonce(real_num).expect("TxBatch nonce overflow! Bridge Halt!"))
 }
 
 /// Gets the peggyID
 pub async fn get_peggy_id(
     contract_address: EthAddress,
-    caller_address: EthAddress,
+    _caller_address: EthAddress,
     web3: &Web3,
 ) -> Result<Vec<u8>, Web3Error> {
-    let val = web3
-        .contract_call(contract_address, "state_peggyId()", &[], caller_address)
-        .await?;
-    Ok(val)
-}
+    let payload = encode_call("state_peggyId()", &[])?;
+    let transaction = TransactionRequest {
+        from: None,
+        to: contract_address,
+        gas: Some((u64::MAX - 1).into()),
+        gas_price: None,
+        value: Some(UnpaddedHex(0u64.into())),
+        data: Some(Data(payload)),
+        nonce: None
+    };
 
-/// Gets the ERC20 symbol, should maybe be upstreamed
-pub async fn get_erc20_symbol(
-    contract_address: EthAddress,
-    caller_address: EthAddress,
-    web3: &Web3,
-) -> Result<String, PeggyError> {
-    let val_symbol = web3
-        .contract_call(contract_address, "symbol()", &[], caller_address)
-        .await?;
-    // Pardon the unwrap, but this is temporary code, intended only for the tests, to help them
-    // deal with a deprecated feature (the symbol), which will be removed soon
-    Ok(String::from_utf8(val_symbol).unwrap())
+    let bytes = match web3.eth_call(transaction).await {
+        Ok(val) => val,
+        Err(e) => return Err(e),
+    };
+
+    Ok(bytes.0)
 }
