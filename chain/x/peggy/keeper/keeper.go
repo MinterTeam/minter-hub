@@ -81,6 +81,10 @@ func (k Keeper) IsStopped(ctx sdk.Context) bool {
 // i.e. {"nonce": 1, "memebers": [{"eth_addr": "foo", "power": 11223}]}
 func (k Keeper) SetValsetRequest(ctx sdk.Context) *types.Valset {
 	valset := k.GetCurrentValset(ctx)
+	if len(valset.Members) == 0 {
+		return valset
+	}
+
 	k.StoreValset(ctx, valset)
 
 	ctx.EventManager().EmitEvent(
@@ -306,19 +310,17 @@ func (k Keeper) GetEthAddress(ctx sdk.Context, validator sdk.ValAddress) string 
 // implementations are involved.
 func (k Keeper) GetCurrentValset(ctx sdk.Context) *types.Valset {
 	validators := k.StakingKeeper.GetBondedValidatorsByPower(ctx)
-	bridgeValidators := make([]*types.BridgeValidator, len(validators))
+	var bridgeValidators []*types.BridgeValidator
 	var totalPower uint64
 	// TODO someone with in depth info on Cosmos staking should determine
 	// if this is doing what I think it's doing
-	for i, validator := range validators {
+	for _, validator := range validators {
 		val := validator.GetOperator()
 
-		p := uint64(k.StakingKeeper.GetLastValidatorPower(ctx, val))
-		totalPower += p
-
-		bridgeValidators[i] = &types.BridgeValidator{Power: p}
 		if ethAddr := k.GetEthAddress(ctx, val); ethAddr != "" {
-			bridgeValidators[i].EthereumAddress = ethAddr
+			p := uint64(k.StakingKeeper.GetLastValidatorPower(ctx, val))
+			totalPower += p
+			bridgeValidators = append(bridgeValidators, &types.BridgeValidator{Power: p, EthereumAddress: ethAddr})
 		}
 	}
 	// normalize power values
