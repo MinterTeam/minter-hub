@@ -48,7 +48,7 @@ func (a AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, claim
 		// pay commissions
 		{
 			valset := a.minterKeeper.GetCurrentValset(ctx)
-			commission := sdk.NewCoin(coin.Denom, coin.Amount.QuoRaw(100)) // total commission
+			commission := sdk.NewCoin(coin.Denom, coin.Amount.ToDec().Mul(a.keeper.GetParams(ctx).Commission).RoundInt()) // total commission
 			vouchers = sdk.Coins{coin.Sub(commission)}
 
 			if err = a.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, sdk.AccAddress{}, sdk.Coins{commission}); err != nil {
@@ -108,7 +108,7 @@ func (a AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, claim
 			return sdkerrors.Wrap(err, "coin not found")
 		}
 
-		commission := sdk.NewCoin(denom, amount.QuoRaw(100))
+		commission := sdk.NewCoin(denom, amount.ToDec().Mul(a.keeper.GetParams(ctx).Commission).RoundInt())
 		_, err = a.minterKeeper.AddToOutgoingPool(ctx, receiver, claim.MinterReceiver, claim.TxHash, sdk.NewCoin(denom, amount).Sub(commission))
 		if err != nil {
 			return sdkerrors.Wrap(err, "withdraw")

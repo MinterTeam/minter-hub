@@ -20,7 +20,7 @@ contract Peggy {
 
 	bool public halted = false;
 	bool public depositsStopped = false;
-	address public halter;
+	address public guardian;
 
 	event TransactionBatchExecutedEvent(
 		uint256 indexed _batchNonce,
@@ -349,15 +349,33 @@ contract Peggy {
 	}
 
 	function toggleHalt() public {
-		require(msg.sender == halter, "permission denied");
+		require(msg.sender == guardian, "permission denied");
 
 		halted = !halted;
 	}
 
 	function toggleDeposits() public {
-		require(msg.sender == halter, "permission denied");
+		require(msg.sender == guardian, "permission denied");
 
 		depositsStopped = !depositsStopped;
+	}
+
+	function changeGuardian(address _guardian) public {
+		require(msg.sender == guardian, "permission denied");
+
+		guardian = _guardian;
+	}
+
+	function panicHalt(address[] _tokenContracts, address _safeAddress) {
+		require(msg.sender == guardian, "permission denied");
+
+		halted = true;
+		depositsStopped = true;
+
+		for (uint256 i = 0; i < _tokenContracts.length; i++) {
+			IERC20 token = IERC20(_tokenContracts[i]);
+			token.safeTransfer(address(this), _safeAddress, token.balanceOf(address(this)));
+		}
 	}
 
 	constructor(
@@ -368,7 +386,7 @@ contract Peggy {
 		// The validator set
 		address[] memory _validators,
 		uint256[] memory _powers,
-		address _halter
+		address _guardian
 	) public {
 		// CHECKS
 
@@ -397,7 +415,7 @@ contract Peggy {
 		state_powerThreshold = _powerThreshold;
 		state_lastValsetCheckpoint = newCheckpoint;
 
-		halter = _halter;
+		guardian = _guardian;
 
 		// LOGS
 
