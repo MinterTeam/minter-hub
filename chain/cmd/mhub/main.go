@@ -2,6 +2,7 @@ package main
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"math/big"
 	"os"
 
 	"github.com/MinterTeam/mhub/chain/cmd/mhub/cmd"
@@ -14,6 +15,8 @@ func main() {
 	config.SetBech32PrefixForValidator(sdk.Bech32PrefixValAddr, sdk.Bech32PrefixValPub)
 	config.SetBech32PrefixForConsensusNode(sdk.Bech32PrefixConsAddr, sdk.Bech32PrefixConsPub)
 	config.Seal()
+
+	sdk.PowerReduction = sdk.NewIntFromBigInt(new(big.Int).Exp(big.NewInt(10), big.NewInt(18), nil))
 
 	rootCmd, _ := cmd.NewRootCmd()
 	if err := cmd.Execute(rootCmd); err != nil {

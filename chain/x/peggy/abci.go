@@ -71,9 +71,6 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) {
 					k.StakingKeeper.Jail(ctx, cons)
 				}
 			}
-
-			// then we prune the valset from state
-			k.DeleteValset(ctx, vs.Nonce)
 		}
 	}
 
