@@ -51,7 +51,7 @@ func (a *AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, clai
 		// pay commissions
 		{
 			valset := a.keeper.GetCurrentValset(ctx)
-			commission := sdk.NewCoin(coin.Denom, coin.Amount.ToDec().Mul(a.keeper.GetParams(ctx).Commission).RoundInt()) // total commission
+			commission := sdk.NewCoin(coin.Denom, coin.Amount.ToDec().Mul(a.keeper.oracleKeeper.GetCommissionForDemon(ctx, coin.Denom)).RoundInt()) // total commission
 			vouchers = sdk.Coins{coin.Sub(commission)}
 
 			if err = a.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, sdk.AccAddress{}, sdk.Coins{commission}); err != nil {
@@ -110,7 +110,7 @@ func (a *AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, clai
 			return sdkerrors.Wrap(err, "coin not found")
 		}
 
-		commission := sdk.NewCoin(denom, claim.Amount.ToDec().Mul(a.keeper.GetParams(ctx).Commission).RoundInt())
+		commission := sdk.NewCoin(denom, claim.Amount.ToDec().Mul(a.keeper.oracleKeeper.GetCommissionForDemon(ctx, denom)).RoundInt())
 
 		fee := sdk.NewCoin(denom, claim.Fee)
 		feeIsOk := false

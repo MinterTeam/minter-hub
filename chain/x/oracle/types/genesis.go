@@ -27,6 +27,8 @@ var (
 	ParamsMinBatchGas          = []byte("MinBatchGas")
 	ParamsMinSingleWithdrawGas = []byte("MinSingleWithdrawGas")
 
+	ParamsCommission = []byte("Commission")
+
 	// Ensure that params implements the proper interface
 	_ paramtypes.ParamSet = &Params{}
 )
@@ -64,6 +66,7 @@ func DefaultParams() *Params {
 		},
 		MinBatchGas:          100000,
 		MinSingleWithdrawGas: 50000,
+		Commission:           sdk.NewDec(1).Quo(sdk.NewDec(100)),
 	}
 }
 
@@ -96,6 +99,7 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 		paramtypes.NewParamSetPair(ParamsStoreCoins, &p.Coins, validateCoins),
 		paramtypes.NewParamSetPair(ParamsMinBatchGas, &p.MinBatchGas, validateMinBatchGas),
 		paramtypes.NewParamSetPair(ParamsMinSingleWithdrawGas, &p.MinSingleWithdrawGas, validateMinSingleWithdrawGas),
+		paramtypes.NewParamSetPair(ParamsCommission, &p.Commission, validateCommission),
 	}
 }
 
@@ -188,4 +192,12 @@ func strToFixByteArray(s string) ([32]byte, error) {
 	}
 	copy(out[:], s)
 	return out, nil
+}
+
+func validateCommission(i interface{}) error {
+	// TODO: do we want to set some bounds on this value?
+	if _, ok := i.(sdk.Dec); !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+	return nil
 }

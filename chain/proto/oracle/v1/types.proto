@@ -35,8 +35,12 @@ message Vote {
 message Coin {
   string denom = 1;
   string eth_addr = 2;
-  uint64 minter_id = 3 [(gogoproto.jsontag) = "minter_id"];
+  int64 minter_id = 3 [(gogoproto.jsontag) = "minter_id"];
   uint64 eth_decimals = 4;
+  bytes custom_commission = 5 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = true
+  ];
 }
 
 message TxStatus {

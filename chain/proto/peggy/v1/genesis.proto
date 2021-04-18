@@ -51,10 +51,6 @@ message Params {
     (gogoproto.nullable)   = false
   ];
   bool stopped = 13;
-  bytes commission = 14 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
 }
 
 // GenesisState struct

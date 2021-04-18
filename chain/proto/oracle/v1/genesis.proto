@@ -24,6 +24,11 @@ message Params {
 
   uint64 min_single_withdraw_gas = 5;
   uint64 min_batch_gas = 6;
+
+  bytes commission = 7 [
+   (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+   (gogoproto.nullable)   = false
+   ];
 }
 
 // GenesisState struct

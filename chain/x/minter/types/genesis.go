@@ -57,8 +57,6 @@ var (
 
 	ParamsStopped = []byte("Stopped")
 
-	ParamsCommission = []byte("Commission")
-
 	// Ensure that params implements the proper interface
 	_ paramtypes.ParamSet = &Params{}
 )
@@ -92,7 +90,6 @@ func DefaultParams() *Params {
 		SlashFractionClaim:            sdk.NewDec(1).Quo(sdk.NewDec(1000)),
 		SlashFractionConflictingClaim: sdk.NewDec(1).Quo(sdk.NewDec(1000)),
 		Stopped:                       false,
-		Commission:                    sdk.NewDec(1).Quo(sdk.NewDec(100)),
 	}
 }
 
@@ -131,7 +128,6 @@ func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
 		paramtypes.NewParamSetPair(ParamsStoreSlashFractionClaim, &p.SlashFractionClaim, validateSlashFractionClaim),
 		paramtypes.NewParamSetPair(ParamsStoreSlashFractionConflictingClaim, &p.SlashFractionConflictingClaim, validateSlashFractionConflictingClaim),
 		paramtypes.NewParamSetPair(ParamsStopped, &p.Stopped, validateStopped),
-		paramtypes.NewParamSetPair(ParamsCommission, &p.Commission, validateCommission),
 	}
 }
 
@@ -255,14 +251,6 @@ func validateSlashFractionConflictingClaim(i interface{}) error {
 
 func validateStopped(i interface{}) error {
 	if _, ok := i.(bool); !ok {
-		return fmt.Errorf("invalid parameter type: %T", i)
-	}
-	return nil
-}
-
-func validateCommission(i interface{}) error {
-	// TODO: do we want to set some bounds on this value?
-	if _, ok := i.(sdk.Dec); !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
 	return nil

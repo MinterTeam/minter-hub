@@ -55,7 +55,7 @@ func (c Coins) GetDenomByEthereumAddress(address string) (string, error) {
 
 func (c Coins) GetDenomByMinterId(id uint64) (string, error) {
 	for _, coin := range c.list {
-		if coin.MinterId == id {
+		if coin.MinterId == int64(id) {
 			return coin.Denom, nil
 		}
 	}
@@ -65,8 +65,8 @@ func (c Coins) GetDenomByMinterId(id uint64) (string, error) {
 
 func (c Coins) GetMinterIdByDenom(denom string) (uint64, error) {
 	for _, coin := range c.list {
-		if coin.Denom == denom {
-			return coin.MinterId, nil
+		if coin.Denom == denom && coin.MinterId != -1 {
+			return uint64(coin.MinterId), nil
 		}
 	}
 

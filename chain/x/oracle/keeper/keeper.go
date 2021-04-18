@@ -243,6 +243,21 @@ func (k Keeper) ConvertToEthValue(ctx sdk.Context, tokenContract string, amount 
 	return convertDecimals(minterDecimals, coin.EthDecimals, amount)
 }
 
+func (k Keeper) GetCommissionForDemon(ctx sdk.Context, denom string) sdk.Dec {
+	coins := k.GetCoins(ctx).List()
+	for _, coin := range coins {
+		if coin.Denom == denom {
+			if coin.CustomCommission != nil {
+				return *coin.CustomCommission
+			}
+
+			break
+		}
+	}
+
+	return k.GetParams(ctx).Commission
+}
+
 func convertDecimals(fromDecimals uint64, toDecimals uint64, amount sdk.Int) sdk.Int {
 	if fromDecimals == toDecimals {
 		return amount
