@@ -1,6 +1,6 @@
 {
-  "genesis_time": "2021-04-18T06:13:09.345529108Z",
-  "chain_id": "mhub-test-9",
+  "genesis_time": "2021-04-18T16:19:04.124448327Z",
+  "chain_id": "mhub-test-10",
   "initial_height": "1",
   "consensus_params": {
     "block": {
@@ -33,7 +33,7 @@
       "accounts": [
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "hub1ca2mmmxr6z0ktkd6qmq3wz36hmp6ls8pmqrunr",
+          "address": "hub1mtqhm5rhdu246ty9v7euz5saxpfx635actp0l5",
           "pub_key": null,
           "account_number": "0",
           "sequence": "0"
@@ -48,6 +48,13 @@
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
           "address": "hub1jz3s6ealwky3wyhhmgtsuv27rej3huqjmdk3ht",
+          "pub_key": null,
+          "account_number": "0",
+          "sequence": "0"
+        },
+        {
+          "@type": "/cosmos.auth.v1beta1.BaseAccount",
+          "address": "hub10l02mdjrhxeg8fy724cnex0jpzehrtjmvcps73",
           "pub_key": null,
           "account_number": "0",
           "sequence": "0"
@@ -70,6 +77,15 @@
           ]
         },
         {
+          "address": "hub10l02mdjrhxeg8fy724cnex0jpzehrtjmvcps73",
+          "coins": [
+            {
+              "denom": "hub",
+              "amount": "1000000000000000000000"
+            }
+          ]
+        },
+        {
           "address": "hub1jz3s6ealwky3wyhhmgtsuv27rej3huqjmdk3ht",
           "coins": [
             {
@@ -79,7 +95,7 @@
           ]
         },
         {
-          "address": "hub1ca2mmmxr6z0ktkd6qmq3wz36hmp6ls8pmqrunr",
+          "address": "hub1mtqhm5rhdu246ty9v7euz5saxpfx635actp0l5",
           "coins": [
             {
               "denom": "hub",
@@ -143,11 +159,11 @@
                   "max_change_rate": "0.010000000000000000"
                 },
                 "min_self_delegation": "1",
-                "delegator_address": "hub1ca2mmmxr6z0ktkd6qmq3wz36hmp6ls8pmqrunr",
-                "validator_address": "cosmosvaloper1ca2mmmxr6z0ktkd6qmq3wz36hmp6ls8pr56gnh",
+                "delegator_address": "hub1mtqhm5rhdu246ty9v7euz5saxpfx635actp0l5",
+                "validator_address": "cosmosvaloper1mtqhm5rhdu246ty9v7euz5saxpfx635aqlcmlq",
                 "pubkey": {
                   "@type": "/cosmos.crypto.ed25519.PubKey",
-                  "key": "IFxb++gXCh4tGr4cBONMPLKaJeTyrbmXbebdySxEMlk="
+                  "key": "+WKdlhTQJHbcnGt3Om6M0ykEJ0btdudvOBCWm60TKsQ="
                 },
                 "value": {
                   "denom": "hub",
@@ -155,7 +171,7 @@
                 }
               }
             ],
-            "memo": "83bd9b919857a529abb30e22042ad9c00c2626a1@46.101.215.17:26656",
+            "memo": "d70d1ba4d7acb933c98f10bcfff14d531f57a8c1@46.101.215.17:26656",
             "timeout_height": "0",
             "extension_options": [],
             "non_critical_extension_options": []
@@ -165,7 +181,7 @@
               {
                 "public_key": {
                   "@type": "/cosmos.crypto.secp256k1.PubKey",
-                  "key": "AwYz9FhC70sa61CcUGlxn1MCZvZYpFIocjN6mOmdjlIC"
+                  "key": "A7akAVxiCV8dqJ1d0wGgExkfb918L7BIPVW3iwWjZqD/"
                 },
                 "mode_info": {
                   "single": {
@@ -183,7 +199,7 @@
             }
           },
           "signatures": [
-            "zP7TOZLFDdRFcbL4T6r6/Lt1HUz1siRUBahXr55aLFtNGYBS++vTgR1SHSQb+nThvBkBYfYT+hu8U92QFU4Pug=="
+            "EdJzMHdSx4Q/uk5KRRGK4Opu1/+BM/2CVpKMc33yYkZVB5/FyoLo//W2preUzP7HfYqR5sh7uxBQiuQsIp+DXQ=="
           ]
         }
       ]
@@ -267,8 +283,7 @@
         "slash_fraction_batch": "0.001000000000000000",
         "slash_fraction_claim": "0.001000000000000000",
         "slash_fraction_conflicting_claim": "0.001000000000000000",
-        "stopped": false,
-        "commission": "0.010000000000000000"
+        "stopped": false
       },
       "start_minter_nonce": "1"
     },
@@ -282,11 +297,13 @@
             "denom": "usdc",
             "eth_addr": "0x4d153722A1b75204c52CD8681eaED174b90fD1A8",
             "minter_id": "1836",
-            "eth_decimals": "6"
+            "eth_decimals": "6",
+            "custom_commission": null
           }
         ],
         "min_single_withdraw_gas": "50000",
-        "min_batch_gas": "100000"
+        "min_batch_gas": "100000",
+        "commission": "0.010000000000000000"
       },
       "attestations": []
     },
@@ -305,8 +322,7 @@
         "slash_fraction_batch": "0.001000000000000000",
         "slash_fraction_claim": "0.001000000000000000",
         "slash_fraction_conflicting_claim": "0.001000000000000000",
-        "stopped": false,
-        "commission": "0.010000000000000000"
+        "stopped": false
       },
       "valsets": [],
       "valset_confirms": [],
@@ -320,7 +336,7 @@
         "min_signed_per_window": "0.500000000000000000",
         "downtime_jail_duration": "600s",
         "slash_fraction_double_sign": "0.050000000000000000",
-        "slash_fraction_downtime": "0.010000000000000000"
+        "slash_fraction_downtime": "0.000000000000000000"
       },
       "signing_infos": [],
       "missed_blocks": []
@@ -328,7 +344,7 @@
     "staking": {
       "params": {
         "unbonding_time": "1814400s",
-        "max_validators": 100,
+        "max_validators": 16,
         "max_entries": 7,
         "historical_entries": 10000,
         "bond_denom": "hub"
