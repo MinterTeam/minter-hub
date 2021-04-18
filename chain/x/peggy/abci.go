@@ -30,7 +30,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) {
 
 	// valsets are sorted so the most recent one is first
 	valsets := k.GetValsets(ctx)
-	if len(valsets) == 0 {
+	if len(valsets) == 0 || types.BridgeValidators(k.GetCurrentValset(ctx).Members).PowerDiff(valsets[0].Members) > 0.01 {
 		k.SetValsetRequest(ctx)
 	}
 }
