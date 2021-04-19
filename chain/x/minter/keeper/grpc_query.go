@@ -111,7 +111,7 @@ func (k Keeper) OutgoingTxBatches(c context.Context, req *types.QueryOutgoingTxB
 	var batches []*types.OutgoingTxBatch
 	k.IterateOutgoingTXBatches(sdk.UnwrapSDKContext(c), func(_ []byte, batch *types.OutgoingTxBatch) bool {
 		batches = append(batches, batch)
-		return len(batches) == MaxResults
+		return false
 	})
 	return &types.QueryOutgoingTxBatchesResponse{Batches: batches}, nil
 }
