@@ -155,7 +155,7 @@ func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, c
 
 	tx.SetMemo("")
 	tx.SetFeeAmount(fee)
-	tx.SetGasLimit(10000000)
+	tx.SetGasLimit(100000000)
 
 	sigData := signing.SingleSignatureData{
 		SignMode:  signing.SignMode_SIGN_MODE_DIRECT,
