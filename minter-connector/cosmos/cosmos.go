@@ -143,6 +143,12 @@ func getEventNonceFromMsg(msg sdk.Msg) uint64 {
 }
 
 func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, cosmosConn *grpc.ClientConn, logger log.Logger) {
+	if len(msgs) > 10 {
+		SendCosmosTx(msgs[:10], address, priv, cosmosConn, logger)
+		SendCosmosTx(msgs[10:], address, priv, cosmosConn, logger)
+		return
+	}
+
 	number, sequence := getAccount(address.String(), cosmosConn, logger)
 
 	fee := sdk.NewCoins(sdk.NewCoin("hub", sdk.NewInt(1)))
