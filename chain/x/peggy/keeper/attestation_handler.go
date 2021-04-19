@@ -49,26 +49,28 @@ func (a AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, claim
 		{
 			valset := a.minterKeeper.GetCurrentValset(ctx)
 			commission := sdk.NewCoin(coin.Denom, coin.Amount.ToDec().Mul(a.keeper.oracleKeeper.GetCommissionForDemon(ctx, coin.Denom)).RoundInt()) // total commission
-			vouchers = sdk.Coins{coin.Sub(commission)}
+			if commission.IsPositive() {
+				vouchers = sdk.Coins{coin.Sub(commission)}
 
-			if err = a.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, sdk.AccAddress{}, sdk.Coins{commission}); err != nil {
-				return sdkerrors.Wrap(err, "transfer vouchers")
-			}
-
-			var totalPower uint64
-			for _, val := range valset.Members {
-				totalPower += val.Power
-			}
-
-			for _, val := range valset.Members {
-				amount := commission.Amount.Mul(sdk.NewIntFromUint64(val.Power)).Quo(sdk.NewIntFromUint64(totalPower))
-				_, err := a.minterKeeper.AddToOutgoingPool(ctx, sdk.AccAddress{}, val.MinterAddress, "#commission", sdk.NewCoin(commission.Denom, amount))
-				if err != nil {
-					return sdkerrors.Wrap(err, "commission withdrawal")
+				if err = a.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, sdk.AccAddress{}, sdk.Coins{commission}); err != nil {
+					return sdkerrors.Wrap(err, "transfer vouchers")
 				}
-			}
 
-			a.minterKeeper.BuildOutgoingTXBatch(ctx, minterkeeper.OutgoingTxBatchSize)
+				var totalPower uint64
+				for _, val := range valset.Members {
+					totalPower += val.Power
+				}
+
+				for _, val := range valset.Members {
+					amount := commission.Amount.Mul(sdk.NewIntFromUint64(val.Power)).Quo(sdk.NewIntFromUint64(totalPower))
+					_, err := a.minterKeeper.AddToOutgoingPool(ctx, sdk.AccAddress{}, val.MinterAddress, "#commission", sdk.NewCoin(commission.Denom, amount))
+					if err != nil {
+						return sdkerrors.Wrap(err, "commission withdrawal")
+					}
+				}
+
+				a.minterKeeper.BuildOutgoingTXBatch(ctx, minterkeeper.OutgoingTxBatchSize)
+			}
 		}
 
 		if err = a.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, addr, vouchers); err != nil {
