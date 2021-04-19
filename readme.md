@@ -52,32 +52,32 @@ cargo install --locked --path register_delegate_keys
 ```
 
 ## Run
-1. Install and sync Minter Node (Taconet)
+1. Install and sync Minter Node 
 ```bash
-minter node --testnet --genesis="https://node-api.taconet.minter.network/v2/genesis"
+minter node
 ```
 
 2. Install and sync Ethereum node
 ```bash
-geth --ropsten
+geth 
 ```
 
 3. Sync Minter Hub Node
 ```bash
 # Download genesis
 mkdir -p ~/.mhub/config/
-curl https://raw.githubusercontent.com/MinterTeam/minter-hub/master/testnet-genesis.json > ~/.mhub/config/genesis.json
+curl https://raw.githubusercontent.com/MinterTeam/minter-hub/master/mainnet-genesis.json > ~/.mhub/config/genesis.json
 
 # Start and sync Minter Hub node
 mhub start \
-	--p2p.persistent_peers="d70d1ba4d7acb933c98f10bcfff14d531f57a8c1@46.101.215.17:36656"
+	--p2p.persistent_peers="b740ff04fadabce115b4bcb296cab9812694e4d5@104.236.213.173:26656"
 ```
 
 - **IMPORTANT**: After syncing you must edit `~/.mhub/config/app.toml`: enable API in respective section.
 
 4. Generate Hub account
 ```bash
-mhub keys add --keyring-backend test validator1
+mhub keys add validator1
 ```
 
 - **WARNING: save generated key**
@@ -89,17 +89,17 @@ mhub tendermint show-validator # show validator's public key
 mhub tx staking create-validator \
 	--from=validator1 \
 	--keyring-backend=test \
-	--amount=10hub \
+	--amount=1000000000000000000hub \
 	--pubkey=<VALIDATOR PUBLIC KEY>  \
 	--commission-max-change-rate="0.1" \
 	--commission-max-rate="1" \
 	--commission-rate="0.1" \
 	--min-self-delegation="1" \
-	--chain-id=mhub-test-10
+	--chain-id=mhub-mainnet-1
 ```
 
 - **WARNING: save tendermint validator's key**
-- An important point: the validator is turned off if it does not commit data for a long time. Here's an up-to-date list of validators: https://hub-api.dl-dev.ru/staking/validators. You can turn in on again by sending an unjail transaction. Docs: `mhub tx slashing unjail --help`
+- An important point: the validator is turned off if it does not commit data for a long time. You can turn in on again by sending an unjail transaction. Docs: `mhub tx slashing unjail --help`
 
 6. Generate Minter & Ethereum keys
 ```bash
