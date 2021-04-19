@@ -87,6 +87,7 @@ func relayPrices(minterClient *http_client.Client, cosmosConn *grpc.ClientConn, 
 				Name:  fmt.Sprintf("minter/%d", coin.MinterId),
 				Value: sdk.NewInt(50 * 1e10), // fix HUB price
 			})
+			continue
 		}
 
 		if coin.MinterId == 0 {
