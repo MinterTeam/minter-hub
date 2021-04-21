@@ -149,7 +149,7 @@ mhub-minter-connector \
 	--minter-multisig=<ADDRESS OF MINTER MULTISIG> \
 	--minter-chain=<testnet|mainnet> \
 	--minter-mnemonic=<MINTER MNEMONIC> \
-	--minter-node-url="127.0.0.1:8843/v2/" \
+	--minter-node-url="tcp://127.0.0.1:8843/v2/" \
 	--cosmos-mnemonic=<COSMOS MNEMONIC> \
 	--cosmos-node-url="127.0.0.1:9090" \
 	--tm-node-url="127.0.0.1:26657" \
