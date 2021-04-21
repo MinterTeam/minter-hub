@@ -88,7 +88,6 @@ mhub keys add validator1
 mhub tendermint show-validator # show validator's public key
 mhub tx staking create-validator \
 	--from=validator1 \
-	--keyring-backend=test \
 	--amount=1000000000000000000hub \
 	--pubkey=<VALIDATOR PUBLIC KEY>  \
 	--commission-max-change-rate="0.1" \
@@ -123,6 +122,8 @@ register-peggy-delegate-keys \
 - **Start Hub ↔ Ethereum oracle.** 
 ```
 Ethereum Contract for testnet: 0x8D0B99eAE97a247B2C3E9B3dA6774B8359a37537
+
+Ethereum Contract for mainnet: 0xc735478ef7562ecc37662fc7c5e521eb835f9dab
 ```
 ```bash
 RUST_LOG=info orchestrator \
@@ -139,11 +140,14 @@ RUST_LOG=info orchestrator \
 ```
 Minter Multisig for testnet: Mx703880f64588b3247f8a583f1bef5a6ac5aeac59
 Start Minter Block for testnet: 3393443
+
+Minter Multisig for mainnet: Mx68f4839d7f32831b9234f9575f3b95e1afe21a56
+Start Minter Block for mainnet: 3442652
 ```
 ```bash
 mhub-minter-connector \
 	--minter-multisig=<ADDRESS OF MINTER MULTISIG> \
-	--minter-chain=testnet \
+	--minter-chain=<testnet|mainnet> \
 	--minter-mnemonic=<MINTER MNEMONIC> \
 	--minter-node-url="127.0.0.1:8843/v2/" \
 	--cosmos-mnemonic=<COSMOS MNEMONIC> \
