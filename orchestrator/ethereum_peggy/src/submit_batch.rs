@@ -106,16 +106,20 @@ pub async fn send_eth_transaction_batch(
         data: Some(payload.clone().into()),
     }).await;
 
-    match estimate_result {
-        Ok(gas) => {
-            if gas.gt(&1_000_000u64.into()) {
-                error!("Error while sending tx: gas limit is too high, possibly trying to send failing tx {}", gas);
+    let gas = match estimate_result {
+        Ok(g) => {
+            if g.gt(&1_000_000u64.into()) {
+                error!("Error while sending tx: gas limit is too high, possibly trying to send failing tx {}", g);
             }
+
+            g
         }
         Err(e) => {
             error!("Error while sending tx: {}", e);
+
+            return Err(PeggyError::EthereumRestError(e));
         }
-    }
+    };
 
     let tx_result = web3
         .send_transaction(
@@ -125,7 +129,7 @@ pub async fn send_eth_transaction_batch(
             eth_address,
             our_eth_key,
             vec![
-                SendTxOption::GasLimit(1_000_000u32.into()),
+                SendTxOption::GasLimit(gas.into()),
                 SendTxOption::Nonce(nonce),
             ],
         )
