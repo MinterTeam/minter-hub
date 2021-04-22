@@ -1,13 +1,13 @@
-use crate::utils::{get_tx_batch_nonce, estimate_and_check_tx_gas};
-use clarity::{Address as EthAddress, Transaction};
+use crate::utils::{estimate_and_check_tx_gas, get_tx_batch_nonce};
+use clarity::utils::bytes_to_hex_str;
 use clarity::PrivateKey as EthPrivateKey;
+use clarity::{Address as EthAddress, Transaction};
 use num256::Uint256;
 use peggy_utils::error::PeggyError;
 use peggy_utils::types::*;
 use std::time::Duration;
 use web30::client::Web3;
 use web30::types::SendTxOption;
-use clarity::utils::bytes_to_hex_str;
 
 /// this function generates an appropriate Ethereum transaction
 /// to submit the provided transaction batch and validator set update.
@@ -94,9 +94,18 @@ pub async fn send_eth_transaction_batch(
         signature: None,
     };
 
-    info!("tx: {}", bytes_to_hex_str(&transaction.sign(&our_eth_key, Some(web3.net_version().await?)).to_bytes().unwrap()));
+    info!(
+        "tx: {}",
+        bytes_to_hex_str(
+            &transaction
+                .sign(&our_eth_key, Some(web3.net_version().await?))
+                .to_bytes()
+                .unwrap()
+        )
+    );
 
-    let gas = estimate_and_check_tx_gas(web3, peggy_contract_address, eth_address, &payload).await?;
+    let gas =
+        estimate_and_check_tx_gas(web3, peggy_contract_address, eth_address, &payload).await?;
     let tx_result = web3
         .send_transaction(
             peggy_contract_address,

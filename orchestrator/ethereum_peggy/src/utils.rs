@@ -1,13 +1,13 @@
-use clarity::abi::{Token, encode_call};
+use clarity::abi::{encode_call, Token};
 use clarity::Uint256;
 use clarity::{abi::encode_tokens, Address as EthAddress};
-use deep_space::address::{Address as CosmosAddress};
+use deep_space::address::Address as CosmosAddress;
 use peggy_utils::error::PeggyError;
 use peggy_utils::types::*;
 use sha3::{Digest, Keccak256};
 use std::u64::MAX as U64MAX;
+use web30::types::{Data, TransactionRequest, UnpaddedHex};
 use web30::{client::Web3, jsonrpc::error::Web3Error};
-use web30::types::{TransactionRequest, Data, UnpaddedHex};
 
 pub fn get_correct_sig_for_address(
     address: CosmosAddress,
@@ -88,7 +88,7 @@ pub async fn get_valset_nonce(
         gas_price: None,
         value: Some(UnpaddedHex(0u64.into())),
         data: Some(Data(payload)),
-        nonce: None
+        nonce: None,
     };
 
     let bytes = match web3.eth_call(transaction).await {
@@ -115,7 +115,7 @@ pub async fn get_tx_batch_nonce(
         gas_price: None,
         value: Some(UnpaddedHex(0u64.into())),
         data: Some(Data(payload)),
-        nonce: None
+        nonce: None,
     };
 
     let bytes = match web3.eth_call(transaction).await {
@@ -141,7 +141,7 @@ pub async fn get_peggy_id(
         gas_price: None,
         value: Some(UnpaddedHex(0u64.into())),
         data: Some(Data(payload)),
-        nonce: None
+        nonce: None,
     };
 
     let bytes = match web3.eth_call(transaction).await {
@@ -152,20 +152,30 @@ pub async fn get_peggy_id(
     Ok(bytes.0)
 }
 
-pub async fn estimate_and_check_tx_gas(web3: &Web3, peggy_contract_address: EthAddress, eth_address: EthAddress, payload: &Vec<u8>) -> Result<Uint256, Web3Error> {
-    let gas = match web3.eth_estimate_gas(TransactionRequest {
-        from: Some(eth_address),
-        to: peggy_contract_address,
-        nonce: None,
-        gas_price: None,
-        gas: None,
-        value: Some(0u64.into()),
-        data: Some(payload.clone().into()),
-    }).await {
+pub async fn estimate_and_check_tx_gas(
+    web3: &Web3,
+    peggy_contract_address: EthAddress,
+    eth_address: EthAddress,
+    payload: &Vec<u8>,
+) -> Result<Uint256, Web3Error> {
+    let gas = match web3
+        .eth_estimate_gas(TransactionRequest {
+            from: Some(eth_address),
+            to: peggy_contract_address,
+            nonce: None,
+            gas_price: None,
+            gas: None,
+            value: Some(0u64.into()),
+            data: Some(payload.clone().into()),
+        })
+        .await
+    {
         Ok(gas) => {
             if gas.gt(&1_000_000u64.into()) {
                 error!("Error while sending tx: gas limit is too high, possibly trying to send failing tx {}", gas);
-                return Err(Web3Error::BadResponse("gas limit is too high, possibly trying to send failing tx".into()));
+                return Err(Web3Error::BadResponse(
+                    "gas limit is too high, possibly trying to send failing tx".into(),
+                ));
             }
 
             gas

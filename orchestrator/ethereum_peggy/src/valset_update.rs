@@ -1,4 +1,4 @@
-use crate::utils::{get_valset_nonce, estimate_and_check_tx_gas};
+use crate::utils::{estimate_and_check_tx_gas, get_valset_nonce};
 use clarity::Address as EthAddress;
 use clarity::PrivateKey as EthPrivateKey;
 use peggy_utils::error::PeggyError;
@@ -71,7 +71,8 @@ pub async fn send_eth_valset_update(
         return Ok(());
     }
 
-    let gas = estimate_and_check_tx_gas(web3, peggy_contract_address, eth_address, &payload).await?;
+    let gas =
+        estimate_and_check_tx_gas(web3, peggy_contract_address, eth_address, &payload).await?;
     let tx = web3
         .send_transaction(
             peggy_contract_address,
@@ -79,9 +80,7 @@ pub async fn send_eth_valset_update(
             0u32.into(),
             eth_address,
             our_eth_key,
-            vec![
-                SendTxOption::GasLimit(gas.into())
-            ],
+            vec![SendTxOption::GasLimit(gas.into())],
         )
         .await?;
     info!("Sent valset update with txid {:#066x}", tx);
