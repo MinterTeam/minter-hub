@@ -1,4 +1,4 @@
-use crate::utils::get_tx_batch_nonce;
+use crate::utils::{get_tx_batch_nonce, estimate_and_check_tx_gas};
 use clarity::{Address as EthAddress, Transaction};
 use clarity::PrivateKey as EthPrivateKey;
 use num256::Uint256;
@@ -6,7 +6,7 @@ use peggy_utils::error::PeggyError;
 use peggy_utils::types::*;
 use std::time::Duration;
 use web30::client::Web3;
-use web30::types::{SendTxOption, TransactionRequest};
+use web30::types::SendTxOption;
 use clarity::utils::bytes_to_hex_str;
 
 /// this function generates an appropriate Ethereum transaction
@@ -96,31 +96,7 @@ pub async fn send_eth_transaction_batch(
 
     info!("tx: {}", bytes_to_hex_str(&transaction.sign(&our_eth_key, Some(web3.net_version().await?)).to_bytes().unwrap()));
 
-    let estimate_result = web3.eth_estimate_gas(TransactionRequest {
-        from: Some(eth_address),
-        to: transaction.to,
-        nonce: None,
-        gas_price: None,
-        gas: None,
-        value: Some(0u64.into()),
-        data: Some(payload.clone().into()),
-    }).await;
-
-    let gas = match estimate_result {
-        Ok(g) => {
-            if g.gt(&1_000_000u64.into()) {
-                error!("Error while sending tx: gas limit is too high, possibly trying to send failing tx {}", g);
-            }
-
-            g
-        }
-        Err(e) => {
-            error!("Error while sending tx: {}", e);
-
-            return Err(PeggyError::EthereumRestError(e));
-        }
-    };
-
+    let gas = estimate_and_check_tx_gas(web3, peggy_contract_address, eth_address, &payload).await?;
     let tx_result = web3
         .send_transaction(
             peggy_contract_address,
