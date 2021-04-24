@@ -1,6 +1,9 @@
 syntax = "proto3";
 package peggy.v1;
 
+import "peggy/v1/msgs.proto";
+import "peggy/v1/attestation.proto";
+
 option go_package = "github.com/MinterTeam/mhub/chain/x/peggy/types";
 
 // BridgeValidator represents a validator's ETH address and its power
@@ -16,6 +19,25 @@ message Valset {
   uint64                   nonce   = 1;
   repeated BridgeValidator members = 2;
   uint64                   height  = 3;
+}
+
+message ValsetHistory {
+  repeated ValsetHistoryItem valsets = 1;
+}
+
+message ValsetHistoryItem {
+  Valset valset = 1;
+  repeated MsgValsetConfirm confirms = 2;
+}
+
+message AttestationHistory {
+  repeated Attestation attestations = 1;
+  repeated AttestationSigners signers = 2;
+}
+
+message AttestationSigners {
+  repeated string vals = 1;
+  repeated bool signed = 2;
 }
 
 // It's difficult to serialize and deserialize

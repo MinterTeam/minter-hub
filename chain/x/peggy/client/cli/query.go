@@ -3,6 +3,7 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 
 	"github.com/MinterTeam/mhub/chain/x/peggy/types"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -20,6 +21,8 @@ func GetQueryCmd(storeKey string) *cobra.Command {
 	peggyQueryCmd.AddCommand([]*cobra.Command{
 		CmdGetCurrentValset(storeKey),
 		CmdGetValsetRequest(storeKey),
+		CmdGetValsetHistory(storeKey),
+		CmdGetAttestationHistory(storeKey),
 		CmdGetValsetConfirm(storeKey),
 		CmdGetPendingValsetRequest(storeKey),
 		CmdGetPendingOutgoingTXBatchRequest(storeKey),
@@ -183,4 +186,98 @@ func CmdGetPendingOutgoingTXBatchRequest(storeKey string) *cobra.Command {
 			return cliCtx.PrintProto(&out)
 		},
 	}
+}
+
+func CmdGetValsetHistory(storeKey string) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "valset-history",
+		Short: "Get valset history",
+		Args:  cobra.ExactArgs(0),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := client.GetClientContextFromCmd(cmd)
+
+			res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/valsetHistory", storeKey), nil)
+			if err != nil {
+				return err
+			}
+			if len(res) == 0 {
+				fmt.Println("Nothing found")
+				return nil
+			}
+
+			var history types.ValsetHistory
+			cliCtx.JSONMarshaler.MustUnmarshalJSON(res, &history)
+
+			for i, item := range history.GetValsets() {
+				fmt.Printf("Valset(nonce: %d, members: %d)\n", item.GetValset().GetNonce(), len(item.GetValset().GetMembers()))
+				if len(history.GetValsets()) < i+2 {
+					continue
+				}
+
+				next := history.GetValsets()[i+1]
+				for _, val := range next.GetValset().GetMembers() {
+					confirmed := false
+					for _, confirm := range item.GetConfirms() {
+						if confirm.GetEthAddress() == val.GetEthereumAddress() {
+							confirmed = true
+							break
+						}
+					}
+
+					if confirmed {
+						fmt.Printf("  %s - ok\n", val.GetEthereumAddress())
+					} else {
+						fmt.Printf("  %s - NOT CONFIRMED\n", val.GetEthereumAddress())
+					}
+				}
+
+				fmt.Printf("\n")
+			}
+
+			return nil
+		},
+	}
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+func CmdGetAttestationHistory(storeKey string) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "attestation-history",
+		Short: "Get attestation history",
+		Args:  cobra.ExactArgs(0),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cliCtx := client.GetClientContextFromCmd(cmd)
+
+			res, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/attestationHistory", storeKey), nil)
+			if err != nil {
+				return err
+			}
+			if len(res) == 0 {
+				fmt.Println("Nothing found")
+				return nil
+			}
+
+			var history types.AttestationHistory
+			cliCtx.JSONMarshaler.MustUnmarshalJSON(res, &history)
+
+			for i, item := range history.GetAttestations() {
+				fmt.Printf("Attestation(nonce: %d)\n", item.GetEventNonce())
+
+				for j, addr := range history.GetSigners()[i].GetVals() {
+					if history.GetSigners()[i].GetSigned()[j] {
+						fmt.Printf("  %s - ok\n", addr)
+					} else {
+						fmt.Printf("  %s - NOT CONFIRMED\n", addr)
+					}
+				}
+
+				fmt.Printf("\n")
+			}
+
+			return nil
+		},
+	}
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
 }

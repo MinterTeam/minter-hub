@@ -218,7 +218,7 @@ func (k Keeper) GetAttestationMapping(ctx sdk.Context) (out map[uint64][]types.A
 func (k Keeper) IterateAttestaions(ctx sdk.Context, cb func([]byte, types.Attestation) bool) {
 	store := ctx.KVStore(k.storeKey)
 	prefix := []byte(types.OracleAttestationKey)
-	iter := store.Iterator(prefixRange(prefix))
+	iter := store.ReverseIterator(prefixRange(prefix))
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
@@ -276,6 +276,21 @@ func (k Keeper) IterateClaimsByValidatorAndType(ctx sdk.Context, claimType types
 	prefixStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.OracleClaimKey)
 	prefix := []byte(validatorKey)
 	iter := prefixStore.Iterator(prefixRange(prefix))
+	defer iter.Close()
+
+	for ; iter.Valid(); iter.Next() {
+		genericClaim := types.GenericClaim{}
+		k.cdc.MustUnmarshalBinaryBare(iter.Value(), &genericClaim)
+		// cb returns true to stop early
+		if cb(iter.Key(), &genericClaim) {
+			break
+		}
+	}
+}
+
+func (k Keeper) IterateClaims(ctx sdk.Context, cb func([]byte, types.EthereumClaim) bool) {
+	prefixStore := prefix.NewStore(ctx.KVStore(k.storeKey), types.OracleClaimKey)
+	iter := prefixStore.Iterator(nil, nil)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
