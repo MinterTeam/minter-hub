@@ -132,7 +132,7 @@ register-peggy-delegate-keys \
 
 - **Start Hub ↔ Ethereum oracle.** 
 ```
-Ethereum Contract for testnet: 0xCa61e9D9Aa7cc70db0D342c6E3F2b9157364C830
+Ethereum Contract for testnet: 0xEB3fb4C664cF3F0B51D523EE5c83d606E63078B8
 
 Ethereum Contract for mainnet: 0xc735478ef7562ecc37662fc7c5e521eb835f9dab
 ```
