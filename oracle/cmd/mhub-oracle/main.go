@@ -82,14 +82,6 @@ func relayPrices(minterClient *http_client.Client, cosmosConn *grpc.ClientConn, 
 
 	basecoinPrice := getBasecoinPrice(logger)
 	for _, coin := range coins.GetCoins() {
-		if coin.Denom == "hub" {
-			prices.List = append(prices.List, &types.Price{
-				Name:  fmt.Sprintf("minter/%d", coin.MinterId),
-				Value: sdk.NewInt(50 * 1e10), // fix HUB price
-			})
-			continue
-		}
-
 		if coin.MinterId == 0 {
 			prices.List = append(prices.List, &types.Price{
 				Name:  fmt.Sprintf("minter/%d", coin.MinterId),
