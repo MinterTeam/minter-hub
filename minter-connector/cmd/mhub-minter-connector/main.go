@@ -217,8 +217,8 @@ func relayBatches(ctx context.Context) {
 
 	// Check if signer is in the last confirmed valset
 	for _, sig := range oldestSignatures {
+		print(sig.MinterSigner)
 		for _, member := range lastValset.GetValset().GetMembers() {
-			print(sig.MinterSigner)
 			if strings.ToLower(member.MinterAddress) == strings.ToLower(sig.MinterSigner) {
 				print(" - ok")
 				signedTx, err = signedTx.AddSignature(sig.Signature)
