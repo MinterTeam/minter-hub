@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"github.com/MinterTeam/mhub/chain/x/minter"
 	"github.com/MinterTeam/mhub/chain/x/oracle"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -591,10 +590,6 @@ func NewMhubApp(
 	app.ScopedIBCKeeper = scopedIBCKeeper
 	app.ScopedTransferKeeper = scopedTransferKeeper
 	
-	if app.AppVersion()[:5] != "v0.0.2" {
-		downgradeMsg := fmt.Sprintf("BINARY UPDATED BEFORE TRIGGER! UPGRADE in binary but not executed on chain")
-		panic(downgradeMsg)
-	}
 	app.upgradeKeeper.SetUpgradeHandler("v0.0.2", func(ctx sdk.Context, plan upgradetypes.Plan) {})
 
 	return app
