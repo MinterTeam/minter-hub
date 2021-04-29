@@ -59,7 +59,7 @@ minter node
 
 2. Install and sync Ethereum node
 ```bash
-geth 
+geth --rpc --rpcaddr "127.0.0.1" --rpcport "8545"
 ```
 
 3. Sync Minter Hub Node
