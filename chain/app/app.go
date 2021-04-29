@@ -590,8 +590,8 @@ func NewMhubApp(
 
 	app.ScopedIBCKeeper = scopedIBCKeeper
 	app.ScopedTransferKeeper = scopedTransferKeeper
-
-	if app.AppVersion() != "v0.0.2" {
+	
+	if app.AppVersion()[:5] != "v0.0.2" {
 		downgradeMsg := fmt.Sprintf("BINARY UPDATED BEFORE TRIGGER! UPGRADE in binary but not executed on chain")
 		panic(downgradeMsg)
 	}
