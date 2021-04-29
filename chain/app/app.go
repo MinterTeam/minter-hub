@@ -589,6 +589,8 @@ func NewMhubApp(
 
 	app.ScopedIBCKeeper = scopedIBCKeeper
 	app.ScopedTransferKeeper = scopedTransferKeeper
+	
+	app.upgradeKeeper.SetUpgradeHandler("v0.0.2", func(ctx sdk.Context, plan upgradetypes.Plan) {})
 
 	return app
 }

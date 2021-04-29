@@ -72,10 +72,15 @@ func (k Keeper) GetPipInBip() sdk.Int {
 }
 
 func (k Keeper) SetTxStatus(ctx sdk.Context, inTxHash string, status types.TxStatusType, outTxHash string) {
+	newStatusType := status
+	if k.GetTxStatus(ctx, inTxHash).Status == types.TX_STATUS_REFUNDED {
+		newStatusType = types.TX_STATUS_REFUNDED
+	}
+
 	ctx.KVStore(k.storeKey).Set(types.GetTxStatusKey(inTxHash), k.cdc.MustMarshalBinaryBare(&types.TxStatus{
 		InTxHash:  inTxHash,
 		OutTxHash: outTxHash,
-		Status:    status,
+		Status:    newStatusType,
 	}))
 }
 

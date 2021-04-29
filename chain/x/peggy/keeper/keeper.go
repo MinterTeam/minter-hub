@@ -414,10 +414,8 @@ func (k Keeper) RefundOutgoingTx(ctx sdk.Context, id uint64, tx *types.OutgoingT
 
 	contractAddr, _ := types.ValidatePeggyCoin(tx.Amount, ctx, k.oracleKeeper)
 
-	vouchers := sdk.Coins{
-		sdk.NewCoin(tx.Amount.Denom, k.oracleKeeper.ConvertFromEthValue(ctx, contractAddr, tx.Amount.Amount)),
-	}
-	vouchers.Add(tx.BridgeFee)
+	vouchers := sdk.NewCoins(sdk.NewCoin(tx.Amount.Denom, k.oracleKeeper.ConvertFromEthValue(ctx, contractAddr, tx.Amount.Amount)))
+	vouchers = vouchers.Add(tx.BridgeFee)
 
 	if err := k.bankKeeper.MintCoins(ctx, types.ModuleName, vouchers); err != nil {
 		panic(sdkerrors.Wrapf(err, "mint vouchers coins: %s", vouchers))

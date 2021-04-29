@@ -15,8 +15,8 @@ import (
 // "custom/%s/lastPendingValsetRequest/%s"
 
 const (
-
-	// Valsets
+	QueryValsetHistory      = "valsetHistory"
+	QueryAttestationHistory = "attestationHistory"
 
 	// used in the relayer
 	QueryValsetRequest                  = "valsetRequest"
@@ -41,6 +41,12 @@ const (
 func NewQuerier(keeper Keeper) sdk.Querier {
 	return func(ctx sdk.Context, path []string, req abci.RequestQuery) (res []byte, err error) {
 		switch path[0] {
+
+		case QueryValsetHistory:
+			return queryValsetHistory(ctx, keeper)
+
+		case QueryAttestationHistory:
+			return queryAttestationHistory(ctx, keeper)
 
 		// Valsets
 		case QueryCurrentValset:
@@ -202,6 +208,71 @@ func lastPendingValsetRequest(ctx sdk.Context, operatorAddr string, keeper Keepe
 func queryCurrentValset(ctx sdk.Context, keeper Keeper) ([]byte, error) {
 	valset := keeper.GetCurrentValset(ctx)
 	res, err := codec.MarshalJSONIndent(types.ModuleCdc, valset)
+	if err != nil {
+		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error())
+	}
+
+	return res, nil
+}
+
+func queryValsetHistory(ctx sdk.Context, keeper Keeper) ([]byte, error) {
+	var history types.ValsetHistory
+
+	keeper.IterateValsets(ctx, func(_ []byte, val *types.Valset) bool {
+		historyItem := &types.ValsetHistoryItem{
+			Valset:   val,
+			Confirms: []*types.MsgValsetConfirm{},
+		}
+
+		keeper.IterateValsetConfirmByNonce(ctx, val.GetNonce(), func(_ []byte, confirm types.MsgValsetConfirm) bool {
+			historyItem.Confirms = append(historyItem.Confirms, &confirm)
+
+			return false
+		})
+
+		history.Valsets = append(history.Valsets, historyItem)
+
+		return false
+	})
+
+	res, err := codec.MarshalJSONIndent(types.ModuleCdc, history)
+	if err != nil {
+		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error())
+	}
+
+	return res, nil
+}
+
+func queryAttestationHistory(ctx sdk.Context, keeper Keeper) ([]byte, error) {
+	valsets := keeper.GetValsets(ctx)
+
+	var history types.AttestationHistory
+	keeper.IterateAttestaions(ctx, func(_ []byte, att types.Attestation) bool {
+		history.Attestations = append(history.Attestations, &att)
+
+		for _, valset := range valsets {
+			if valset.GetHeight() < att.GetHeight() {
+				voted := map[string]bool{}
+				for _, vote := range att.Votes {
+					valaddr, _ := sdk.ValAddressFromBech32(vote)
+					voted[keeper.GetEthAddress(ctx, valaddr)] = true
+				}
+
+				signers := types.AttestationSigners{Vals: []string{}, Signed: []bool{}}
+				for _, val := range valset.Members {
+					signers.Vals = append(signers.Vals, val.GetEthereumAddress())
+					signers.Signed = append(signers.Signed, voted[val.GetEthereumAddress()])
+				}
+
+				history.Signers = append(history.Signers, &signers)
+				break
+			}
+		}
+
+		return false
+	})
+
+	res, err := codec.MarshalJSONIndent(types.ModuleCdc, history)
 	if err != nil {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error())
 	}
