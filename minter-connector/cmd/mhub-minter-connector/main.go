@@ -226,8 +226,8 @@ func relayBatches(ctx context.Context) {
 					panic(err)
 				}
 			}
-			println()
 		}
+		println()
 	}
 
 	encodedTx, err := signedTx.Encode()
