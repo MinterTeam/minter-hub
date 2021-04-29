@@ -18,6 +18,7 @@ import (
 	"github.com/cosmos/go-bip39"
 	"github.com/tendermint/tendermint/libs/log"
 	tmClient "github.com/tendermint/tendermint/rpc/client/http"
+	tmTypes "github.com/tendermint/tendermint/types"
 	"google.golang.org/grpc"
 	"sort"
 	"strings"
@@ -228,8 +229,12 @@ func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, c
 			logger.Error("Failed broadcast tx", "err", err.Error())
 		}
 
-		time.Sleep(1 * time.Second)
-		SendCosmosTx(msgs, address, priv, cosmosConn, logger)
+		time.Sleep(5 * time.Second)
+		txResponse, err := client.Tx(context.Background(), tmTypes.Tx(txBytes).Hash(), false)
+		if err != nil || txResponse.TxResult.IsErr() {
+			SendCosmosTx(msgs, address, priv, cosmosConn, logger)
+		}
+
 		return
 	}
 
