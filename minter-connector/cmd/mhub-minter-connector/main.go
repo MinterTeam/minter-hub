@@ -219,6 +219,7 @@ func relayBatches(ctx context.Context) {
 	for _, sig := range oldestSignatures {
 		for _, member := range lastValset.GetValset().GetMembers() {
 			if strings.ToLower(member.MinterAddress) == strings.ToLower(sig.MinterSigner) {
+				println(sig.MinterSigner)
 				signedTx, err = signedTx.AddSignature(sig.Signature)
 				if err != nil {
 					panic(err)
