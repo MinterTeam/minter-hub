@@ -1,6 +1,7 @@
 PACKAGES=$(shell go list ./... | grep -v '/simulation')
 VERSION := $(shell echo $(shell git describe --tags) | sed 's/^v//')
 COMMIT := $(shell git log -1 --format='%H')
+LEDGER_ENABLED ?= true
 
 build_tags = netgo
 ifeq ($(LEDGER_ENABLED),true)
@@ -43,7 +44,7 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=mhub \
 	-X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 	-X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)" \
 
-BUILD_FLAGS := -ldflags '$(ldflags)' -gcflags="all=-N -l"
+BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)' -gcflags="all=-N -l"
 
 all: install
 
