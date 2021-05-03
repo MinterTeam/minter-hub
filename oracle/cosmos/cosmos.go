@@ -2,6 +2,9 @@ package cosmos
 
 import (
 	"context"
+	"strings"
+	"time"
+
 	"github.com/MinterTeam/mhub/chain/app"
 	"github.com/MinterTeam/minter-hub-oracle/config"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
@@ -15,17 +18,17 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	tmClient "github.com/tendermint/tendermint/rpc/client/http"
 	"google.golang.org/grpc"
-	"strings"
-	"time"
 )
 
 var encoding = app.MakeEncodingConfig()
-var cfg = config.Get()
+var cfg *config.Config
 
-func Setup() {
-	config := sdk.GetConfig()
-	config.SetBech32PrefixForAccount("hub", "hubpub")
-	config.Seal()
+func Setup(conf *config.Config) {
+	cfg = conf
+
+	cosmosCfg := sdk.GetConfig()
+	cosmosCfg.SetBech32PrefixForAccount("hub", "hubpub")
+	cosmosCfg.Seal()
 }
 
 func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, cosmosConn *grpc.ClientConn, logger log.Logger) {
