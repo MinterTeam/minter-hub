@@ -130,7 +130,7 @@ func relayPrices(
 
 	prices.List = append(prices.List, &types.Price{
 		Name:  "eth/gas",
-		Value: sdk.NewInt(ethGasPrice.GetGasPrice().Fast),
+		Value: ethGasPrice.GetGasPrice().Fast,
 	})
 
 	msg := &types.MsgPriceClaim{

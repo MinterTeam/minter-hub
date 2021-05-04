@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+
 	"github.com/MinterTeam/mhub/chain/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -53,7 +54,7 @@ func (k Keeper) EthFee(context context.Context, request *types.QueryEthFeeReques
 	}
 
 	return &types.QueryEthFeeResponse{
-		Min:  gasPrice.Mul(ethPrice).MulRaw(int64(k.GetMinSingleWithdrawGas(ctx))).QuoRaw(gweiInEth).QuoRaw(k.GetGasUnits()),
-		Fast: gasPrice.Mul(ethPrice).MulRaw(int64(k.GetMinBatchGas(ctx))).QuoRaw(gweiInEth).QuoRaw(k.GetGasUnits()),
+		Min:  gasPrice.Mul(ethPrice).MulRaw(int64(k.GetMinSingleWithdrawGas(ctx))).QuoRaw(gweiInEth),
+		Fast: gasPrice.Mul(ethPrice).MulRaw(int64(k.GetMinBatchGas(ctx))).QuoRaw(gweiInEth),
 	}, nil
 }

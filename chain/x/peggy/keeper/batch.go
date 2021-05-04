@@ -2,9 +2,10 @@ package keeper
 
 import (
 	"fmt"
+	"strconv"
+
 	minterkeeper "github.com/MinterTeam/mhub/chain/x/minter/keeper"
 	oracletypes "github.com/MinterTeam/mhub/chain/x/oracle/types"
-	"strconv"
 
 	"github.com/MinterTeam/mhub/chain/x/peggy/types"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
@@ -56,7 +57,7 @@ func (k Keeper) BuildOutgoingTXBatch(ctx sdk.Context, contractAddress string, ma
 	}
 
 	totalUsdCommission := totalCommission.Mul(price).Quo(k.oracleKeeper.GetPipInBip())
-	totalUsdGas := gasPrice.Mul(ethPrice).MulRaw(int64(k.oracleKeeper.GetMinBatchGas(ctx))).QuoRaw(gweiInEth).QuoRaw(k.oracleKeeper.GetGasUnits())
+	totalUsdGas := gasPrice.Mul(ethPrice).MulRaw(int64(k.oracleKeeper.GetMinBatchGas(ctx))).QuoRaw(gweiInEth)
 	if totalUsdCommission.LT(totalUsdGas) {
 		return nil, sdkerrors.Wrap(types.ErrInvalid, "not enough gas yet")
 	}

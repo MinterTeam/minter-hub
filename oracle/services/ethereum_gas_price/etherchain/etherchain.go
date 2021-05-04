@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/MinterTeam/minter-hub-oracle/services/ethereum_gas_price"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/tendermint/tendermint/libs/log"
 	"github.com/valyala/fasthttp"
 )
@@ -41,6 +42,6 @@ func (s *Service) GetGasPrice() ethereum_gas_price.GasPrice {
 	}
 
 	return ethereum_gas_price.GasPrice{
-		Fast: result.Fast,
+		Fast: sdk.NewInt(result.Fast),
 	}
 }

@@ -2,14 +2,15 @@ package keeper
 
 import (
 	"fmt"
+	"math"
+	"math/big"
+
 	"github.com/MinterTeam/mhub/chain/x/oracle/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/tendermint/tendermint/libs/log"
-	"math"
-	"math/big"
 )
 
 const minterDecimals = 18
@@ -202,10 +203,6 @@ func (k Keeper) ProcessCurrentEpoch(ctx sdk.Context) {
 func (k Keeper) storePrices(ctx sdk.Context, prices *types.Prices) {
 	store := ctx.KVStore(k.storeKey)
 	store.Set(types.CurrentPricesKey, k.cdc.MustMarshalBinaryBare(prices))
-}
-
-func (k Keeper) GetGasUnits() int64 {
-	return 10
 }
 
 func (k Keeper) GetNormalizedValPowers(ctx sdk.Context) map[string]uint64 {

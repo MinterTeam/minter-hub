@@ -156,7 +156,7 @@ func (k msgServer) SendToEth(c context.Context, msg *types.MsgSendToEth) (*types
 	}
 
 	totalUsdCommission := msg.BridgeFee.Amount.Mul(coinPrice).Quo(k.oracleKeeper.GetPipInBip())
-	totalUsdGas := gasPrice.Mul(ethPrice).MulRaw(int64(k.oracleKeeper.GetMinSingleWithdrawGas(ctx))).QuoRaw(gweiInEth).QuoRaw(k.oracleKeeper.GetGasUnits())
+	totalUsdGas := gasPrice.Mul(ethPrice).MulRaw(int64(k.oracleKeeper.GetMinSingleWithdrawGas(ctx))).QuoRaw(gweiInEth)
 	if totalUsdCommission.LT(totalUsdGas) {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "bridge fee is not sufficient")
 	}
