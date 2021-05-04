@@ -1,11 +1,12 @@
-package ethereum_gas_price
+package providers
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-type Service interface {
-	GetGasPrice() GasPrice
+type Provider interface {
+	Name() string
+	GetGasPrice() (*GasPrice, error)
 }
 
 type GasPrice struct {

@@ -3,68 +3,45 @@ package config
 import (
 	"flag"
 
-	"github.com/MinterTeam/minter-hub-oracle/services/ethereum_gas_price"
-	"github.com/MinterTeam/minter-hub-oracle/services/ethereum_gas_price/etherchain"
-	"github.com/MinterTeam/minter-hub-oracle/services/ethereum_gas_price/ethgasstation"
-	"github.com/tendermint/tendermint/libs/log"
+	"github.com/spf13/viper"
 )
 
-func Get(logger log.Logger) *Config {
-	cfg := &Config{}
-
-	minterNodeUrl := flag.String("minter-node-url", "", "")
-
-	cosmosMnemonic := flag.String("cosmos-mnemonic", "", "")
-	cosmosNodeUrl := flag.String("cosmos-node-url", "", "")
-	tendermintNodeUrl := flag.String("tm-node-url", "", "")
-	ethGasPriceProviderName := flag.String("eth-gas-price-provider", "ethgasstation", "")
-
-	flag.Parse()
-
-	cfg.Cosmos = CosmosConfig{
-		Mnemonic:    *cosmosMnemonic,
-		NodeGrpcUrl: *cosmosNodeUrl,
-		TmUrl:       *tendermintNodeUrl,
-	}
-
-	cfg.Minter = MinterConfig{
-		NodeUrl: *minterNodeUrl,
-	}
-
-	var ethGasPriceProvider ethereum_gas_price.Service
-
-	switch *ethGasPriceProviderName {
-	case "ethgasstation":
-		ethGasPriceProvider = ethgasstation.New(logger)
-		break
-	case "etherchain":
-		ethGasPriceProvider = etherchain.New(logger)
-		break
-	}
-
-	cfg.EthGasPriceProvider = EthGasPriceProvider{
-		Service: ethGasPriceProvider,
-	}
-
-	return cfg
-}
-
 type MinterConfig struct {
-	NodeUrl string
+	ApiAddr string `mapstructure:"api_addr"`
 }
 
 type CosmosConfig struct {
-	Mnemonic    string
-	NodeGrpcUrl string
-	TmUrl       string
+	Mnemonic string
+	GrpcAddr string `mapstructure:"grpc_addr"`
+	RpcAddr  string `mapstructure:"rpc_addr"`
 }
 
-type EthGasPriceProvider struct {
-	Service ethereum_gas_price.Service
+type EthereumConfig struct {
+	GasPriceProviders []string `mapstructure:"gas_price_providers"`
 }
 
 type Config struct {
-	Cosmos              CosmosConfig
-	Minter              MinterConfig
-	EthGasPriceProvider EthGasPriceProvider
+	Cosmos   CosmosConfig
+	Minter   MinterConfig
+	Ethereum EthereumConfig
+}
+
+func Get() *Config {
+	cfg := &Config{}
+
+	configPath := flag.String("config", "config.toml", "path to the configuration file")
+	flag.Parse()
+
+	v := viper.New()
+	v.SetConfigFile(*configPath)
+
+	if err := v.ReadInConfig(); err != nil {
+		panic(err)
+	}
+
+	if err := v.Unmarshal(&cfg); err != nil {
+		panic(err)
+	}
+
+	return cfg
 }
