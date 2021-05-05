@@ -205,6 +205,11 @@ func (k Keeper) storePrices(ctx sdk.Context, prices *types.Prices) {
 	store.Set(types.CurrentPricesKey, k.cdc.MustMarshalBinaryBare(prices))
 }
 
+func (k Keeper) GetGasUnits() int64 {
+	// TODO convert to gwei in oracle
+	return 10
+}
+
 func (k Keeper) GetNormalizedValPowers(ctx sdk.Context) map[string]uint64 {
 	validators := k.StakingKeeper.GetBondedValidatorsByPower(ctx)
 	bridgeValidators := map[string]uint64{}

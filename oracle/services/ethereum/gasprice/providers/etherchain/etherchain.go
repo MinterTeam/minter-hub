@@ -37,6 +37,6 @@ func (p *Provider) GetGasPrice() (*providers.GasPrice, error) {
 	}
 
 	return &providers.GasPrice{
-		Fast: sdk.NewInt(result.Fast),
+		Fast: sdk.NewInt(result.Fast).MulRaw(10),
 	}, nil
 }
