@@ -133,7 +133,7 @@ func (a *AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, clai
 		}
 
 		totalUsdCommission := fee.Amount.Mul(coinPrice).Quo(a.keeper.oracleKeeper.GetPipInBip())
-		totalUsdGas := gasPrice.Mul(ethPrice).MulRaw(int64(a.keeper.oracleKeeper.GetMinSingleWithdrawGas(ctx))).QuoRaw(gweiInEth)
+		totalUsdGas := gasPrice.Mul(ethPrice).MulRaw(int64(a.keeper.oracleKeeper.GetMinSingleWithdrawGas(ctx))).QuoRaw(gweiInEth).QuoRaw(a.keeper.oracleKeeper.GetGasUnits())
 		if totalUsdCommission.GTE(totalUsdGas) {
 			feeIsOk = true
 		}

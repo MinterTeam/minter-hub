@@ -57,7 +57,7 @@ func (k Keeper) BuildOutgoingTXBatch(ctx sdk.Context, contractAddress string, ma
 	}
 
 	totalUsdCommission := totalCommission.Mul(price).Quo(k.oracleKeeper.GetPipInBip())
-	totalUsdGas := gasPrice.Mul(ethPrice).MulRaw(int64(k.oracleKeeper.GetMinBatchGas(ctx))).QuoRaw(gweiInEth)
+	totalUsdGas := gasPrice.Mul(ethPrice).MulRaw(int64(k.oracleKeeper.GetMinBatchGas(ctx))).QuoRaw(gweiInEth).QuoRaw(k.oracleKeeper.GetGasUnits())
 	if totalUsdCommission.LT(totalUsdGas) {
 		return nil, sdkerrors.Wrap(types.ErrInvalid, "not enough gas yet")
 	}
