@@ -88,6 +88,10 @@ func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, nonce uint64, hash stri
 	)
 
 	for _, tx := range b.Transactions {
+		if tx.TxHash == "" {
+			continue
+		}
+
 		batchEventExecuted = batchEventExecuted.AppendAttributes(sdk.NewAttribute(types.AttributeKeyTxHash, tx.TxHash))
 		k.oracleKeeper.SetTxStatus(ctx, tx.TxHash, oracletypes.TX_STATUS_BATCH_EXECUTED, hash)
 	}

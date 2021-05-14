@@ -61,4 +61,5 @@ func RegisterCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MinterCoin{}, "minter/MinterCoin", nil)
 	cdc.RegisterConcrete(&IDSet{}, "minter/IDSet", nil)
 	cdc.RegisterConcrete(&Attestation{}, "minter/Attestation", nil)
+	cdc.RegisterConcrete(&ColdStorageTransferProposal{}, "minter/ColdStorageTransferProposal", nil)
 }

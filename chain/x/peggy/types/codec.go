@@ -55,4 +55,5 @@ func RegisterCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&ERC20Token{}, "peggy/ERC20Token", nil)
 	cdc.RegisterConcrete(&IDSet{}, "peggy/IDSet", nil)
 	cdc.RegisterConcrete(&Attestation{}, "peggy/Attestation", nil)
+	cdc.RegisterConcrete(&ColdStorageTransferProposal{}, "peggy/ColdStorageTransferProposal", nil)
 }

@@ -3,6 +3,7 @@ package minter
 import (
 	"bytes"
 	"fmt"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
 	"github.com/MinterTeam/mhub/chain/x/minter/keeper"
 	"github.com/MinterTeam/mhub/chain/x/minter/types"
@@ -303,4 +304,16 @@ func handleMsgRequestBatch(ctx sdk.Context, k keeper.Keeper, msg *types.MsgReque
 		Data:   types.UInt64Bytes(batchID.BatchNonce),
 		Events: ctx.EventManager().Events().ToABCIEvents(),
 	}, nil
+}
+
+func NewColdStorageTransferProposalHandler(k keeper.Keeper) govtypes.Handler {
+	return func(ctx sdk.Context, content govtypes.Content) error {
+		switch c := content.(type) {
+		case *types.ColdStorageTransferProposal:
+			return k.ColdStorageTransfer(ctx, c)
+
+		default:
+			return sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "unrecognized proposal content type: %T", c)
+		}
+	}
 }
