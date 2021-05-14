@@ -10,7 +10,7 @@ import (
 
 const (
 	// ProposalTypeColdStorageTransfer defines the type for a ColdStorageTransferProposal
-	ProposalTypeColdStorageTransfer = "ColdStorageTransfer"
+	ProposalTypeColdStorageTransfer = "MinterColdStorageTransfer"
 )
 
 // Assert ColdStorageTransferProposal implements govtypes.Content at compile-time

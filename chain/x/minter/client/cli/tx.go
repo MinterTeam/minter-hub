@@ -164,7 +164,7 @@ func CmdUnsafeMinterAddr() *cobra.Command {
 }
 
 func CmdWithdrawToMinter() *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "withdraw [from_key_or_cosmos_address] [to_minter_address] [amount]",
 		Short: "Adds a new entry to the transaction pool to withdraw an amount from the Minter multisig",
 		Args:  cobra.ExactArgs(3),
@@ -193,6 +193,10 @@ func CmdWithdrawToMinter() *cobra.Command {
 			return tx.GenerateOrBroadcastTxCLI(cliCtx, cmd.Flags(), &msg)
 		},
 	}
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
 }
 
 func CmdRequestBatch() *cobra.Command {
