@@ -23,11 +23,13 @@ import (
 	dbm "github.com/tendermint/tm-db"
 
 	peggyparams "github.com/MinterTeam/mhub/chain/app/params"
+	minterclient "github.com/MinterTeam/mhub/chain/x/minter/client"
 	minterkeeper "github.com/MinterTeam/mhub/chain/x/minter/keeper"
 	mintertypes "github.com/MinterTeam/mhub/chain/x/minter/types"
 	oraclekeeper "github.com/MinterTeam/mhub/chain/x/oracle/keeper"
 	oracletypes "github.com/MinterTeam/mhub/chain/x/oracle/types"
 	"github.com/MinterTeam/mhub/chain/x/peggy"
+	peggyclient "github.com/MinterTeam/mhub/chain/x/peggy/client"
 	"github.com/MinterTeam/mhub/chain/x/peggy/keeper"
 	peggytypes "github.com/MinterTeam/mhub/chain/x/peggy/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -122,6 +124,8 @@ var (
 			distrclient.ProposalHandler,
 			upgradeclient.ProposalHandler,
 			upgradeclient.CancelProposalHandler,
+			minterclient.ProposalHandler,
+			peggyclient.ProposalHandler,
 		),
 		params.AppModuleBasic{},
 		crisis.AppModuleBasic{},

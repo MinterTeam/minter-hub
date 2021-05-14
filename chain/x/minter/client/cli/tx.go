@@ -3,8 +3,13 @@ package cli
 import (
 	"crypto/ecdsa"
 	"encoding/hex"
+	"fmt"
+	"github.com/MinterTeam/mhub/chain/x/minter/client/utils"
 	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/version"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"log"
+	"strings"
 
 	"github.com/cosmos/cosmos-sdk/types/errors"
 	ethCrypto "github.com/ethereum/go-ethereum/crypto"
@@ -219,6 +224,67 @@ func CmdRequestBatch() *cobra.Command {
 			}
 			// Send it
 			return tx.GenerateOrBroadcastTxCLI(cliCtx, cmd.Flags(), &msg)
+		},
+	}
+}
+
+func NewSubmitColdStorageTransferProposalTxCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "minter-cold-storage-transfer [proposal-file]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Submit a cold storage transfer proposal",
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`Submit a cold storage transfer proposal along with an initial deposit.
+The proposal details must be supplied via a JSON file. For values that contains
+objects, only non-empty fields will be updated.
+
+Example:
+$ %s tx gov submit-proposal minter-cold-storage-transfer <path/to/proposal.json> --from=<key_or_address>
+
+Where proposal.json contains:
+
+{
+  "amount": [
+    {
+      "denom": "hub",
+      "amount": "100"
+    }
+  ],
+  "deposit": "1000stake"
+}
+`,
+				version.AppName,
+			),
+		),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+			proposal, err := utils.ParseColdStorageTransferProposalJSON(clientCtx.LegacyAmino, args[0])
+			if err != nil {
+				return err
+			}
+
+			from := clientCtx.GetFromAddress()
+			content := types.NewColdStorageTransferProposal(
+				proposal.Amount,
+			)
+
+			deposit, err := sdk.ParseCoinsNormalized(proposal.Deposit)
+			if err != nil {
+				return err
+			}
+
+			msg, err := govtypes.NewMsgSubmitProposal(content, deposit, from)
+			if err != nil {
+				return err
+			}
+			if err := msg.ValidateBasic(); err != nil {
+				return err
+			}
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
 	}
 }

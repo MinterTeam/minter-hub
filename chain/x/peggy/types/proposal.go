@@ -21,9 +21,7 @@ func init() {
 	govtypes.RegisterProposalTypeCodec(&ColdStorageTransferProposal{}, "peggy/ColdStorageTransferProposal")
 }
 
-// NewCommunityPoolSpendProposal creates a new community pool spned proposal.
-//nolint:interfacer
-func NewCommunityPoolSpendProposal(amount sdk.Coins) *ColdStorageTransferProposal {
+func NewColdStorageTransferProposal(amount sdk.Coins) *ColdStorageTransferProposal {
 	return &ColdStorageTransferProposal{amount}
 }
 
