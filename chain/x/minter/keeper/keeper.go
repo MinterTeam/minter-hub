@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/MinterTeam/mhub/chain/cold_storage"
 	oraclekeeper "github.com/MinterTeam/mhub/chain/x/oracle/keeper"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"math"
 	"sort"
 	"strconv"
@@ -424,6 +425,15 @@ func (k Keeper) ColdStorageTransfer(ctx sdk.Context, c *types.ColdStorageTransfe
 		minterCoin, err := types.MinterCoinFromPeggyCoin(coin, ctx, k.oracleKeeper)
 		if err != nil {
 			return err
+		}
+
+		vouchers := sdk.Coins{coin}
+		if err := k.bankKeeper.MintCoins(ctx, types.ModuleName, vouchers); err != nil {
+			return sdkerrors.Wrapf(err, "mint vouchers coins: %s", vouchers)
+		}
+
+		if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, defaultSender, vouchers); err != nil {
+			return sdkerrors.Wrap(err, "transfer vouchers")
 		}
 
 		txID, err := k.AddToOutgoingPool(ctx, defaultSender, coldStorageAddr, "", coin)

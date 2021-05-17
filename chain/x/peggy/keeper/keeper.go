@@ -461,6 +461,15 @@ func (k Keeper) ColdStorageTransfer(ctx sdk.Context, c *types.ColdStorageTransfe
 			return err
 		}
 
+		vouchers := sdk.Coins{coin}
+		if err := k.bankKeeper.MintCoins(ctx, types.ModuleName, vouchers); err != nil {
+			return sdkerrors.Wrapf(err, "mint vouchers coins: %s", vouchers)
+		}
+
+		if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, defaultSender, vouchers); err != nil {
+			return sdkerrors.Wrap(err, "transfer vouchers")
+		}
+
 		txID, err := k.AddToOutgoingPool(ctx, defaultSender, coldStorageAddr, defaultSender.String(), "", coin, sdk.NewCoin(coin.Denom, sdk.NewInt(0)))
 		if err != nil {
 			return err
