@@ -488,7 +488,7 @@ func (k Keeper) ColdStorageTransfer(ctx sdk.Context, c *types.ColdStorageTransfe
 					Id:          txID,
 					Sender:      defaultSender.String(),
 					DestAddress: coldStorageAddr,
-					Erc20Token:  erc20,
+					Erc20Token:  types.NewERC20Token(k.oracleKeeper.ConvertToEthValue(ctx, erc20.GetContract(), erc20.Amount), erc20.GetContract()),
 					Erc20Fee:    types.NewERC20Token(sdk.NewInt(0), erc20.GetContract()),
 					TxHash:      "",
 				},
