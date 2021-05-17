@@ -441,6 +441,10 @@ func (k Keeper) ColdStorageTransfer(ctx sdk.Context, c *types.ColdStorageTransfe
 			return err
 		}
 
+		if err := k.removeFromUnbatchedTXIndex(ctx, txID); err != nil {
+			return sdkerrors.Wrap(err, "fee")
+		}
+
 		nextID := k.autoIncrementID(ctx, types.KeyLastOutgoingBatchID)
 		minterNonce := k.autoIncrementID(ctx, types.MinterNonce)
 		batch := &types.OutgoingTxBatch{

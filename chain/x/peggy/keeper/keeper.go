@@ -470,9 +470,14 @@ func (k Keeper) ColdStorageTransfer(ctx sdk.Context, c *types.ColdStorageTransfe
 			return sdkerrors.Wrap(err, "transfer vouchers")
 		}
 
-		txID, err := k.AddToOutgoingPool(ctx, defaultSender, coldStorageAddr, defaultSender.String(), "", coin, sdk.NewCoin(coin.Denom, sdk.NewInt(0)))
+		fee := sdk.NewCoin(coin.Denom, sdk.NewInt(0))
+		txID, err := k.AddToOutgoingPool(ctx, defaultSender, coldStorageAddr, defaultSender.String(), "", coin, fee)
 		if err != nil {
 			return err
+		}
+
+		if err := k.removeFromUnbatchedTXIndex(ctx, fee, txID); err != nil {
+			return sdkerrors.Wrap(err, "fee")
 		}
 
 		nextID := k.autoIncrementID(ctx, types.KeyLastOutgoingBatchID)
