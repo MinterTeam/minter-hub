@@ -1,80 +1,87 @@
 package config
 
 import (
+	"errors"
 	"flag"
+	"reflect"
+
 	"github.com/MinterTeam/minter-go-sdk/v2/transaction"
+	"github.com/mitchellh/mapstructure"
+
+	"github.com/spf13/viper"
 )
 
-var cfg *Config
-
-func Get() Config {
-	if cfg == nil {
-		cfg = &Config{}
-
-		minterMsigAddr := flag.String("minter-multisig", "", "")
-		minterChain := flag.String("minter-chain", "", "")
-		minterMnemonic := flag.String("minter-mnemonic", "", "")
-		minterNodeUrl := flag.String("minter-node-url", "", "")
-		minterStartBlock := flag.Int("minter-start-block", 1, "")
-		minterStartEventNonce := flag.Int("minter-start-event-nonce", 1, "")
-		minterStartBatchNonce := flag.Int("minter-start-batch-nonce", 1, "")
-		minterStartValsetNonce := flag.Int("minter-start-valset-nonce", 1, "")
-
-		cosmosMnemonic := flag.String("cosmos-mnemonic", "", "")
-		cosmosNodeUrl := flag.String("cosmos-node-url", "", "")
-		tendermintNodeUrl := flag.String("tm-node-url", "", "")
-
-		flag.Parse()
-
-		var minterChainId transaction.ChainID
-		switch *minterChain {
-		case "mainnet":
-			minterChainId = transaction.MainNetChainID
-		case "testnet":
-			minterChainId = transaction.TestNetChainID
-		default:
-			panic("unknown minter chain id")
-		}
-
-		cfg.Minter = MinterConfig{
-			MultisigAddr:     *minterMsigAddr,
-			ChainID:          minterChainId,
-			Mnemonic:         *minterMnemonic,
-			StartBlock:       uint64(*minterStartBlock),
-			StartEventNonce:  uint64(*minterStartEventNonce),
-			StartBatchNonce:  uint64(*minterStartBatchNonce),
-			StartValsetNonce: uint64(*minterStartValsetNonce),
-			NodeUrl:          *minterNodeUrl,
-		}
-
-		cfg.Cosmos = CosmosConfig{
-			Mnemonic:    *cosmosMnemonic,
-			NodeGrpcUrl: *cosmosNodeUrl,
-			TmUrl:       *tendermintNodeUrl,
-		}
-	}
-
-	return *cfg
-}
-
 type MinterConfig struct {
-	MultisigAddr     string
-	ChainID          transaction.ChainID
+	MultisigAddr     string              `mapstructure:"multisig_addr"`
+	ChainID          transaction.ChainID `mapstructure:"chain"`
+	ApiAddr          string              `mapstructure:"api_addr"`
 	Mnemonic         string
-	StartBlock       uint64
-	StartEventNonce  uint64
-	StartBatchNonce  uint64
-	StartValsetNonce uint64
-	NodeUrl          string
+	StartBlock       uint64 `mapstructure:"start_block"`
+	StartEventNonce  uint64 `mapstructure:"start_event_nonce"`
+	StartBatchNonce  uint64 `mapstructure:"start_batch_nonce"`
+	StartValsetNonce uint64 `mapstructure:"start_valset_nonce"`
 }
 
 type CosmosConfig struct {
-	Mnemonic    string
-	NodeGrpcUrl string
-	TmUrl       string
+	Mnemonic string
+	GrpcAddr string `mapstructure:"grpc_addr"`
+	RpcAddr  string `mapstructure:"rpc_addr"`
 }
 
 type Config struct {
 	Minter MinterConfig
 	Cosmos CosmosConfig
+}
+
+var cfg *Config
+
+func Get() *Config {
+	if cfg != nil {
+		return cfg
+	}
+
+	configPath := flag.String("config", "config.toml", "path to the configuration file")
+	flag.Parse()
+
+	v := viper.New()
+	v.SetConfigFile(*configPath)
+
+	if err := v.ReadInConfig(); err != nil {
+		panic(err)
+	}
+
+	err := v.Unmarshal(&cfg, viper.DecodeHook(
+		stringToChainHook(),
+	))
+
+	if err != nil {
+		panic(err)
+	}
+
+	return cfg
+}
+
+func stringToChainHook() mapstructure.DecodeHookFunc {
+	return func(
+		f reflect.Type,
+		t reflect.Type,
+		data interface{},
+	) (interface{}, error) {
+		if f.Kind() != reflect.String {
+			return data, nil
+		}
+
+		if t != reflect.TypeOf(transaction.ChainID(0)) {
+			return data, nil
+		}
+
+		switch data.(string) {
+		case "mainnet":
+			return transaction.MainNetChainID, nil
+		case "testnet":
+			return transaction.TestNetChainID, nil
+		default:
+			return nil, errors.New("unknown minter chain")
+		}
+	}
 }

@@ -4,21 +4,21 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/MinterTeam/mhub/chain/x/oracle/types"
 	"github.com/MinterTeam/minter-go-sdk/v2/api/http_client"
 	"github.com/MinterTeam/minter-hub-oracle/config"
 	"github.com/MinterTeam/minter-hub-oracle/cosmos"
+	"github.com/MinterTeam/minter-hub-oracle/services/ethereum/gasprice"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/tendermint/tendermint/libs/log"
 	"github.com/valyala/fasthttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/backoff"
-	"os"
-	"time"
 )
-
-var cfg = config.Get()
 
 const multiplier = 1e10
 
@@ -27,17 +27,20 @@ var pipInBip = sdk.NewInt(1000000000000000000)
 func main() {
 	logger := log.NewTMLogger(os.Stdout)
 
-	cosmos.Setup()
+	cfg := config.Get()
+
+	cosmos.Setup(cfg)
+
 	orcAddress, orcPriv := cosmos.GetAccount(cfg.Cosmos.Mnemonic)
 
 	logger.Info("Orc address", "address", orcAddress.String())
 
-	minterClient, err := http_client.New(cfg.Minter.NodeUrl)
+	minterClient, err := http_client.New(cfg.Minter.ApiAddr)
 	if err != nil {
 		panic(err)
 	}
 
-	cosmosConn, err := grpc.DialContext(context.Background(), cfg.Cosmos.NodeGrpcUrl, grpc.WithInsecure(), grpc.WithConnectParams(grpc.ConnectParams{
+	cosmosConn, err := grpc.DialContext(context.Background(), cfg.Cosmos.GrpcAddr, grpc.WithInsecure(), grpc.WithConnectParams(grpc.ConnectParams{
 		Backoff:           backoff.DefaultConfig,
 		MinConnectTimeout: time.Second * 5,
 	}))
@@ -47,14 +50,27 @@ func main() {
 	}
 	defer cosmosConn.Close()
 
+	ethGasPrice, err := gasprice.NewService(cfg, logger)
+
+	if err != nil {
+		panic(err)
+	}
+
 	for {
-		relayPrices(minterClient, cosmosConn, orcAddress, orcPriv, logger)
+		relayPrices(minterClient, ethGasPrice, cosmosConn, orcAddress, orcPriv, logger)
 
 		time.Sleep(1 * time.Second)
 	}
 }
 
-func relayPrices(minterClient *http_client.Client, cosmosConn *grpc.ClientConn, orcAddress sdk.AccAddress, orcPriv *secp256k1.PrivKey, logger log.Logger) {
+func relayPrices(
+	minterClient *http_client.Client,
+	ethGasPrice *gasprice.Service,
+	cosmosConn *grpc.ClientConn,
+	orcAddress sdk.AccAddress,
+	orcPriv *secp256k1.PrivKey,
+	logger log.Logger,
+) {
 	cosmosClient := types.NewQueryClient(cosmosConn)
 
 	response, err := cosmosClient.CurrentEpoch(context.Background(), &types.QueryCurrentEpochRequest{})
@@ -120,7 +136,7 @@ func relayPrices(minterClient *http_client.Client, cosmosConn *grpc.ClientConn, 
 
 	prices.List = append(prices.List, &types.Price{
 		Name:  "eth/gas",
-		Value: getEthGasPrice(logger),
+		Value: ethGasPrice.GetGasPrice().Fast,
 	})
 
 	msg := &types.MsgPriceClaim{
@@ -166,27 +182,6 @@ func getEthPrice(logger log.Logger) sdk.Int {
 	}
 
 	return sdk.NewInt(int64(result["ethereum"]["usd"] * multiplier)) // todo
-}
-
-func getEthGasPrice(logger log.Logger) sdk.Int {
-	_, body, err := fasthttp.Get(nil, "https://ethgasstation.info/api/ethgasAPI.json")
-	if err != nil {
-		logger.Error("Error getting eth gas price", "err", err.Error())
-		time.Sleep(time.Second)
-		return getEthGasPrice(logger)
-	}
-	var result EthGasResult
-	if err := json.Unmarshal(body, &result); err != nil {
-		logger.Error("Error getting eth gas price", "err", err.Error())
-		time.Sleep(time.Second)
-		return getEthGasPrice(logger)
-	}
-
-	return sdk.NewInt(result.Fast) // todo
-}
-
-type EthGasResult struct {
-	Fast int64 `json:"fast"`
 }
 
 type CoingeckoResult map[string]map[string]float64

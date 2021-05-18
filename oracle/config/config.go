@@ -2,47 +2,46 @@ package config
 
 import (
 	"flag"
+
+	"github.com/spf13/viper"
 )
 
-var cfg *Config
-
-func Get() Config {
-	if cfg == nil {
-		cfg = &Config{}
-
-		minterNodeUrl := flag.String("minter-node-url", "", "")
-
-		cosmosMnemonic := flag.String("cosmos-mnemonic", "", "")
-		cosmosNodeUrl := flag.String("cosmos-node-url", "", "")
-		tendermintNodeUrl := flag.String("tm-node-url", "", "")
-
-		flag.Parse()
-
-		cfg.Cosmos = CosmosConfig{
-			Mnemonic:    *cosmosMnemonic,
-			NodeGrpcUrl: *cosmosNodeUrl,
-			TmUrl:       *tendermintNodeUrl,
-		}
-
-		cfg.Minter = MinterConfig{
-			NodeUrl: *minterNodeUrl,
-		}
-	}
-
-	return *cfg
-}
-
 type MinterConfig struct {
-	NodeUrl string
+	ApiAddr string `mapstructure:"api_addr"`
 }
 
 type CosmosConfig struct {
-	Mnemonic    string
-	NodeGrpcUrl string
-	TmUrl       string
+	Mnemonic string
+	GrpcAddr string `mapstructure:"grpc_addr"`
+	RpcAddr  string `mapstructure:"rpc_addr"`
+}
+
+type EthereumConfig struct {
+	GasPriceProviders []string `mapstructure:"gas_price_providers"`
 }
 
 type Config struct {
-	Cosmos CosmosConfig
-	Minter MinterConfig
+	Cosmos   CosmosConfig
+	Minter   MinterConfig
+	Ethereum EthereumConfig
+}
+
+func Get() *Config {
+	cfg := &Config{}
+
+	configPath := flag.String("config", "config.toml", "path to the configuration file")
+	flag.Parse()
+
+	v := viper.New()
+	v.SetConfigFile(*configPath)
+
+	if err := v.ReadInConfig(); err != nil {
+		panic(err)
+	}
+
+	if err := v.Unmarshal(&cfg); err != nil {
+		panic(err)
+	}
+
+	return cfg
 }

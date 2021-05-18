@@ -2,14 +2,15 @@ package keeper
 
 import (
 	"fmt"
+	"math"
+	"math/big"
+
 	"github.com/MinterTeam/mhub/chain/x/oracle/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/tendermint/tendermint/libs/log"
-	"math"
-	"math/big"
 )
 
 const minterDecimals = 18
@@ -205,6 +206,7 @@ func (k Keeper) storePrices(ctx sdk.Context, prices *types.Prices) {
 }
 
 func (k Keeper) GetGasUnits() int64 {
+	// TODO convert to gwei in oracle
 	return 10
 }
 
