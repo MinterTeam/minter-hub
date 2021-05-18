@@ -157,7 +157,7 @@ Start Minter Block for mainnet: 3442652
 ```
 
 ```toml
-// connector-config.toml
+# connector-config.toml
 
 [minter]
 # testnet|mainnet
@@ -183,6 +183,8 @@ mhub-minter-connector --config=connector-config.toml
 	
 - **Start price oracle**
 ```toml
+# oracle-config.toml
+
 [minter]
 api_addr = "http://127.0.0.1:8843/v2/"
 
@@ -199,10 +201,6 @@ gas_price_providers = [
 ```
 
 ```bash
-mhub-oracle \
-	--minter-node-url="127.0.0.1:8843/v2/" \
-	--cosmos-mnemonic=<COSMOS MNEMONIC> \
-	--cosmos-node-url="127.0.0.1:9090" \
-	--tm-node-url="127.0.0.1:26657" 
+mhub-oracle --config=oracle-config.toml
 ```
 
