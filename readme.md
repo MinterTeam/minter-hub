@@ -155,22 +155,49 @@ Start Minter Block for testnet: 4000121
 Minter Multisig for mainnet: Mx68f4839d7f32831b9234f9575f3b95e1afe21a56
 Start Minter Block for mainnet: 3442652
 ```
+
+```toml
+// connector-config.toml
+
+[minter]
+# testnet|mainnet
+chain = "mainnet"
+multisig_addr = <ADDRESS OF MINTER MULTISIG>
+mnemonic = <MINTER MNEMONIC>
+api_addr = "http://127.0.0.1:8843/v2/"
+start_block = <MINTER START BLOCK>
+start_event_nonce = 1
+start_batch_nonce = 1
+start_valset_nonce = 1
+
+[cosmos]
+mnemonic = ""
+grpc_addr = "127.0.0.1:9090"
+rpc_addr = "http://127.0.0.1:26657"
+
+```
+
 ```bash
-mhub-minter-connector \
-	--minter-multisig=<ADDRESS OF MINTER MULTISIG> \
-	--minter-chain=<testnet|mainnet> \
-	--minter-mnemonic=<MINTER MNEMONIC> \
-	--minter-node-url="tcp://127.0.0.1:8843/v2/" \
-	--cosmos-mnemonic=<COSMOS MNEMONIC> \
-	--cosmos-node-url="127.0.0.1:9090" \
-	--tm-node-url="127.0.0.1:26657" \
-	--minter-start-block=<MINTER START BLOCK> \
-	--minter-start-event-nonce=1 \
-	--minter-start-batch-nonce=1 \
-	--minter-start-valset-nonce=1
+mhub-minter-connector --config=connector-config.toml
 ```
 	
 - **Start price oracle**
+```toml
+[minter]
+api_addr = "http://127.0.0.1:8843/v2/"
+
+[cosmos]
+mnemonic = <COSMOS MNEMONIC>
+grpc_addr = "127.0.0.1:9090"
+rpc_addr = "http://127.0.0.1:26657"
+
+[ethereum]
+gas_price_providers = [
+    "ethgasstation",
+    "etherchain"
+]
+```
+
 ```bash
 mhub-oracle \
 	--minter-node-url="127.0.0.1:8843/v2/" \
