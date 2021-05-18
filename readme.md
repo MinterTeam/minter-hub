@@ -81,7 +81,7 @@ curl https://raw.githubusercontent.com/MinterTeam/minter-hub/dev/testnet-genesis
 
 # Start and sync Minter Hub node
 mhub start \
-	--p2p.persistent_peers="79b0bd87828fed9dd754501c792060ad7111162f@46.101.215.17:36656"
+	--p2p.persistent_peers="0993faf14d07f686d9f80770abebfc5de4112651@46.101.215.17:36656"
 ```
 
 - **IMPORTANT**: After syncing you must edit `~/.mhub/config/app.toml`: enable API in respective section.
@@ -132,7 +132,7 @@ register-peggy-delegate-keys \
 
 - **Start Hub ↔ Ethereum oracle.** 
 ```
-Ethereum Contract for testnet: 0xEB3fb4C664cF3F0B51D523EE5c83d606E63078B8
+Ethereum Contract for testnet: 0x85ed13705d75dd26837525993c8fab20423cb8df
 
 Ethereum Contract for mainnet: 0xc735478ef7562ecc37662fc7c5e521eb835f9dab
 ```
@@ -149,8 +149,8 @@ RUST_LOG=info orchestrator \
 
 - **Start Hub ↔ Minter oracle.** 
 ```
-Minter Multisig for testnet: Mx360e34fc59bcabc20a433448abb062e56a754966
-Start Minter Block for testnet: 3574295
+Minter Multisig for testnet: Mx9fb36738ebb3f9c260e4a5e301a04081ade27fab
+Start Minter Block for testnet: 4000121
 
 Minter Multisig for mainnet: Mx68f4839d7f32831b9234f9575f3b95e1afe21a56
 Start Minter Block for mainnet: 3442652
