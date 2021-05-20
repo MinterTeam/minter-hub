@@ -40,12 +40,12 @@ func main() {
 		panic(err)
 	}
 
-	minterClient, err := http_client.New(cfg.Minter.NodeUrl)
+	minterClient, err := http_client.New(cfg.Minter.ApiAddr)
 	if err != nil {
 		panic(err)
 	}
 
-	cosmosConn, err := grpc.DialContext(c.Background(), cfg.Cosmos.NodeGrpcUrl, grpc.WithInsecure(), grpc.WithConnectParams(grpc.ConnectParams{
+	cosmosConn, err := grpc.DialContext(c.Background(), cfg.Cosmos.GrpcAddr, grpc.WithInsecure(), grpc.WithConnectParams(grpc.ConnectParams{
 		Backoff:           backoff.DefaultConfig,
 		MinConnectTimeout: time.Second * 5,
 	}))

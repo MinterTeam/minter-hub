@@ -2,6 +2,13 @@ package rest
 
 import (
 	"fmt"
+	"github.com/MinterTeam/mhub/chain/x/minter/client/utils"
+	"github.com/MinterTeam/mhub/chain/x/peggy/types"
+	"github.com/cosmos/cosmos-sdk/client/tx"
+	"github.com/cosmos/cosmos-sdk/types/rest"
+	govrest "github.com/cosmos/cosmos-sdk/x/gov/client/rest"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	"net/http"
 
 	"github.com/cosmos/cosmos-sdk/client"
 
@@ -57,4 +64,37 @@ func RegisterRoutes(cliCtx client.Context, r *mux.Router, storeName string) {
 	// This endpoint gets all of the batch confirmations for a given nonce and denom In order to determine if a batch is complete
 	// the relayer will compare the valset power on the contract to the number of signatures
 	r.HandleFunc(fmt.Sprintf("/%s/batch_confirm/{%s}/{%s}", storeName, nonce, tokenAddress), allBatchConfirmsHandler(cliCtx, storeName)).Methods("GET")
+}
+
+func ProposalRESTHandler(clientCtx client.Context) govrest.ProposalRESTHandler {
+	return govrest.ProposalRESTHandler{
+		SubRoute: "ethereum_cold_storage_transfer",
+		Handler:  postProposalHandlerFn(clientCtx),
+	}
+}
+
+func postProposalHandlerFn(clientCtx client.Context) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var req utils.ColdStorageTransferProposalReq
+		if !rest.ReadRESTReq(w, r, clientCtx.LegacyAmino, &req) {
+			return
+		}
+
+		req.BaseReq = req.BaseReq.Sanitize()
+		if !req.BaseReq.ValidateBasic(w) {
+			return
+		}
+
+		content := types.NewColdStorageTransferProposal(req.Amount)
+
+		msg, err := govtypes.NewMsgSubmitProposal(content, req.Deposit, req.Proposer)
+		if rest.CheckBadRequestError(w, err) {
+			return
+		}
+		if rest.CheckBadRequestError(w, msg.ValidateBasic()) {
+			return
+		}
+
+		tx.WriteGeneratedTxResponse(clientCtx, w, req.BaseReq, msg)
+	}
 }

@@ -12,6 +12,8 @@ require (
 	github.com/cosmos/cosmos-sdk v0.42.4
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/ethereum/go-ethereum v1.9.22
+	github.com/mitchellh/mapstructure v1.3.3 // indirect
+	github.com/spf13/viper v1.7.1
 	github.com/tendermint/tendermint v0.34.9
 	google.golang.org/grpc v1.35.0
 )

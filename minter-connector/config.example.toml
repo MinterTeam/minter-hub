@@ -1,0 +1,16 @@
+[minter]
+
+# testnet|mainnet
+chain = "mainnet"
+multisig_addr = "Mx68f4839d7f32831b9234f9575f3b95e1afe21a56"
+mnemonic = ""
+api_addr = "http://127.0.0.1:8843/v2/"
+start_block = 3442652
+start_event_nonce = 1
+start_batch_nonce = 1
+start_valset_nonce = 1
+
+[cosmos]
+mnemonic = ""
+grpc_addr = "127.0.0.1:9090"
+rpc_addr = "http://127.0.0.1:26657"

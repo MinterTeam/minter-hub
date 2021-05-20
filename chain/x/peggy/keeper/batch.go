@@ -2,9 +2,10 @@ package keeper
 
 import (
 	"fmt"
+	"strconv"
+
 	minterkeeper "github.com/MinterTeam/mhub/chain/x/minter/keeper"
 	oracletypes "github.com/MinterTeam/mhub/chain/x/oracle/types"
-	"strconv"
 
 	"github.com/MinterTeam/mhub/chain/x/peggy/types"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
@@ -107,18 +108,21 @@ func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, tokenContract string, n
 		totalFee = totalFee.Add(tx.Erc20Fee.PeggyCoin(ctx, k.oracleKeeper))
 		k.removePoolEntry(ctx, tx.Id)
 	}
-	commissionKeeperAddress := sdk.AccAddress{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	vouchers := sdk.Coins{totalFee}
-	if err := k.bankKeeper.MintCoins(ctx, types.ModuleName, vouchers); err != nil {
-		return sdkerrors.Wrapf(err, "mint vouchers coins: %s", vouchers)
-	}
 
-	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, commissionKeeperAddress, vouchers); err != nil {
-		return sdkerrors.Wrap(err, "transfer vouchers")
-	}
+	if totalFee.IsPositive() {
+		commissionKeeperAddress := sdk.AccAddress{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+		vouchers := sdk.Coins{totalFee}
+		if err := k.bankKeeper.MintCoins(ctx, types.ModuleName, vouchers); err != nil {
+			return sdkerrors.Wrapf(err, "mint vouchers coins: %s", vouchers)
+		}
 
-	k.minterKeeper.AddToOutgoingPool(ctx, commissionKeeperAddress, "Mx"+txSender[2:], txHash, totalFee)
-	k.minterKeeper.BuildOutgoingTXBatch(ctx, minterkeeper.OutgoingTxBatchSize)
+		if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, commissionKeeperAddress, vouchers); err != nil {
+			return sdkerrors.Wrap(err, "transfer vouchers")
+		}
+
+		k.minterKeeper.AddToOutgoingPool(ctx, commissionKeeperAddress, "Mx"+txSender[2:], txHash, totalFee)
+		k.minterKeeper.BuildOutgoingTXBatch(ctx, minterkeeper.OutgoingTxBatchSize)
+	}
 
 	// Iterate through remaining batches
 	k.IterateOutgoingTXBatches(ctx, func(key []byte, iterBatch *types.OutgoingTxBatch) bool {
@@ -141,6 +145,10 @@ func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, tokenContract string, n
 	)
 
 	for _, tx := range b.Transactions {
+		if tx.TxHash == "" {
+			continue
+		}
+
 		batchEventExecuted = batchEventExecuted.AppendAttributes(sdk.NewAttribute(types.AttributeKeyTxHash, tx.TxHash))
 		k.oracleKeeper.SetTxStatus(ctx, tx.TxHash, oracletypes.TX_STATUS_BATCH_EXECUTED, txHash)
 	}

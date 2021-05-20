@@ -178,7 +178,7 @@ func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, c
 		panic(err)
 	}
 
-	client, err := tmClient.New("http://"+cfg.Cosmos.TmUrl, "")
+	client, err := tmClient.New(cfg.Cosmos.RpcAddr, "")
 	if err != nil {
 		panic(err)
 	}

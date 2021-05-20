@@ -2,7 +2,9 @@ package keeper
 
 import (
 	"fmt"
+	"github.com/MinterTeam/mhub/chain/cold_storage"
 	oraclekeeper "github.com/MinterTeam/mhub/chain/x/oracle/keeper"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"math"
 	"sort"
 	"strconv"
@@ -14,6 +16,8 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/tendermint/tendermint/libs/log"
 )
+
+var defaultSender = sdk.AccAddress{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
 // Keeper maintains the link to storage and exposes getter/setter methods for the various parts of the state machine
 type Keeper struct {
@@ -412,6 +416,69 @@ func (k Keeper) GetLastValset(ctx sdk.Context) *types.Valset {
 	valset := types.Valset{}
 	k.cdc.MustUnmarshalBinaryBare(entity, &valset)
 	return &valset
+}
+
+func (k Keeper) ColdStorageTransfer(ctx sdk.Context, c *types.ColdStorageTransferProposal) error {
+	coldStorageAddr := k.GetColdStorageAddr(ctx)
+
+	for _, coin := range c.Amount {
+		minterCoin, err := types.MinterCoinFromPeggyCoin(coin, ctx, k.oracleKeeper)
+		if err != nil {
+			return err
+		}
+
+		vouchers := sdk.Coins{coin}
+		if err := k.bankKeeper.MintCoins(ctx, types.ModuleName, vouchers); err != nil {
+			return sdkerrors.Wrapf(err, "mint vouchers coins: %s", vouchers)
+		}
+
+		if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, defaultSender, vouchers); err != nil {
+			return sdkerrors.Wrap(err, "transfer vouchers")
+		}
+
+		txID, err := k.AddToOutgoingPool(ctx, defaultSender, coldStorageAddr, "", coin)
+		if err != nil {
+			return err
+		}
+
+		if err := k.removeFromUnbatchedTXIndex(ctx, txID); err != nil {
+			return sdkerrors.Wrap(err, "fee")
+		}
+
+		nextID := k.autoIncrementID(ctx, types.KeyLastOutgoingBatchID)
+		minterNonce := k.autoIncrementID(ctx, types.MinterNonce)
+		batch := &types.OutgoingTxBatch{
+			BatchNonce:  nextID,
+			MinterNonce: minterNonce,
+			Transactions: []*types.OutgoingTransferTx{
+				{
+					Id:          txID,
+					Sender:      defaultSender.String(),
+					DestAddress: coldStorageAddr,
+					MinterToken: minterCoin,
+					TxHash:      "",
+				},
+			},
+		}
+		k.storeBatch(ctx, batch)
+
+		batchEvent := sdk.NewEvent(
+			types.EventTypeOutgoingBatch,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(types.AttributeKeyContract, k.GetBridgeContractAddress(ctx)),
+			sdk.NewAttribute(types.AttributeKeyBridgeChainID, strconv.Itoa(int(k.GetBridgeChainID(ctx)))),
+			sdk.NewAttribute(types.AttributeKeyOutgoingBatchID, fmt.Sprint(nextID)),
+			sdk.NewAttribute(types.AttributeKeyNonce, fmt.Sprint(nextID)),
+		)
+
+		ctx.EventManager().EmitEvent(batchEvent)
+	}
+
+	return nil
+}
+
+func (k Keeper) GetColdStorageAddr(ctx sdk.Context) string {
+	return cold_storage.MinterStorage
 }
 
 // prefixRange turns a prefix into a (start, end) range. The start is the given prefix value and

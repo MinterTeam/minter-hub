@@ -2,6 +2,7 @@ package peggy
 
 import (
 	"fmt"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
 	"github.com/MinterTeam/mhub/chain/x/peggy/keeper"
 	"github.com/MinterTeam/mhub/chain/x/peggy/types"
@@ -42,6 +43,18 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 			return sdk.WrapServiceResult(ctx, res, err)
 		default:
 			return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, fmt.Sprintf("Unrecognized Peggy Msg type: %v", msg.Type()))
+		}
+	}
+}
+
+func NewColdStorageTransferProposalHandler(k keeper.Keeper) govtypes.Handler {
+	return func(ctx sdk.Context, content govtypes.Content) error {
+		switch c := content.(type) {
+		case *types.ColdStorageTransferProposal:
+			return k.ColdStorageTransfer(ctx, c)
+
+		default:
+			return sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "unrecognized proposal content type: %T", c)
 		}
 	}
 }

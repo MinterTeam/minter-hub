@@ -1,0 +1,20 @@
+[minter]
+
+api_addr = "http://127.0.0.1:8843/v2/"
+
+[cosmos]
+
+mnemonic = ""
+grpc_addr = "127.0.0.1:9090"
+rpc_addr = "http://127.0.0.1:26657"
+
+[ethereum]
+
+# Available gas price providers:
+# - ethgasstation
+# - etherchain
+
+gas_price_providers = [
+    "ethgasstation",
+    "etherchain"
+]
