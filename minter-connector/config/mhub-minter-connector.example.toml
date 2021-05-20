@@ -1,0 +1,30 @@
+#
+#
+[minter]
+# --minter-chain =  testnet|mainnet
+chain = "#MINTER_CHAIN_ID#"
+# --minter-multisig
+multisig_addr = "#MINTER_MULTISIG_ADDR#"
+# --minter-mnemonic
+mnemonic = "#MINTER_MNEMONIC#"
+# --minter-node-url
+api_addr = "127.0.0.1:8843/v2/"
+# --minter-start-block
+start_block = "#MINTER_START_BLOCK#"
+# --minter-start-event-nonce
+start_event_nonce = 1
+# --minter-start-batch-nonce
+start_batch_nonce = 1
+#--minter-start-valset-nonce
+start_valset_nonce = 1
+
+#
+#
+[cosmos]
+# --cosmos-mnemonic
+# mnemonic for management wallet Minter Hub Validator owner
+mnemonic = "#COSMOS_MNEMONIC#"
+# --cosmos-node-url
+grpc_addr = "127.0.0.1:9090"
+# --tm-node-url
+rpc_addr = "127.0.0.1:36657"
