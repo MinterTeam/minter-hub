@@ -598,6 +598,7 @@ func NewMhubApp(
 
 	app.upgradeKeeper.SetUpgradeHandler("v0.0.2", func(ctx sdk.Context, plan upgradetypes.Plan) {})
 	app.upgradeKeeper.SetUpgradeHandler("v0.0.3", func(ctx sdk.Context, plan upgradetypes.Plan) {})
+	app.upgradeKeeper.SetUpgradeHandler("v0.0.4", func(ctx sdk.Context, plan upgradetypes.Plan) {})
 
 	return app
 }
