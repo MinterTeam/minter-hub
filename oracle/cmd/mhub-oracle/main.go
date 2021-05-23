@@ -107,6 +107,15 @@ func relayPrices(
 			continue
 		}
 
+		if coin.Denom == "usdt" || coin.Denom == "usdc" {
+			prices.List = append(prices.List, &types.Price{
+				Name:  fmt.Sprintf("minter/%d", coin.MinterId),
+				Value: sdk.NewInt(10000000000),
+			})
+
+			continue
+		}
+
 		response, err := minterClient.EstimateCoinIDSell(0, uint64(coin.MinterId), pipInBip.String())
 		if err != nil {
 			_, payload, err := http_client.ErrorBody(err)
