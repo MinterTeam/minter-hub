@@ -142,7 +142,7 @@ func CmdWithdrawToETH() *cobra.Command {
 }
 
 func CmdRequestBatch() *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "build-batch [token_contract_address]",
 		Short: "Build a new batch on the cosmos side for pooled withdrawal transactions",
 		Args:  cobra.ExactArgs(1),
@@ -165,6 +165,10 @@ func CmdRequestBatch() *cobra.Command {
 			return tx.GenerateOrBroadcastTxCLI(cliCtx, cmd.Flags(), &msg)
 		},
 	}
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
 }
 
 func NewSubmitColdStorageTransferProposalTxCmd() *cobra.Command {
