@@ -21,6 +21,7 @@ import (
 )
 
 const multiplier = 1e10
+const usdteCoinId = 1993
 
 var pipInBip = sdk.NewInt(1000000000000000000)
 
@@ -96,7 +97,7 @@ func relayPrices(
 
 	prices := &types.Prices{List: []*types.Price{}}
 
-	basecoinPrice := getBasecoinPrice(logger)
+	basecoinPrice := getBasecoinPrice(logger, minterClient)
 	for _, coin := range coins.GetCoins() {
 		if coin.MinterId == 0 {
 			prices.List = append(prices.List, &types.Price{
@@ -111,6 +112,15 @@ func relayPrices(
 			prices.List = append(prices.List, &types.Price{
 				Name:  fmt.Sprintf("minter/%d", coin.MinterId),
 				Value: sdk.NewInt(10000000000),
+			})
+
+			continue
+		}
+
+		if coin.Denom == "wbtc" {
+			prices.List = append(prices.List, &types.Price{
+				Name:  fmt.Sprintf("minter/%d", coin.MinterId),
+				Value: getBitcoinPrice(logger),
 			})
 
 			continue
@@ -148,6 +158,9 @@ func relayPrices(
 		Value: ethGasPrice.GetGasPrice().Fast,
 	})
 
+	jsonPrices, _ := json.Marshal(prices.List)
+	logger.Info("Prices", "val", jsonPrices)
+
 	msg := &types.MsgPriceClaim{
 		Epoch:        response.Epoch.Nonce,
 		Prices:       prices,
@@ -157,23 +170,24 @@ func relayPrices(
 	cosmos.SendCosmosTx([]sdk.Msg{msg}, orcAddress, orcPriv, cosmosConn, logger)
 }
 
-func getBasecoinPrice(logger log.Logger) sdk.Int {
-	_, body, err := fasthttp.Get(nil, "https://api.coingecko.com/api/v3/simple/price?ids=bip&vs_currencies=usd")
+func getBasecoinPrice(logger log.Logger, client *http_client.Client) sdk.Int {
+	response, err := client.EstimateCoinIDSell(usdteCoinId, 0, pipInBip.String())
 	if err != nil {
-		logger.Error("Error getting bip price", "err", err.Error())
+		_, payload, err := http_client.ErrorBody(err)
+		if err != nil {
+			logger.Error("Error estimating coin sell", "coin", "basecoin", "err", err.Error())
+		} else {
+			logger.Error("Error estimating coin sell", "coin", "basecoin", "err", payload.Error.Message)
+		}
+
 		time.Sleep(time.Second)
-		return getBasecoinPrice(logger)
-	}
-	var result CoingeckoResult
-	if err := json.Unmarshal(body, &result); err != nil {
-		logger.Error("Error getting bip price", "err", err.Error())
-		time.Sleep(time.Second)
-		return getBasecoinPrice(logger)
+
+		return getBasecoinPrice(logger, client)
 	}
 
-	bipPrice := result["bip"]["usd"]
+	price, _ := sdk.NewIntFromString(response.WillGet)
 
-	return sdk.NewInt(int64(bipPrice * multiplier)) // todo
+	return price.Mul(sdk.NewInt(multiplier)).Quo(pipInBip)
 }
 
 func getEthPrice(logger log.Logger) sdk.Int {
@@ -191,6 +205,23 @@ func getEthPrice(logger log.Logger) sdk.Int {
 	}
 
 	return sdk.NewInt(int64(result["ethereum"]["usd"] * multiplier)) // todo
+}
+
+func getBitcoinPrice(logger log.Logger) sdk.Int {
+	_, body, err := fasthttp.Get(nil, "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd")
+	if err != nil {
+		logger.Error("Error getting eth price", "err", err.Error())
+		time.Sleep(time.Second)
+		return getEthPrice(logger)
+	}
+	var result CoingeckoResult
+	if err := json.Unmarshal(body, &result); err != nil {
+		logger.Error("Error getting eth price", "err", err.Error())
+		time.Sleep(time.Second)
+		return getEthPrice(logger)
+	}
+
+	return sdk.NewInt(int64(result["bitcoin"]["usd"] * multiplier)) // todo
 }
 
 type CoingeckoResult map[string]map[string]float64
