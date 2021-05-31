@@ -158,6 +158,9 @@ func relayPrices(
 		Value: ethGasPrice.GetGasPrice().Fast,
 	})
 
+	jsonPrices, _ := json.Marshal(prices.List)
+	logger.Info("Prices", "val", jsonPrices)
+
 	msg := &types.MsgPriceClaim{
 		Epoch:        response.Epoch.Nonce,
 		Prices:       prices,
