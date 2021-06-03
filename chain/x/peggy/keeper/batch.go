@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strconv"
 
-	minterkeeper "github.com/MinterTeam/mhub/chain/x/minter/keeper"
 	oracletypes "github.com/MinterTeam/mhub/chain/x/oracle/types"
 
 	"github.com/MinterTeam/mhub/chain/x/peggy/types"
@@ -102,11 +101,41 @@ func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, tokenContract string, n
 		return sdkerrors.Wrap(types.ErrUnknown, "nonce")
 	}
 
+	valFees := sdk.Coins{}
 	totalFee := sdk.NewInt64Coin(b.Transactions[0].Erc20Fee.PeggyCoin(ctx, k.oracleKeeper).Denom, 0)
 	// cleanup outgoing TX pool
 	for _, tx := range b.Transactions {
 		totalFee = totalFee.Add(tx.Erc20Fee.PeggyCoin(ctx, k.oracleKeeper))
+		pe, _ := k.getPoolEntry(ctx, tx.Id)
+		valFees = valFees.Add(pe.ValFee)
 		k.removePoolEntry(ctx, tx.Id)
+	}
+
+	if !valFees.IsZero() {
+		if err := k.bankKeeper.MintCoins(ctx, types.ModuleName, valFees); err != nil {
+			return sdkerrors.Wrapf(err, "mint vouchers coins: %s", valFees)
+		}
+		if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, sdk.AccAddress{}, valFees); err != nil {
+			return sdkerrors.Wrap(err, "transfer vouchers")
+		}
+
+		valset := k.minterKeeper.GetCurrentValset(ctx)
+		var totalPower uint64
+		for _, val := range valset.Members {
+			totalPower += val.Power
+		}
+
+		for _, fee := range valFees {
+			if fee.IsPositive() {
+				for _, val := range valset.Members {
+					amount := fee.Amount.Mul(sdk.NewIntFromUint64(val.Power)).Quo(sdk.NewIntFromUint64(totalPower))
+					_, err := k.minterKeeper.AddToOutgoingPool(ctx, sdk.AccAddress{}, val.MinterAddress, "#commission", sdk.NewCoin(fee.Denom, amount), sdk.NewInt64Coin(fee.Denom, 0))
+					if err != nil {
+						return sdkerrors.Wrap(err, "commission withdrawal")
+					}
+				}
+			}
+		}
 	}
 
 	if totalFee.IsPositive() {
@@ -120,8 +149,7 @@ func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, tokenContract string, n
 			return sdkerrors.Wrap(err, "transfer vouchers")
 		}
 
-		k.minterKeeper.AddToOutgoingPool(ctx, commissionKeeperAddress, "Mx"+txSender[2:], txHash, totalFee)
-		k.minterKeeper.BuildOutgoingTXBatch(ctx, minterkeeper.OutgoingTxBatchSize)
+		k.minterKeeper.AddToOutgoingPool(ctx, commissionKeeperAddress, "Mx"+txSender[2:], txHash, totalFee, sdk.NewInt64Coin(totalFee.Denom, 0))
 	}
 
 	// Iterate through remaining batches

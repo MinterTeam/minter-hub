@@ -24,9 +24,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) {
 		})
 	}
 
-	if hasRefunds {
-		k.MinterKeeper().BuildOutgoingTXBatch(ctx, minterkeeper.OutgoingTxBatchSize)
-	}
+	k.MinterKeeper().BuildOutgoingTXBatch(ctx, minterkeeper.OutgoingTxBatchSize)
 
 	// valsets are sorted so the most recent one is first
 	valsets := k.GetValsets(ctx)

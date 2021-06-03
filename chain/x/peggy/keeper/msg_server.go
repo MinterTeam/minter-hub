@@ -161,7 +161,10 @@ func (k msgServer) SendToEth(c context.Context, msg *types.MsgSendToEth) (*types
 		return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "bridge fee is not sufficient")
 	}
 
-	txID, err := k.AddToOutgoingPool(ctx, sender, msg.EthDest, sender.String(), "todo", msg.Amount, msg.BridgeFee) // todo
+	totalAmount := msg.Amount.Add(msg.BridgeFee)
+	commission := sdk.NewCoin(totalAmount.Denom, totalAmount.Amount.ToDec().Mul(k.oracleKeeper.GetCommissionForDemon(ctx, totalAmount.Denom)).RoundInt())
+
+	txID, err := k.AddToOutgoingPool(ctx, sender, msg.EthDest, sender.String(), "todo", msg.Amount.Sub(commission), msg.BridgeFee, commission) // todo
 	if err != nil {
 		return nil, err
 	}

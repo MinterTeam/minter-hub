@@ -16,8 +16,9 @@ import (
 // - burns the voucher for transfer amount and fees
 // - persists an OutgoingTx
 // - adds the TX to the `available` TX pool via a second index
-func (k Keeper) AddToOutgoingPool(ctx sdk.Context, sender sdk.AccAddress, counterpartReceiver string, txHash string, amount sdk.Coin) (uint64, error) {
+func (k Keeper) AddToOutgoingPool(ctx sdk.Context, sender sdk.AccAddress, counterpartReceiver string, txHash string, amount sdk.Coin, valFee sdk.Coin) (uint64, error) {
 	totalInVouchers := sdk.Coins{amount}
+	totalInVouchers.Add(valFee)
 
 	// Ensure that the coin is a peggy voucher
 	if _, err := types.ValidatePeggyCoin(amount, ctx, k.oracleKeeper); err != nil {
@@ -42,6 +43,7 @@ func (k Keeper) AddToOutgoingPool(ctx sdk.Context, sender sdk.AccAddress, counte
 		Sender:   sender.String(),
 		DestAddr: counterpartReceiver,
 		Amount:   amount,
+		ValFee:   valFee,
 		TxHash:   txHash,
 	}
 

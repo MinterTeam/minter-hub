@@ -278,7 +278,8 @@ func handleMsgSendToMinter(ctx sdk.Context, keeper keeper.Keeper, msg *types.Msg
 	}
 
 	sender, _ := sdk.AccAddressFromBech32(msg.Sender)
-	txID, err := keeper.AddToOutgoingPool(ctx, sender, msg.MinterDest, "todo", msg.Amount) // todo: txhash
+	commission := sdk.NewCoin(msg.Amount.Denom, msg.Amount.Amount.ToDec().Mul(keeper.OracleKeeper().GetCommissionForDemon(ctx, msg.Amount.Denom)).RoundInt())
+	txID, err := keeper.AddToOutgoingPool(ctx, sender, msg.MinterDest, "todo", msg.Amount.Sub(commission), commission) // todo: txhash
 	if err != nil {
 		return &sdk.Result{}, nil // todo log
 	}
