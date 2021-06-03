@@ -66,7 +66,9 @@ func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, nonce uint64, hash stri
 	// cleanup outgoing TX pool and calculate total fees
 	for _, tx := range b.Transactions {
 		pe, _ := k.getPoolEntry(ctx, tx.Id)
-		fees = fees.Add(pe.ValFee)
+		if !pe.ValFee.Amount.IsNil() {
+			fees = fees.Add(pe.ValFee)
+		}
 		k.removePoolEntry(ctx, tx.Id)
 	}
 

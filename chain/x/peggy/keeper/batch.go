@@ -107,7 +107,9 @@ func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, tokenContract string, n
 	for _, tx := range b.Transactions {
 		totalFee = totalFee.Add(tx.Erc20Fee.PeggyCoin(ctx, k.oracleKeeper))
 		pe, _ := k.getPoolEntry(ctx, tx.Id)
-		valFees = valFees.Add(pe.ValFee)
+		if !pe.ValFee.Amount.IsNil() {
+			valFees = valFees.Add(pe.ValFee)
+		}
 		k.removePoolEntry(ctx, tx.Id)
 	}
 
