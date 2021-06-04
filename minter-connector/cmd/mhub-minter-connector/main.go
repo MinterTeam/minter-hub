@@ -517,7 +517,7 @@ func relayMinterEvents(ctx context.Context) context.Context {
 	}
 
 	if len(deposits) > 0 || len(batches) > 0 || len(valsets) > 0 {
-		cosmos.SendCosmosTx(cosmos.CreateClaims(ctx.CosmosConn, ctx.OrcAddress, deposits, batches, valsets, ctx.Logger), ctx.OrcAddress, ctx.OrcPriv, ctx.CosmosConn, ctx.Logger)
+		cosmos.SendCosmosTx(cosmos.CreateClaims(ctx.OrcAddress, deposits, batches, valsets, ctx.Logger), ctx.OrcAddress, ctx.OrcPriv, ctx.CosmosConn, ctx.Logger)
 	}
 
 	return ctx

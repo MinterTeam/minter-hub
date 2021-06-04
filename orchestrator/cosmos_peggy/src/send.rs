@@ -204,12 +204,6 @@ pub async fn send_ethereum_claims(
         )))
     }
 
-    if !transfers.is_empty() {
-        msgs.push(PeggyMsg::RequestMinterBatchMsg(RequestMinterBatchMsg {
-            requester: our_address,
-        }))
-    }
-
     msgs.sort();
 
     let std_sign_msg = StdSignMsg {

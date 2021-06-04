@@ -1,7 +1,6 @@
 package peggy
 
 import (
-	minterkeeper "github.com/MinterTeam/mhub/chain/x/minter/keeper"
 	"github.com/MinterTeam/mhub/chain/x/peggy/keeper"
 	"github.com/MinterTeam/mhub/chain/x/peggy/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -24,7 +23,9 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) {
 		})
 	}
 
-	k.MinterKeeper().BuildOutgoingTXBatch(ctx, minterkeeper.OutgoingTxBatchSize)
+	for _, coin := range k.OracleKeeper().GetCoins(ctx).List() {
+		k.BuildOutgoingTXBatch(ctx, coin.EthAddr, keeper.OutgoingTxBatchSize)
+	}
 
 	// valsets are sorted so the most recent one is first
 	valsets := k.GetValsets(ctx)
