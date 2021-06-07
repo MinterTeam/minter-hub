@@ -98,6 +98,8 @@ func relayPrices(
 	prices := &types.Prices{List: []*types.Price{}}
 
 	basecoinPrice := getBasecoinPrice(logger, minterClient)
+	ethPrice := getEthPrice(logger)
+
 	for _, coin := range coins.GetCoins() {
 		if coin.MinterId == 0 {
 			prices.List = append(prices.List, &types.Price{
@@ -121,6 +123,15 @@ func relayPrices(
 			prices.List = append(prices.List, &types.Price{
 				Name:  fmt.Sprintf("minter/%d", coin.MinterId),
 				Value: getBitcoinPrice(logger),
+			})
+
+			continue
+		}
+
+		if coin.Denom == "weth" {
+			prices.List = append(prices.List, &types.Price{
+				Name:  fmt.Sprintf("minter/%d", coin.MinterId),
+				Value: ethPrice,
 			})
 
 			continue
@@ -150,7 +161,7 @@ func relayPrices(
 
 	prices.List = append(prices.List, &types.Price{
 		Name:  "eth/0",
-		Value: getEthPrice(logger),
+		Value: ethPrice,
 	})
 
 	prices.List = append(prices.List, &types.Price{
