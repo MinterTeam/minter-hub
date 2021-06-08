@@ -143,10 +143,10 @@ func getEventNonceFromMsg(msg sdk.Msg) uint64 {
 	return 999999999
 }
 
-func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, cosmosConn *grpc.ClientConn, logger log.Logger) {
+func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, cosmosConn *grpc.ClientConn, logger log.Logger, retry bool) {
 	if len(msgs) > 10 {
-		SendCosmosTx(msgs[:10], address, priv, cosmosConn, logger)
-		SendCosmosTx(msgs[10:], address, priv, cosmosConn, logger)
+		SendCosmosTx(msgs[:10], address, priv, cosmosConn, logger, retry)
+		SendCosmosTx(msgs[10:], address, priv, cosmosConn, logger, retry)
 		return
 	}
 
@@ -231,8 +231,8 @@ func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, c
 
 		time.Sleep(5 * time.Second)
 		txResponse, err := client.Tx(context.Background(), tmTypes.Tx(txBytes).Hash(), false)
-		if err != nil || txResponse.TxResult.IsErr() {
-			SendCosmosTx(msgs, address, priv, cosmosConn, logger)
+		if (err != nil || txResponse.TxResult.IsErr()) && retry {
+			SendCosmosTx(msgs, address, priv, cosmosConn, logger, retry)
 		}
 
 		return
@@ -240,8 +240,12 @@ func SendCosmosTx(msgs []sdk.Msg, address sdk.AccAddress, priv crypto.PrivKey, c
 
 	if result.DeliverTx.GetCode() != 0 || result.CheckTx.GetCode() != 0 {
 		logger.Error("Error on sending cosmos tx with", "code", result.CheckTx.GetCode(), "log", result.DeliverTx.GetLog())
-		time.Sleep(1 * time.Second)
-		SendCosmosTx(msgs, address, priv, cosmosConn, logger)
+		if retry {
+			time.Sleep(1 * time.Second)
+			SendCosmosTx(msgs, address, priv, cosmosConn, logger, retry)
+		}
+
+		return
 	}
 
 	logger.Info("Sending cosmos tx", "code", result.DeliverTx.GetCode(), "log", result.DeliverTx.GetLog(), "info", result.DeliverTx.GetInfo())

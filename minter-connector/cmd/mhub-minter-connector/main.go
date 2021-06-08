@@ -107,7 +107,7 @@ func main() {
 
 			cosmos.SendCosmosTx([]sdk.Msg{
 				types.NewMsgSetMinterAddress("Mx"+minterAddress.String()[2:], orcAddress, hex.EncodeToString(signature)),
-			}, orcAddress, orcPriv, cosmosConn, ctx.Logger)
+			}, orcAddress, orcPriv, cosmosConn, ctx.Logger, true)
 		}
 	}
 
@@ -160,7 +160,7 @@ func relayBatches(ctx context.Context) {
 				Signature:    sigData,
 			}
 
-			cosmos.SendCosmosTx([]sdk.Msg{msg}, ctx.OrcAddress, ctx.OrcPriv, ctx.CosmosConn, ctx.Logger)
+			cosmos.SendCosmosTx([]sdk.Msg{msg}, ctx.OrcAddress, ctx.OrcPriv, ctx.CosmosConn, ctx.Logger, false)
 		}
 	}
 
@@ -299,7 +299,7 @@ func relayValsets(ctx context.Context) {
 				Signature:     sigData,
 			}
 
-			cosmos.SendCosmosTx([]sdk.Msg{msg}, ctx.OrcAddress, ctx.OrcPriv, ctx.CosmosConn, ctx.Logger)
+			cosmos.SendCosmosTx([]sdk.Msg{msg}, ctx.OrcAddress, ctx.OrcPriv, ctx.CosmosConn, ctx.Logger, false)
 		}
 	}
 
@@ -517,7 +517,7 @@ func relayMinterEvents(ctx context.Context) context.Context {
 	}
 
 	if len(deposits) > 0 || len(batches) > 0 || len(valsets) > 0 {
-		cosmos.SendCosmosTx(cosmos.CreateClaims(ctx.CosmosConn, ctx.OrcAddress, deposits, batches, valsets, ctx.Logger), ctx.OrcAddress, ctx.OrcPriv, ctx.CosmosConn, ctx.Logger)
+		cosmos.SendCosmosTx(cosmos.CreateClaims(ctx.CosmosConn, ctx.OrcAddress, deposits, batches, valsets, ctx.Logger), ctx.OrcAddress, ctx.OrcPriv, ctx.CosmosConn, ctx.Logger, true)
 	}
 
 	return ctx
