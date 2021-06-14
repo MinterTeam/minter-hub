@@ -111,7 +111,7 @@ func relayPrices(
 		}
 
 		switch coin.Denom {
-		case "usdt", "usdc":
+		case "usdt", "usdc", "busd", "dai", "ust", "pax", "tusd", "husd":
 			prices.List = append(prices.List, &types.Price{
 				Name:  fmt.Sprintf("minter/%d", coin.MinterId),
 				Value: sdk.NewInt(10000000000),
