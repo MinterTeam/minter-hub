@@ -110,53 +110,49 @@ func relayPrices(
 			continue
 		}
 
-		if coin.Denom == "usdt" || coin.Denom == "usdc" {
+		switch coin.Denom {
+		case "usdt", "usdc":
 			prices.List = append(prices.List, &types.Price{
 				Name:  fmt.Sprintf("minter/%d", coin.MinterId),
 				Value: sdk.NewInt(10000000000),
 			})
-
-			continue
-		}
-
-		if coin.Denom == "wbtc" {
+		case "wbtc":
 			prices.List = append(prices.List, &types.Price{
 				Name:  fmt.Sprintf("minter/%d", coin.MinterId),
 				Value: getBitcoinPrice(logger),
 			})
-
-			continue
-		}
-
-		if coin.Denom == "weth" {
+		case "weth":
 			prices.List = append(prices.List, &types.Price{
 				Name:  fmt.Sprintf("minter/%d", coin.MinterId),
 				Value: ethPrice,
 			})
-
-			continue
-		}
-
-		response, err := minterClient.EstimateCoinIDSell(0, uint64(coin.MinterId), pipInBip.String())
-		if err != nil {
-			_, payload, err := http_client.ErrorBody(err)
+		case "bnb":
+			prices.List = append(prices.List, &types.Price{
+				Name:  fmt.Sprintf("minter/%d", coin.MinterId),
+				Value: getBnbPrice(logger),
+			})
+		default:
+			response, err := minterClient.EstimateCoinIDSell(0, uint64(coin.MinterId), pipInBip.String())
 			if err != nil {
-				logger.Error("Error estimating coin sell", "coin", coin.Denom, "err", err.Error())
-			} else {
-				logger.Error("Error estimating coin sell", "coin", coin.Denom, "err", payload.Error.Message)
+				_, payload, err := http_client.ErrorBody(err)
+				if err != nil {
+					logger.Error("Error estimating coin sell", "coin", coin.Denom, "err", err.Error())
+				} else {
+					logger.Error("Error estimating coin sell", "coin", coin.Denom, "err", payload.Error.Message)
+				}
+
+				time.Sleep(time.Second)
+				return
 			}
 
-			time.Sleep(time.Second)
-			return
+			priceInBasecoin, _ := sdk.NewIntFromString(response.WillGet)
+			price := priceInBasecoin.Mul(basecoinPrice).Quo(pipInBip)
+
+			prices.List = append(prices.List, &types.Price{
+				Name:  fmt.Sprintf("minter/%d", coin.MinterId),
+				Value: price,
+			})
 		}
-
-		priceInBasecoin, _ := sdk.NewIntFromString(response.WillGet)
-		price := priceInBasecoin.Mul(basecoinPrice).Quo(pipInBip)
-
-		prices.List = append(prices.List, &types.Price{
-			Name:  fmt.Sprintf("minter/%d", coin.MinterId),
-			Value: price,
-		})
 	}
 
 	prices.List = append(prices.List, &types.Price{
@@ -221,13 +217,30 @@ func getEthPrice(logger log.Logger) sdk.Int {
 func getBitcoinPrice(logger log.Logger) sdk.Int {
 	_, body, err := fasthttp.Get(nil, "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd")
 	if err != nil {
-		logger.Error("Error getting eth price", "err", err.Error())
+		logger.Error("Error getting btc price", "err", err.Error())
 		time.Sleep(time.Second)
 		return getEthPrice(logger)
 	}
 	var result CoingeckoResult
 	if err := json.Unmarshal(body, &result); err != nil {
-		logger.Error("Error getting eth price", "err", err.Error())
+		logger.Error("Error getting btc price", "err", err.Error())
+		time.Sleep(time.Second)
+		return getEthPrice(logger)
+	}
+
+	return sdk.NewInt(int64(result["bitcoin"]["usd"] * multiplier)) // todo
+}
+
+func getBnbPrice(logger log.Logger) sdk.Int {
+	_, body, err := fasthttp.Get(nil, "https://api.coingecko.com/api/v3/simple/price?ids=binancecoin&vs_currencies=usd")
+	if err != nil {
+		logger.Error("Error getting bnb price", "err", err.Error())
+		time.Sleep(time.Second)
+		return getEthPrice(logger)
+	}
+	var result CoingeckoResult
+	if err := json.Unmarshal(body, &result); err != nil {
+		logger.Error("Error getting bnb price", "err", err.Error())
 		time.Sleep(time.Second)
 		return getEthPrice(logger)
 	}
