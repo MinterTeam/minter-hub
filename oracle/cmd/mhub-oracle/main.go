@@ -132,7 +132,13 @@ func relayPrices(
 				Value: getBnbPrice(logger),
 			})
 		default:
-			response, err := minterClient.EstimateCoinIDSell(0, uint64(coin.MinterId), pipInBip.String())
+			var route []uint64
+			if coin.Denom == "hubabuba" {
+				const hubCoinId = 1902
+				route = []uint64{hubCoinId}
+			}
+
+			response, err := minterClient.EstimateCoinIDSellExtended(0, uint64(coin.MinterId), pipInBip.String(), 0, "pool", route)
 			if err != nil {
 				_, payload, err := http_client.ErrorBody(err)
 				if err != nil {
@@ -178,7 +184,7 @@ func relayPrices(
 }
 
 func getBasecoinPrice(logger log.Logger, client *http_client.Client) sdk.Int {
-	response, err := client.EstimateCoinIDSell(usdteCoinId, 0, pipInBip.String())
+	response, err := client.EstimateCoinIDSell(usdteCoinId, 0, pipInBip.String(), 0)
 	if err != nil {
 		_, payload, err := http_client.ErrorBody(err)
 		if err != nil {
