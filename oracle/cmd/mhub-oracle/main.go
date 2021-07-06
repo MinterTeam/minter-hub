@@ -131,7 +131,7 @@ func relayPrices(
 				Name:  fmt.Sprintf("minter/%d", coin.MinterId),
 				Value: getBnbPrice(logger),
 			})
-		case "1inch":
+		case "oneinch":
 			prices.List = append(prices.List, &types.Price{
 				Name:  fmt.Sprintf("minter/%d", coin.MinterId),
 				Value: get1inchPrice(logger),
