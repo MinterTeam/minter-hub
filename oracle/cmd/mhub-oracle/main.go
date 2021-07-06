@@ -131,6 +131,11 @@ func relayPrices(
 				Name:  fmt.Sprintf("minter/%d", coin.MinterId),
 				Value: getBnbPrice(logger),
 			})
+		case "1inch":
+			prices.List = append(prices.List, &types.Price{
+				Name:  fmt.Sprintf("minter/%d", coin.MinterId),
+				Value: get1inchPrice(logger),
+			})
 		default:
 			var route []uint64
 			if coin.Denom == "hubabuba" {
@@ -242,16 +247,33 @@ func getBnbPrice(logger log.Logger) sdk.Int {
 	if err != nil {
 		logger.Error("Error getting bnb price", "err", err.Error())
 		time.Sleep(time.Second)
-		return getEthPrice(logger)
+		return getBnbPrice(logger)
 	}
 	var result CoingeckoResult
 	if err := json.Unmarshal(body, &result); err != nil {
 		logger.Error("Error getting bnb price", "err", err.Error())
 		time.Sleep(time.Second)
-		return getEthPrice(logger)
+		return getBnbPrice(logger)
 	}
 
-	return sdk.NewInt(int64(result["bitcoin"]["usd"] * multiplier)) // todo
+	return sdk.NewInt(int64(result["binancecoin"]["usd"] * multiplier)) // todo
+}
+
+func get1inchPrice(logger log.Logger) sdk.Int {
+	_, body, err := fasthttp.Get(nil, "https://api.coingecko.com/api/v3/simple/price?ids=1inch&vs_currencies=usd")
+	if err != nil {
+		logger.Error("Error getting 1inch price", "err", err.Error())
+		time.Sleep(time.Second)
+		return get1inchPrice(logger)
+	}
+	var result CoingeckoResult
+	if err := json.Unmarshal(body, &result); err != nil {
+		logger.Error("Error getting 1inch price", "err", err.Error())
+		time.Sleep(time.Second)
+		return get1inchPrice(logger)
+	}
+
+	return sdk.NewInt(int64(result["1inch"]["usd"] * multiplier)) // todo
 }
 
 type CoingeckoResult map[string]map[string]float64
