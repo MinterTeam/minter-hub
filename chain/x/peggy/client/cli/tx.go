@@ -143,7 +143,7 @@ func CmdWithdrawToETH() *cobra.Command {
 
 func CmdRequestBatch() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "build-batch [token_contract_address]",
+		Use:   "build-batch [denom]",
 		Short: "Build a new batch on the cosmos side for pooled withdrawal transactions",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -153,10 +153,9 @@ func CmdRequestBatch() *cobra.Command {
 			}
 			cosmosAddr := cliCtx.GetFromAddress()
 
-			// TODO: better denom searching
 			msg := types.MsgRequestBatch{
 				Orchestrator: cosmosAddr.String(),
-				Denom:        fmt.Sprintf("peggy/%s", args[0]),
+				Denom:        args[0],
 			}
 			if err := msg.ValidateBasic(); err != nil {
 				return err
