@@ -26,10 +26,79 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // OutgoingTx is a withdrawal on the bridged contract
 // TODO: can this type be replaced by outgoing transfer tx
+type OutgoingTxDeprecated struct {
+	Sender   string     `protobuf:"bytes,1,opt,name=sender,proto3" json:"sender,omitempty"`
+	DestAddr string     `protobuf:"bytes,2,opt,name=dest_addr,json=destAddr,proto3" json:"dest_addr,omitempty"`
+	Amount   types.Coin `protobuf:"bytes,3,opt,name=amount,proto3" json:"amount"`
+	TxHash   string     `protobuf:"bytes,7,opt,name=tx_hash,json=txHash,proto3" json:"tx_hash,omitempty"`
+}
+
+func (m *OutgoingTxDeprecated) Reset()         { *m = OutgoingTxDeprecated{} }
+func (m *OutgoingTxDeprecated) String() string { return proto.CompactTextString(m) }
+func (*OutgoingTxDeprecated) ProtoMessage()    {}
+func (*OutgoingTxDeprecated) Descriptor() ([]byte, []int) {
+	return fileDescriptor_86823eeec411a049, []int{0}
+}
+func (m *OutgoingTxDeprecated) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *OutgoingTxDeprecated) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_OutgoingTxDeprecated.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *OutgoingTxDeprecated) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_OutgoingTxDeprecated.Merge(m, src)
+}
+func (m *OutgoingTxDeprecated) XXX_Size() int {
+	return m.Size()
+}
+func (m *OutgoingTxDeprecated) XXX_DiscardUnknown() {
+	xxx_messageInfo_OutgoingTxDeprecated.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_OutgoingTxDeprecated proto.InternalMessageInfo
+
+func (m *OutgoingTxDeprecated) GetSender() string {
+	if m != nil {
+		return m.Sender
+	}
+	return ""
+}
+
+func (m *OutgoingTxDeprecated) GetDestAddr() string {
+	if m != nil {
+		return m.DestAddr
+	}
+	return ""
+}
+
+func (m *OutgoingTxDeprecated) GetAmount() types.Coin {
+	if m != nil {
+		return m.Amount
+	}
+	return types.Coin{}
+}
+
+func (m *OutgoingTxDeprecated) GetTxHash() string {
+	if m != nil {
+		return m.TxHash
+	}
+	return ""
+}
+
 type OutgoingTx struct {
 	Sender   string     `protobuf:"bytes,1,opt,name=sender,proto3" json:"sender,omitempty"`
 	DestAddr string     `protobuf:"bytes,2,opt,name=dest_addr,json=destAddr,proto3" json:"dest_addr,omitempty"`
 	Amount   types.Coin `protobuf:"bytes,3,opt,name=amount,proto3" json:"amount"`
+	ValFee   types.Coin `protobuf:"bytes,4,opt,name=val_fee,json=valFee,proto3" json:"val_fee"`
 	TxHash   string     `protobuf:"bytes,7,opt,name=tx_hash,json=txHash,proto3" json:"tx_hash,omitempty"`
 }
 
@@ -37,7 +106,7 @@ func (m *OutgoingTx) Reset()         { *m = OutgoingTx{} }
 func (m *OutgoingTx) String() string { return proto.CompactTextString(m) }
 func (*OutgoingTx) ProtoMessage()    {}
 func (*OutgoingTx) Descriptor() ([]byte, []int) {
-	return fileDescriptor_86823eeec411a049, []int{0}
+	return fileDescriptor_86823eeec411a049, []int{1}
 }
 func (m *OutgoingTx) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -87,6 +156,13 @@ func (m *OutgoingTx) GetAmount() types.Coin {
 	return types.Coin{}
 }
 
+func (m *OutgoingTx) GetValFee() types.Coin {
+	if m != nil {
+		return m.ValFee
+	}
+	return types.Coin{}
+}
+
 func (m *OutgoingTx) GetTxHash() string {
 	if m != nil {
 		return m.TxHash
@@ -103,7 +179,7 @@ func (m *IDSet) Reset()         { *m = IDSet{} }
 func (m *IDSet) String() string { return proto.CompactTextString(m) }
 func (*IDSet) ProtoMessage()    {}
 func (*IDSet) Descriptor() ([]byte, []int) {
-	return fileDescriptor_86823eeec411a049, []int{1}
+	return fileDescriptor_86823eeec411a049, []int{2}
 }
 func (m *IDSet) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -140,6 +216,7 @@ func (m *IDSet) GetIds() []uint64 {
 }
 
 func init() {
+	proto.RegisterType((*OutgoingTxDeprecated)(nil), "minter.v1.OutgoingTxDeprecated")
 	proto.RegisterType((*OutgoingTx)(nil), "minter.v1.OutgoingTx")
 	proto.RegisterType((*IDSet)(nil), "minter.v1.IDSet")
 }
@@ -147,26 +224,83 @@ func init() {
 func init() { proto.RegisterFile("minter/v1/pool.proto", fileDescriptor_86823eeec411a049) }
 
 var fileDescriptor_86823eeec411a049 = []byte{
-	// 300 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x2c, 0x90, 0xbd, 0x4e, 0xc3, 0x30,
-	0x14, 0x85, 0x63, 0x5a, 0x5a, 0x6a, 0x16, 0x14, 0x55, 0x90, 0x16, 0xc9, 0x54, 0x9d, 0x3a, 0xf9,
-	0x2a, 0x30, 0x30, 0x53, 0x18, 0xe8, 0x80, 0x90, 0x4a, 0x27, 0x96, 0xca, 0x89, 0xad, 0xc4, 0x12,
-	0xf1, 0xad, 0x62, 0xa7, 0x0a, 0x6f, 0x81, 0xc4, 0x4b, 0x75, 0xec, 0xc8, 0x84, 0x50, 0xfb, 0x22,
-	0x28, 0x3f, 0xdb, 0xf1, 0xf1, 0x91, 0xee, 0xa7, 0x8f, 0x0e, 0x33, 0x6d, 0x9c, 0xca, 0x61, 0x1b,
-	0xc2, 0x06, 0xf1, 0x83, 0x6f, 0x72, 0x74, 0xe8, 0x0f, 0x9a, 0x96, 0x6f, 0xc3, 0x31, 0x8b, 0xd1,
-	0x66, 0x68, 0x21, 0x12, 0x56, 0xc1, 0x36, 0x8c, 0x94, 0x13, 0x21, 0xc4, 0xa8, 0x4d, 0x33, 0x1d,
-	0x0f, 0x13, 0x4c, 0xb0, 0x8e, 0x50, 0xa5, 0xa6, 0x9d, 0x7e, 0x13, 0x4a, 0x5f, 0x0b, 0x97, 0xa0,
-	0x36, 0xc9, 0xaa, 0xf4, 0x2f, 0x69, 0xcf, 0x2a, 0x23, 0x55, 0x1e, 0x90, 0x09, 0x99, 0x0d, 0x96,
-	0xed, 0xcb, 0xbf, 0xa6, 0x03, 0xa9, 0xac, 0x5b, 0x0b, 0x29, 0xf3, 0xe0, 0xa4, 0xfe, 0x3a, 0xab,
-	0x8a, 0x07, 0x29, 0x73, 0xff, 0x9e, 0xf6, 0x44, 0x86, 0x85, 0x71, 0x41, 0x67, 0x42, 0x66, 0xe7,
-	0xb7, 0x23, 0xde, 0xa0, 0xf0, 0x0a, 0x85, 0xb7, 0x28, 0xfc, 0x11, 0xb5, 0x99, 0x77, 0x77, 0xbf,
-	0x37, 0xde, 0xb2, 0x9d, 0xfb, 0x57, 0xb4, 0xef, 0xca, 0x75, 0x2a, 0x6c, 0x1a, 0xf4, 0x9b, 0x73,
-	0xae, 0x7c, 0x16, 0x36, 0x9d, 0x8e, 0xe8, 0xe9, 0xe2, 0xe9, 0x4d, 0x39, 0xff, 0x82, 0x76, 0xb4,
-	0xb4, 0x01, 0x99, 0x74, 0x66, 0xdd, 0x65, 0x15, 0xe7, 0x8b, 0xdd, 0x81, 0x91, 0xfd, 0x81, 0x91,
-	0xbf, 0x03, 0x23, 0x5f, 0x47, 0xe6, 0xed, 0x8f, 0xcc, 0xfb, 0x39, 0x32, 0xef, 0x1d, 0x12, 0xed,
-	0xd2, 0x22, 0xe2, 0x31, 0x66, 0xf0, 0x52, 0x6b, 0x59, 0x29, 0x91, 0x41, 0x96, 0x16, 0x11, 0xc4,
-	0xa9, 0xd0, 0x06, 0x4a, 0x68, 0x25, 0xba, 0xcf, 0x8d, 0xb2, 0x51, 0xaf, 0x56, 0x70, 0xf7, 0x1f,
-	0x00, 0x00, 0xff, 0xff, 0x9e, 0xe1, 0xf9, 0xd6, 0x5b, 0x01, 0x00, 0x00,
+	// 345 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x92, 0xbf, 0x4e, 0xeb, 0x30,
+	0x18, 0xc5, 0xe3, 0xdb, 0xde, 0xf6, 0xd6, 0x77, 0x41, 0x51, 0x05, 0x69, 0x91, 0x42, 0xd5, 0xa9,
+	0x93, 0xad, 0xc0, 0x00, 0x2b, 0xa5, 0x42, 0x74, 0x40, 0x48, 0xa5, 0x13, 0x4b, 0xe5, 0xc4, 0x1f,
+	0x89, 0xa5, 0xc6, 0x8e, 0x62, 0x27, 0x0a, 0x6f, 0xc1, 0x0b, 0xf0, 0x3e, 0x5d, 0x90, 0x3a, 0x32,
+	0x21, 0xd4, 0xbe, 0x08, 0xca, 0x1f, 0x89, 0x09, 0x89, 0x89, 0xed, 0xf8, 0xf8, 0x58, 0xfe, 0x7d,
+	0x3a, 0x1f, 0xee, 0xc7, 0x42, 0x1a, 0x48, 0x69, 0xee, 0xd1, 0x44, 0xa9, 0x35, 0x49, 0x52, 0x65,
+	0x94, 0xdd, 0xab, 0x5d, 0x92, 0x7b, 0x43, 0x37, 0x50, 0x3a, 0x56, 0x9a, 0xfa, 0x4c, 0x03, 0xcd,
+	0x3d, 0x1f, 0x0c, 0xf3, 0x68, 0xa0, 0x84, 0xac, 0xa3, 0xc3, 0x7e, 0xa8, 0x42, 0x55, 0x49, 0x5a,
+	0xaa, 0xda, 0x1d, 0xbf, 0x20, 0xdc, 0xbf, 0xcb, 0x4c, 0xa8, 0x84, 0x0c, 0x97, 0xc5, 0x0c, 0x92,
+	0x14, 0x02, 0x66, 0x80, 0xdb, 0x87, 0xb8, 0xa3, 0x41, 0x72, 0x48, 0x1d, 0x34, 0x42, 0x93, 0xde,
+	0xa2, 0x39, 0xd9, 0xc7, 0xb8, 0xc7, 0x41, 0x9b, 0x15, 0xe3, 0x3c, 0x75, 0xfe, 0x54, 0x57, 0xff,
+	0x4a, 0xe3, 0x92, 0xf3, 0xd4, 0x3e, 0xc7, 0x1d, 0x16, 0xab, 0x4c, 0x1a, 0xa7, 0x35, 0x42, 0x93,
+	0xff, 0xa7, 0x03, 0x52, 0x43, 0x91, 0x12, 0x8a, 0x34, 0x50, 0xe4, 0x4a, 0x09, 0x39, 0x6d, 0x6f,
+	0xde, 0x4f, 0xac, 0x45, 0x13, 0xb7, 0x8f, 0x70, 0xd7, 0x14, 0xab, 0x88, 0xe9, 0xc8, 0xe9, 0xd6,
+	0xdf, 0x99, 0xe2, 0x86, 0xe9, 0x68, 0xfc, 0x8a, 0x30, 0xfe, 0xe2, 0xfb, 0x65, 0xaa, 0x0b, 0xdc,
+	0xcd, 0xd9, 0x7a, 0xf5, 0x08, 0xe0, 0xb4, 0x7f, 0xf8, 0x32, 0x67, 0xeb, 0x6b, 0x80, 0xef, 0xe7,
+	0x19, 0xe0, 0xbf, 0xf3, 0xd9, 0x3d, 0x18, 0xfb, 0x00, 0xb7, 0x04, 0xd7, 0x0e, 0x1a, 0xb5, 0x26,
+	0xed, 0x45, 0x29, 0xa7, 0xf3, 0xcd, 0xce, 0x45, 0xdb, 0x9d, 0x8b, 0x3e, 0x76, 0x2e, 0x7a, 0xde,
+	0xbb, 0xd6, 0x76, 0xef, 0x5a, 0x6f, 0x7b, 0xd7, 0x7a, 0xa0, 0xa1, 0x30, 0x51, 0xe6, 0x93, 0x40,
+	0xc5, 0xf4, 0xb6, 0x2a, 0x7c, 0x09, 0x2c, 0xa6, 0x71, 0x94, 0xf9, 0x34, 0x88, 0x98, 0x90, 0xb4,
+	0xa0, 0xcd, 0x7a, 0x98, 0xa7, 0x04, 0xb4, 0xdf, 0xa9, 0xca, 0x3d, 0xfb, 0x0c, 0x00, 0x00, 0xff,
+	0xff, 0xdc, 0xda, 0xfe, 0x2e, 0x35, 0x02, 0x00, 0x00,
+}
+
+func (m *OutgoingTxDeprecated) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *OutgoingTxDeprecated) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *OutgoingTxDeprecated) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.TxHash) > 0 {
+		i -= len(m.TxHash)
+		copy(dAtA[i:], m.TxHash)
+		i = encodeVarintPool(dAtA, i, uint64(len(m.TxHash)))
+		i--
+		dAtA[i] = 0x3a
+	}
+	{
+		size, err := m.Amount.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintPool(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x1a
+	if len(m.DestAddr) > 0 {
+		i -= len(m.DestAddr)
+		copy(dAtA[i:], m.DestAddr)
+		i = encodeVarintPool(dAtA, i, uint64(len(m.DestAddr)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Sender) > 0 {
+		i -= len(m.Sender)
+		copy(dAtA[i:], m.Sender)
+		i = encodeVarintPool(dAtA, i, uint64(len(m.Sender)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
 }
 
 func (m *OutgoingTx) Marshal() (dAtA []byte, err error) {
@@ -196,6 +330,16 @@ func (m *OutgoingTx) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x3a
 	}
+	{
+		size, err := m.ValFee.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintPool(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x22
 	{
 		size, err := m.Amount.MarshalToSizedBuffer(dAtA[:i])
 		if err != nil {
@@ -244,20 +388,20 @@ func (m *IDSet) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	var l int
 	_ = l
 	if len(m.Ids) > 0 {
-		dAtA3 := make([]byte, len(m.Ids)*10)
-		var j2 int
+		dAtA5 := make([]byte, len(m.Ids)*10)
+		var j4 int
 		for _, num := range m.Ids {
 			for num >= 1<<7 {
-				dAtA3[j2] = uint8(uint64(num)&0x7f | 0x80)
+				dAtA5[j4] = uint8(uint64(num)&0x7f | 0x80)
 				num >>= 7
-				j2++
+				j4++
 			}
-			dAtA3[j2] = uint8(num)
-			j2++
+			dAtA5[j4] = uint8(num)
+			j4++
 		}
-		i -= j2
-		copy(dAtA[i:], dAtA3[:j2])
-		i = encodeVarintPool(dAtA, i, uint64(j2))
+		i -= j4
+		copy(dAtA[i:], dAtA5[:j4])
+		i = encodeVarintPool(dAtA, i, uint64(j4))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -275,6 +419,29 @@ func encodeVarintPool(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
+func (m *OutgoingTxDeprecated) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Sender)
+	if l > 0 {
+		n += 1 + l + sovPool(uint64(l))
+	}
+	l = len(m.DestAddr)
+	if l > 0 {
+		n += 1 + l + sovPool(uint64(l))
+	}
+	l = m.Amount.Size()
+	n += 1 + l + sovPool(uint64(l))
+	l = len(m.TxHash)
+	if l > 0 {
+		n += 1 + l + sovPool(uint64(l))
+	}
+	return n
+}
+
 func (m *OutgoingTx) Size() (n int) {
 	if m == nil {
 		return 0
@@ -290,6 +457,8 @@ func (m *OutgoingTx) Size() (n int) {
 		n += 1 + l + sovPool(uint64(l))
 	}
 	l = m.Amount.Size()
+	n += 1 + l + sovPool(uint64(l))
+	l = m.ValFee.Size()
 	n += 1 + l + sovPool(uint64(l))
 	l = len(m.TxHash)
 	if l > 0 {
@@ -319,6 +488,188 @@ func sovPool(x uint64) (n int) {
 }
 func sozPool(x uint64) (n int) {
 	return sovPool(uint64((x << 1) ^ uint64((int64(x) >> 63))))
+}
+func (m *OutgoingTxDeprecated) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowPool
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: OutgoingTxDeprecated: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: OutgoingTxDeprecated: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Sender", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPool
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPool
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPool
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Sender = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field DestAddr", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPool
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPool
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPool
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.DestAddr = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Amount", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPool
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPool
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPool
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Amount.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TxHash", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPool
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPool
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPool
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.TxHash = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipPool(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthPool
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthPool
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
 }
 func (m *OutgoingTx) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
@@ -443,6 +794,39 @@ func (m *OutgoingTx) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if err := m.Amount.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ValFee", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPool
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthPool
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthPool
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.ValFee.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

@@ -8,10 +8,18 @@ option go_package = "github.com/MinterTeam/mhub/chain/x/minter/types";
 
 // OutgoingTx is a withdrawal on the bridged contract
 // TODO: can this type be replaced by outgoing transfer tx
+message OutgoingTxDeprecated {
+  string sender = 1;
+  string dest_addr = 2;
+  cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false];
+  string tx_hash = 7;
+}
+
 message OutgoingTx {
   string sender = 1;
   string dest_addr = 2;
   cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin val_fee = 4 [(gogoproto.nullable) = false];
   string tx_hash = 7;
 }
 

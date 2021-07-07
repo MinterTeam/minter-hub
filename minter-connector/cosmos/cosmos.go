@@ -4,8 +4,6 @@ import (
 	"context"
 	"github.com/MinterTeam/mhub/chain/app"
 	mhub "github.com/MinterTeam/mhub/chain/x/minter/types"
-	oracleTypes "github.com/MinterTeam/mhub/chain/x/oracle/types"
-	phub "github.com/MinterTeam/mhub/chain/x/peggy/types"
 	"github.com/MinterTeam/minter-hub-connector/command"
 	"github.com/MinterTeam/minter-hub-connector/config"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
@@ -56,26 +54,11 @@ func Setup() {
 	config.Seal()
 }
 
-func CreateClaims(cosmosConn *grpc.ClientConn, orcAddress sdk.AccAddress, deposits []Deposit, batches []Batch, valsets []Valset, logger log.Logger) []sdk.Msg {
-	oracleClient := oracleTypes.NewQueryClient(cosmosConn)
-	coinList, err := oracleClient.Coins(context.Background(), &oracleTypes.QueryCoinsRequest{})
-	if err != nil {
-		logger.Error("Error getting hub coins", "err", err.Error())
-		time.Sleep(time.Second)
-		return CreateClaims(cosmosConn, orcAddress, deposits, batches, valsets, logger)
-	}
-
-	coins := oracleTypes.NewCoins(coinList.GetCoins())
-
+func CreateClaims(orcAddress sdk.AccAddress, deposits []Deposit, batches []Batch, valsets []Valset, logger log.Logger) []sdk.Msg {
 	var msgs []sdk.Msg
 	for _, deposit := range deposits {
 		amount, _ := sdk.NewIntFromString(deposit.Amount)
 		fee, _ := sdk.NewIntFromString(deposit.Fee)
-
-		denom, err := coins.GetDenomByMinterId(deposit.CoinID)
-		if err != nil {
-			panic(err)
-		}
 
 		if deposit.Type == command.TypeSendToEth {
 			msgs = append(msgs, &mhub.MsgSendToEthClaim{
@@ -87,9 +70,6 @@ func CreateClaims(cosmosConn *grpc.ClientConn, orcAddress sdk.AccAddress, deposi
 				EthReceiver:  deposit.Recipient,
 				Orchestrator: orcAddress.String(),
 				TxHash:       deposit.TxHash,
-			}, &phub.MsgRequestBatch{
-				Orchestrator: orcAddress.String(),
-				Denom:        denom,
 			})
 		} else {
 			msgs = append(msgs, &mhub.MsgDepositClaim{

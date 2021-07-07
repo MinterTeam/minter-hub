@@ -171,6 +171,8 @@ func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.Val
 		}
 	}
 
+	am.keeper.BuildOutgoingTXBatch(ctx, keeper.OutgoingTxBatchSize)
+
 	return []abci.ValidatorUpdate{}
 }
 

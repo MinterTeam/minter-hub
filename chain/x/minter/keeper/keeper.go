@@ -436,7 +436,7 @@ func (k Keeper) ColdStorageTransfer(ctx sdk.Context, c *types.ColdStorageTransfe
 			return sdkerrors.Wrap(err, "transfer vouchers")
 		}
 
-		txID, err := k.AddToOutgoingPool(ctx, defaultSender, coldStorageAddr, "", coin)
+		txID, err := k.AddToOutgoingPool(ctx, defaultSender, coldStorageAddr, "", coin, sdk.NewInt64Coin(coin.Denom, 0))
 		if err != nil {
 			return err
 		}

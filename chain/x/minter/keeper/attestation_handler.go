@@ -48,34 +48,6 @@ func (a *AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, clai
 			return sdkerrors.Wrap(err, "invalid receiver address")
 		}
 
-		// pay commissions
-		{
-			valset := a.keeper.GetCurrentValset(ctx)
-			commission := sdk.NewCoin(coin.Denom, coin.Amount.ToDec().Mul(a.keeper.oracleKeeper.GetCommissionForDemon(ctx, coin.Denom)).RoundInt()) // total commission
-			if commission.IsPositive() {
-				vouchers = sdk.Coins{coin.Sub(commission)}
-
-				if err = a.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, sdk.AccAddress{}, sdk.Coins{commission}); err != nil {
-					return sdkerrors.Wrap(err, "transfer vouchers")
-				}
-
-				var totalPower uint64
-				for _, val := range valset.Members {
-					totalPower += val.Power
-				}
-
-				for _, val := range valset.Members {
-					amount := commission.Amount.Mul(sdk.NewIntFromUint64(val.Power)).Quo(sdk.NewIntFromUint64(totalPower))
-					_, err := a.keeper.AddToOutgoingPool(ctx, sdk.AccAddress{}, val.MinterAddress, "#commission", sdk.NewCoin(commission.Denom, amount))
-					if err != nil {
-						return sdkerrors.Wrap(err, "commission withdrawal")
-					}
-				}
-
-				a.keeper.BuildOutgoingTXBatch(ctx, OutgoingTxBatchSize)
-			}
-		}
-
 		if err = a.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, addr, vouchers); err != nil {
 			return sdkerrors.Wrap(err, "transfer vouchers")
 		}
@@ -147,7 +119,7 @@ func (a *AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, clai
 		}
 
 		if feeIsOk {
-			_, err := a.peggyKeeper.AddToOutgoingPool(ctx, receiver, claim.EthReceiver, claim.MinterSender, claim.TxHash, sdk.NewCoin(denom, claim.Amount).Sub(commission).Sub(fee), fee)
+			_, err := a.peggyKeeper.AddToOutgoingPool(ctx, receiver, claim.EthReceiver, claim.MinterSender, claim.TxHash, sdk.NewCoin(denom, claim.Amount).Sub(commission).Sub(fee), fee, commission)
 			if err != nil {
 				return sdkerrors.Wrap(err, "withdraw")
 			}
@@ -161,7 +133,7 @@ func (a *AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, clai
 
 			a.keeper.oracleKeeper.SetTxStatus(ctx, claim.TxHash, oracletypes.TX_STATUS_REFUNDED, "")
 
-			_, err := a.keeper.AddToOutgoingPool(ctx, receiver, claim.MinterSender, claim.TxHash, sdk.NewCoin(denom, claim.Amount).Sub(commission))
+			_, err := a.keeper.AddToOutgoingPool(ctx, receiver, claim.MinterSender, claim.TxHash, sdk.NewCoin(denom, claim.Amount), sdk.NewInt64Coin(denom, 0))
 			if err != nil {
 				return sdkerrors.Wrap(err, "refund")
 			}

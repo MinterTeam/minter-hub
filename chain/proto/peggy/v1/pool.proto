@@ -8,7 +8,7 @@ option go_package = "github.com/MinterTeam/mhub/chain/x/peggy/types";
 
 // OutgoingTx is a withdrawal on the bridged contract
 // TODO: can this type be replaced by outgoing transfer tx
-message OutgoingTx {
+message OutgoingTxDeprecated {
   string sender = 1;
   string dest_addr = 2;
   string refund_addr = 3;
@@ -16,6 +16,17 @@ message OutgoingTx {
   cosmos.base.v1beta1.Coin amount = 5 [(gogoproto.nullable) = false];
   cosmos.base.v1beta1.Coin bridge_fee = 6 [(gogoproto.nullable) = false];
   string tx_hash = 7;
+}
+
+message OutgoingTx {
+  string sender = 1;
+  string dest_addr = 2;
+  string refund_addr = 3;
+  int64 expiration_time = 4;
+  cosmos.base.v1beta1.Coin amount = 5 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin bridge_fee = 6 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin val_fee = 7 [(gogoproto.nullable) = false];
+  string tx_hash = 8;
 }
 
 // IDSet represents a set of IDs

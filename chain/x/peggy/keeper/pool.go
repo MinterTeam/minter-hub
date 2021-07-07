@@ -17,8 +17,9 @@ import (
 // - burns the voucher for transfer amount and fees
 // - persists an OutgoingTx
 // - adds the TX to the `available` TX pool via a second index
-func (k Keeper) AddToOutgoingPool(ctx sdk.Context, sender sdk.AccAddress, counterpartReceiver string, refundAddr string, txHash string, amount sdk.Coin, fee sdk.Coin) (uint64, error) {
+func (k Keeper) AddToOutgoingPool(ctx sdk.Context, sender sdk.AccAddress, counterpartReceiver string, refundAddr string, txHash string, amount sdk.Coin, fee sdk.Coin, valFee sdk.Coin) (uint64, error) {
 	totalAmount := amount.Add(fee)
+	totalAmount = totalAmount.Add(valFee)
 	totalInVouchers := sdk.Coins{totalAmount}
 
 	// Ensure that the coin is a peggy voucher
@@ -48,6 +49,7 @@ func (k Keeper) AddToOutgoingPool(ctx sdk.Context, sender sdk.AccAddress, counte
 		ExpirationTime: ctx.BlockTime().Add(time.Hour).Unix(),
 		Amount:         sdk.NewCoin(amount.Denom, k.oracleKeeper.ConvertToEthValue(ctx, contractAddr, amount.Amount)),
 		BridgeFee:      fee,
+		ValFee:         valFee,
 		TxHash:         txHash,
 	}
 

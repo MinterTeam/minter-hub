@@ -62,9 +62,41 @@ func (k Keeper) OutgoingTxBatchExecuted(ctx sdk.Context, nonce uint64, hash stri
 		return sdkerrors.Wrap(types.ErrUnknown, "nonce")
 	}
 
-	// cleanup outgoing TX pool
+	fees := sdk.Coins{}
+	// cleanup outgoing TX pool and calculate total fees
 	for _, tx := range b.Transactions {
+		pe, _ := k.getPoolEntry(ctx, tx.Id)
+		if !pe.ValFee.Amount.IsNil() {
+			fees = fees.Add(pe.ValFee)
+		}
 		k.removePoolEntry(ctx, tx.Id)
+	}
+
+	if !fees.IsZero() {
+		if err := k.bankKeeper.MintCoins(ctx, types.ModuleName, fees); err != nil {
+			return sdkerrors.Wrapf(err, "mint vouchers coins: %s", fees)
+		}
+		if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, sdk.AccAddress{}, fees); err != nil {
+			return sdkerrors.Wrap(err, "transfer vouchers")
+		}
+
+		valset := k.GetCurrentValset(ctx)
+		var totalPower uint64
+		for _, val := range valset.Members {
+			totalPower += val.Power
+		}
+
+		for _, fee := range fees {
+			if fee.IsPositive() {
+				for _, val := range valset.Members {
+					amount := fee.Amount.Mul(sdk.NewIntFromUint64(val.Power)).Quo(sdk.NewIntFromUint64(totalPower))
+					_, err := k.AddToOutgoingPool(ctx, sdk.AccAddress{}, val.MinterAddress, "#commission", sdk.NewCoin(fee.Denom, amount), sdk.NewInt64Coin(fee.Denom, 0))
+					if err != nil {
+						return sdkerrors.Wrap(err, "commission withdrawal")
+					}
+				}
+			}
+		}
 	}
 
 	// Iterate through remaining batches
