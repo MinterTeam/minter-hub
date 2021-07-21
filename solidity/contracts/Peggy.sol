@@ -436,11 +436,10 @@ contract Peggy {
 		emit ValsetUpdatedEvent(0, _validators, _powers);
 	}
 
-	// submitBatch processes a batch of Hub -> Ethereum transactions by sending the tokens in the transactions
-	// to the destination addresses. It is approved by the current Hub validator set.
+	// swapBatch processes a batch of swap transactions in ETH. It is approved by the current Hub validator set.
 	// Anyone can call this function, but they must supply valid signatures of state_powerThreshold of the current valset over
 	// the batch.
-	function swap(
+	function swapBatch(
 		// The validators that approve the batch
 		address[] memory _currentValidators,
 		uint256[] memory _currentPowers,
@@ -468,9 +467,9 @@ contract Peggy {
 			// Check that current validators, powers, and signatures (v,r,s) set is well-formed
 			require(
 				_currentValidators.length == _currentPowers.length &&
-				_currentValidators.length == _v.length &&
-				_currentValidators.length == _r.length &&
-				_currentValidators.length == _s.length,
+					_currentValidators.length == _v.length &&
+					_currentValidators.length == _r.length &&
+					_currentValidators.length == _s.length,
 				"Malformed current validator set"
 			);
 
@@ -498,11 +497,11 @@ contract Peggy {
 				_v,
 				_r,
 				_s,
-			// Get hash of the transaction batch and checkpoint
+				// Get hash of the transaction batch and checkpoint
 				keccak256(
 					abi.encode(
 						state_peggyId,
-					// bytes32 encoding of "swapBatch"
+						// bytes32 encoding of "swapBatch"
 						0x7377617042617463680000000000000000000000000000000000000000000000,
 						_callers,
 						_descs,
@@ -520,7 +519,7 @@ contract Peggy {
 
 
 			{
-				// Send transaction amounts to destinations
+				// Send transactions swap
 				for (uint256 i = 0; i < _callers.length; i++) {
 					try dex.swap(_callers[i], _descs[i], _calls[i]) returns (uint256 returnAmount) {
 						emit SwapSuccessEvent(_descs[i].srcReceiver, _descs[i].dstReceiver, _descs[i].dstToken, returnAmount);
