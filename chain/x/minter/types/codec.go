@@ -28,6 +28,7 @@ func RegisterInterfaces(registry types.InterfaceRegistry) {
 		&MsgValsetClaim{},
 		&MsgWithdrawClaim{},
 		&MsgSendToEthClaim{},
+		&MsgSwapEthClaim{},
 	)
 
 	registry.RegisterInterface(
@@ -37,6 +38,7 @@ func RegisterInterfaces(registry types.InterfaceRegistry) {
 		&MsgWithdrawClaim{},
 		&MsgValsetClaim{},
 		&MsgSendToEthClaim{},
+		&MsgSwapEthClaim{},
 	)
 
 	registry.RegisterImplementations(
@@ -68,4 +70,5 @@ func RegisterCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&IDSet{}, "minter/IDSet", nil)
 	cdc.RegisterConcrete(&Attestation{}, "minter/Attestation", nil)
 	cdc.RegisterConcrete(&ColdStorageTransferProposal{}, "minter/ColdStorageTransferProposal", nil)
+	cdc.RegisterConcrete(&MsgSwapEthClaim{}, "minter/MsgSwapEthClaim", nil)
 }

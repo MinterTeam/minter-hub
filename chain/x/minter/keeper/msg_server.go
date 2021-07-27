@@ -63,3 +63,7 @@ func (k msgServer) SendToEthClaim(c context.Context, msg *types.MsgSendToEthClai
 func (k msgServer) ValsetClaim(c context.Context, msg *types.MsgValsetClaim) (*types.MsgValsetClaimResponse, error) {
 	return nil, nil
 }
+
+func (k msgServer) SwapEthClaim(c context.Context, msg *types.MsgSwapEthClaim) (*types.MsgSwapEthClaimResponse, error) {
+	return nil, nil
+}

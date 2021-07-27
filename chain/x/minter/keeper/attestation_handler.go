@@ -139,6 +139,8 @@ func (a *AttestationHandler) Handle(ctx sdk.Context, att types.Attestation, clai
 			}
 		}
 
+	case *types.MsgSwapEthClaim:
+		// TODO: implement
 	case *types.MsgWithdrawClaim:
 		return a.keeper.OutgoingTxBatchExecuted(ctx, claim.BatchNonce, claim.TxHash)
 	case *types.MsgValsetClaim:

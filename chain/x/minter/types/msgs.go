@@ -18,6 +18,7 @@ var (
 	_ sdk.Msg = &MsgSendToMinter{}
 	_ sdk.Msg = &MsgRequestBatch{}
 	_ sdk.Msg = &MsgConfirmBatch{}
+	_ sdk.Msg = &MsgSwapEthClaim{}
 )
 
 // NewMsgValsetConfirm returns a new msgValsetConfirm
@@ -496,3 +497,62 @@ func ValidateEthAddress(a string) error {
 	}
 	return nil
 }
+
+// ------------------------------------------------
+
+// GetType returns the type of the claim
+func (msg *MsgSwapEthClaim) GetType() ClaimType {
+	return CLAIM_TYPE_SWAP_ETH
+}
+
+// ValidateBasic performs stateless checks
+func (msg *MsgSwapEthClaim) ValidateBasic() error {
+	if err := ValidateMinterAddress(msg.MinterSender); err != nil {
+		return sdkerrors.Wrap(err, "eth sender")
+	}
+
+	if _, err := sdk.AccAddressFromBech32(msg.Orchestrator); err != nil {
+		return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, msg.Orchestrator)
+	}
+
+	if msg.EventNonce == 0 {
+		return fmt.Errorf("nonce == 0")
+	}
+
+	return nil
+}
+
+// GetSignBytes encodes the message for signing
+func (msg MsgSwapEthClaim) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
+}
+
+// GetSigners defines whose signature is required
+func (msg MsgSwapEthClaim) GetSigners() []sdk.AccAddress {
+	acc, err := sdk.AccAddressFromBech32(msg.Orchestrator)
+	if err != nil {
+		panic(err)
+	}
+
+	return []sdk.AccAddress{acc}
+}
+
+// Type should return the action
+func (msg MsgSwapEthClaim) Type() string {
+	return "swap_eth"
+}
+
+// Route should return the name of the module
+func (msg MsgSwapEthClaim) Route() string { return RouterKey }
+
+const (
+	TypeMsgSwapEth = "swap_eth"
+)
+
+// Hash implements WithdrawBatch.Hash
+func (msg *MsgSwapEthClaim) ClaimHash() []byte {
+	path := fmt.Sprintf("%d", msg.EventNonce)
+	return tmhash.Sum([]byte(path))
+}
+
+// ------------------------------------------------

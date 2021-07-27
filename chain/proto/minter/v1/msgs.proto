@@ -36,6 +36,9 @@ service Msg {
   rpc ValsetClaim(MsgValsetClaim) returns(MsgValsetClaimResponse) {
     option (google.api.http).post = "/minter/v1/valset_claim";
   }
+  rpc SwapEthClaim(MsgSwapEthClaim) returns(MsgSwapEthClaimResponse) {
+    option (google.api.http).post = "/minter/v1/swap_eth_claim";
+  }
 }
 
 // MsgValsetConfirm
@@ -202,3 +205,12 @@ message MsgSendToEthClaim {
 
 // TODO: write response data here
 message MsgSendToEthClaimResponse {}
+
+message MsgSwapEthClaim {
+  uint64 event_nonce = 1;
+  string minter_sender = 2;
+  string orchestrator = 3;
+}
+
+// TODO: write response data here
+message MsgSwapEthClaimResponse {}
