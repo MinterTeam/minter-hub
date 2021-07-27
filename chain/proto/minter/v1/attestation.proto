@@ -15,6 +15,7 @@ enum ClaimType {
   CLAIM_TYPE_WITHDRAW = 2 [(gogoproto.enumvalue_customname) = "CLAIM_TYPE_WITHDRAW"];
   CLAIM_TYPE_VALSET   = 3 [(gogoproto.enumvalue_customname) = "CLAIM_TYPE_VALSET"];
   CLAIM_TYPE_SEND_TO_ETH   = 4 [(gogoproto.enumvalue_customname) = "CLAIM_TYPE_SEND_TO_ETH"];
+  CLAIM_TYPE_SWAP_ETH   = 5 [(gogoproto.enumvalue_customname) = "CLAIM_TYPE_SWAP_ETH"];
 }
 
 // Attestation is an aggregate of `claims` that eventually becomes `observed` by

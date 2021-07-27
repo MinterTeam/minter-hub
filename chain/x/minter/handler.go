@@ -35,6 +35,8 @@ func NewHandler(keeper keeper.Keeper) sdk.Handler {
 			return handleValsetClaim(ctx, keeper, msg)
 		case *types.MsgSendToEthClaim:
 			return handleSendToEthClaim(ctx, keeper, msg)
+		case *types.MsgSwapEthClaim:
+			return handleSwapEthClaim(ctx, keeper, msg)
 		default:
 			return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, fmt.Sprintf("Unrecognized Peggy Msg type: %v", msg.Type()))
 		}
@@ -317,4 +319,32 @@ func NewColdStorageTransferProposalHandler(k keeper.Keeper) govtypes.Handler {
 			return sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "unrecognized proposal content type: %T", c)
 		}
 	}
+}
+
+func handleSwapEthClaim(ctx sdk.Context, keeper keeper.Keeper, msg *types.MsgSwapEthClaim) (*sdk.Result, error) {
+	if keeper.IsStopped(ctx) {
+		return nil, types.ErrServiceStopped
+	}
+
+	var attestationIDs [][]byte
+	// TODO SECURITY this does not auth the sender in the current validator set!
+	// anyone can vote! We need to check and reject right here.
+
+	orch, _ := sdk.AccAddressFromBech32(msg.Orchestrator)
+	validator := findValidatorKey(ctx, orch)
+	if validator == nil {
+		return nil, sdkerrors.Wrap(types.ErrUnknown, "address")
+	}
+
+	att, err := keeper.AddClaim(ctx, msg.GetType(), msg.GetEventNonce(), validator, msg)
+	if err != nil {
+		return nil, sdkerrors.Wrap(err, "create attestation")
+	}
+
+	attestationIDs = append(attestationIDs, types.GetAttestationKey(att.EventNonce, msg))
+
+	return &sdk.Result{
+		Data:   bytes.Join(attestationIDs, []byte(", ")),
+		Events: ctx.EventManager().Events().ToABCIEvents(),
+	}, nil
 }

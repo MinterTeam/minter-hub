@@ -1,8 +1,11 @@
 pragma solidity ^0.6.6;
+pragma experimental ABIEncoderV2;
+
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@nomiclabs/buidler/console.sol";
+import "./Exchange.sol";
 
 contract Peggy {
 	using SafeMath for uint256;
@@ -10,6 +13,7 @@ contract Peggy {
 
 	// These are updated often
 	bytes32 public state_lastValsetCheckpoint;
+	uint256 public state_lastSwapBatchNonce;
 	mapping(address => uint256) public state_lastBatchNonces;
 	uint256 public state_lastValsetNonce = 0;
 	uint256 public state_lastEventNonce = 0;
@@ -22,12 +26,15 @@ contract Peggy {
 	bool public depositsStopped = false;
 	address public guardian;
 
+	OneInchExchange public immutable dex;
+
 	event TransactionBatchExecutedEvent(
 		uint256 indexed _batchNonce,
 		address indexed _token,
 		address indexed _sender,
 		uint256 _eventNonce
 	);
+
 	event SendToHubEvent(
 		address indexed _tokenContract,
 		address indexed _sender,
@@ -35,6 +42,7 @@ contract Peggy {
 		uint256 _amount,
 		uint256 _eventNonce
 	);
+
 	event SendToMinterEvent(
 		address indexed _tokenContract,
 		address indexed _sender,
@@ -42,11 +50,15 @@ contract Peggy {
 		uint256 _amount,
 		uint256 _eventNonce
 	);
+
 	event ValsetUpdatedEvent(
 		uint256 indexed _newValsetNonce,
 		address[] _validators,
 		uint256[] _powers
 	);
+
+	event SwapFailedEvent(address srcReceiver, address dstReceiver);
+	event SwapSuccessEvent(address srcReceiver, address dstReceiver, IERC20 dstToken, uint256 returnAmount);
 
 	function lastBatchNonce(address _erc20Address) public view returns (uint256) {
 		return state_lastBatchNonces[_erc20Address];
@@ -419,6 +431,103 @@ contract Peggy {
 
 		// LOGS
 
+		dex = OneInchExchange(0x95C26e6a253b5E493073eF7e86AB61584Ea398B1);
+
 		emit ValsetUpdatedEvent(0, _validators, _powers);
+	}
+
+	// swapBatch processes a batch of swap transactions in ETH. It is approved by the current Hub validator set.
+	// Anyone can call this function, but they must supply valid signatures of state_powerThreshold of the current valset over
+	// the batch.
+	function swapBatch(
+		// The validators that approve the batch
+		address[] memory _currentValidators,
+		uint256[] memory _currentPowers,
+		uint256 _currentValsetNonce,
+		// These are arrays of the parts of the validators signatures
+		uint8[] memory _v,
+		bytes32[] memory _r,
+		bytes32[] memory _s,
+		// The batch of transactions
+		IOneInchCaller[] memory _callers,
+		OneInchExchange.SwapDescription[] memory _descs,
+		IOneInchCaller.CallDescription[][] memory _calls,
+		uint256 _batchNonce
+	) public {
+		// CHECKS scoped to reduce stack depth
+		{
+			require(!halted, "contract halted");
+
+			// Check that the batch nonce is higher than the last nonce for this token
+			require(
+				state_lastSwapBatchNonce < _batchNonce,
+				"New batch nonce must be greater than the current nonce"
+			);
+
+			// Check that current validators, powers, and signatures (v,r,s) set is well-formed
+			require(
+				_currentValidators.length == _currentPowers.length &&
+					_currentValidators.length == _v.length &&
+					_currentValidators.length == _r.length &&
+					_currentValidators.length == _s.length,
+				"Malformed current validator set"
+			);
+
+			// Check that the supplied current validator set matches the saved checkpoint
+			require(
+				makeCheckpoint(
+					_currentValidators,
+					_currentPowers,
+					_currentValsetNonce,
+					state_peggyId
+				) == state_lastValsetCheckpoint,
+				"Supplied current validators and powers do not match checkpoint."
+			);
+
+			// Check that the transaction batch is well-formed
+			require(
+				_callers.length == _descs.length && _callers.length == _calls.length,
+				"Malformed batch of transactions"
+			);
+
+			// Check that enough current validators have signed off on the transaction batch and valset
+			checkValidatorSignatures(
+				_currentValidators,
+				_currentPowers,
+				_v,
+				_r,
+				_s,
+				// Get hash of the transaction batch and checkpoint
+				keccak256(
+					abi.encode(
+						state_peggyId,
+						// bytes32 encoding of "swapBatch"
+						0x7377617042617463680000000000000000000000000000000000000000000000,
+						_callers,
+						_descs,
+						_calls,
+						_batchNonce
+					)
+				),
+				state_powerThreshold
+			);
+
+			// ACTIONS
+
+			// Store batch nonce
+			state_lastSwapBatchNonce = _batchNonce;
+
+
+			{
+				// Send transactions swap
+				for (uint256 i = 0; i < _callers.length; i++) {
+					try dex.swap(_callers[i], _descs[i], _calls[i]) returns (uint256 returnAmount) {
+						emit SwapSuccessEvent(_descs[i].srcReceiver, _descs[i].dstReceiver, _descs[i].dstToken, returnAmount);
+					} catch {
+						emit SwapFailedEvent(_descs[i].srcReceiver, _descs[i].dstReceiver);
+					}
+				}
+			}
+		}
 	}
 }
