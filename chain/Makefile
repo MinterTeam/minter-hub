@@ -162,6 +162,9 @@ proto-tools-stamp:
 	echo "Installing protoc-gen-gocosmos..."
 	go install github.com/regen-network/cosmos-proto/protoc-gen-gocosmos
 
+	echo "Installing protoc-gen-grpc-gateway..."
+	go install github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
+
 	# Create dummy file to satisfy dependency and avoid
 	# rebuilding when this Makefile target is hit twice
 	# in a row
