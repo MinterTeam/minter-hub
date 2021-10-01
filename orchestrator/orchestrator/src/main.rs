@@ -20,6 +20,7 @@ mod ethereum_event_watcher;
 mod main_loop;
 mod oracle_resync;
 
+use std::time::Duration;
 use crate::main_loop::orchestrator_main_loop;
 use crate::main_loop::LOOP_SPEED;
 use clarity::Address as EthAddress;
@@ -100,8 +101,8 @@ async fn main() {
     let grpc_client = PeggyQueryClient::connect(cosmos_grpc_url.clone())
         .await
         .unwrap();
-    let web3 = Web3::new(&eth_url, LOOP_SPEED);
-    let contact = Contact::new(&cosmos_legacy_url, LOOP_SPEED);
+    let web3 = Web3::new(&eth_url, Duration::from_secs(600));
+    let contact = Contact::new(&cosmos_legacy_url, Duration::from_secs(600));
 
     let public_eth_key = ethereum_key
         .to_public_key()
