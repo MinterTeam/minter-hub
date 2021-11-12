@@ -141,6 +141,11 @@ func relayPrices(
 				Name:  fmt.Sprintf("minter/%d", coin.MinterId),
 				Value: getTonPrice(logger),
 			})
+		case "shib":
+			prices.List = append(prices.List, &types.Price{
+				Name:  fmt.Sprintf("minter/%d", coin.MinterId),
+				Value: getShibPrice(logger),
+			})
 		default:
 			var route []uint64
 			if coin.Denom == "hubabuba" {
@@ -297,5 +302,23 @@ func getTonPrice(logger log.Logger) sdk.Int {
 
 	return sdk.NewInt(int64(result["the-open-network"]["usd"] * multiplier)) // todo
 }
+
+func getShibPrice(logger log.Logger) sdk.Int {
+	_, body, err := fasthttp.Get(nil, "https://api.coingecko.com/api/v3/simple/price?ids=shiba-inu&vs_currencies=usd")
+	if err != nil {
+		logger.Error("Error getting SHIB price", "err", err.Error())
+		time.Sleep(time.Second)
+		return getShibPrice(logger)
+	}
+	var result CoingeckoResult
+	if err := json.Unmarshal(body, &result); err != nil {
+		logger.Error("Error getting SHIB price", "err", err.Error())
+		time.Sleep(time.Second)
+		return getShibPrice(logger)
+	}
+
+	return sdk.NewInt(int64(result["shiba-inu"]["usd"] * multiplier)) // todo
+}
+
 
 type CoingeckoResult map[string]map[string]float64
