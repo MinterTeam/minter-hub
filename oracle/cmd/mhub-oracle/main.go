@@ -146,6 +146,11 @@ func relayPrices(
 				Name:  fmt.Sprintf("minter/%d", coin.MinterId),
 				Value: getShibPrice(logger),
 			})
+		case "mvi":
+			prices.List = append(prices.List, &types.Price{
+				Name:  fmt.Sprintf("minter/%d", coin.MinterId),
+				Value: getMetaversePrice(logger),
+			})
 		default:
 			var route []uint64
 			if coin.Denom == "hubabuba" {
@@ -320,5 +325,21 @@ func getShibPrice(logger log.Logger) sdk.Int {
 	return sdk.NewInt(int64(result["shiba-inu"]["usd"] * multiplier)) // todo
 }
 
+func getMetaversePrice(logger log.Logger) sdk.Int {
+	_, body, err := fasthttp.Get(nil, "https://api.coingecko.com/api/v3/simple/price?ids=metaverse-index&vs_currencies=usd")
+	if err != nil {
+		logger.Error("Error getting metaverse-index price", "err", err.Error())
+		time.Sleep(time.Second)
+		return getMetaversePrice(logger)
+	}
+	var result CoingeckoResult
+	if err := json.Unmarshal(body, &result); err != nil {
+		logger.Error("Error getting metaverse-index price", "err", err.Error())
+		time.Sleep(time.Second)
+		return getMetaversePrice(logger)
+	}
+
+	return sdk.NewInt(int64(result["metaverse-index"]["usd"] * multiplier)) // todo
+}
 
 type CoingeckoResult map[string]map[string]float64
