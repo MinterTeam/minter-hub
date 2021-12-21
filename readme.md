@@ -1,5 +1,9 @@
 # Minter Hub
 
+## Minter Hub 2 is ready!
+
+https://github.com/MinterTeam/mhub2
+
 ## Build & Install
 
 1. Install dependencies
